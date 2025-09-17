@@ -1,0 +1,115 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 30 Aug 2024, 16:42:05
+    Author     : ANNA MARGARETTE TERO
+*/
+
+.login-form{
+    -fx-background-color: linear-gradient(to bottom right, #252d50, #324f6b);
+}
+.card-form{
+    -fx-background-color:#2a5172;
+    -fx-background-radius: 15px;
+}
+
+.close{
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+.close:hover{
+    -fx-background-color:#f13f57;
+}
+.minimize{
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+.minimize:hover{
+    -fx-background-color:#5481ab;
+}
+
+.textfield{
+    -fx-background-color:transparent;
+    -fx-text-inner-color:#fff;
+    -fx-border-color:#fff;
+    -fx-border-width: 0px 0px .4px 0px;
+    -fx-font-size: 13px;
+}
+
+.textfield1{
+    -fx-background-color:transparent;
+    -fx-text-inner-color:BLACK;
+    -fx-border-color:BLACK;
+    -fx-border-width: 0px 0px .4px 0px;
+    -fx-font-size: 13px;
+}
+.textfield1:focused{
+    -fx-border-width: 0px 0px 1px 0px;
+}
+
+.textfield:focused{
+    -fx-border-width: 0px 0px 1px 0px;
+}
+
+.login-btn{
+    -fx-background-color: #468ec2;
+    -fx-background-radius: 15px;
+    -fx-cursor:hand;
+    -fx-text-fill: #fff;
+    -fx-font-size: 15px;
+}
+.login-btn:hover{
+    -fx-background-color: #559bc9;
+}
+
+/*TAB*/
+* {
+	-fx-primary-color:  transparent;
+	-fx-secondary-color:  #2a5172;
+
+	-fx-focus-color: -fx-secondary-color;
+}
+
+.tab-header-area .tab-header-background {
+ 	-fx-background-color: -fx-primary-color;
+        
+         /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+}
+.tab-pane .tab:selected {
+	-fx-background-color: -fx-secondary-color;
+	-fx-background-insets: 0 0 0 0;
+	-fx-font-size:15px; 
+           -fx-background-radius: 15px;
+}
+.tab .tab-label { 
+ 	-fx-alignment: CENTER;
+	-fx-text-fill: white;
+	-fx-font-weight: bold;
+	-fx-padding: 0 0 0 0;
+}
+.tab-pane:top *.tab-header-area {
+	-fx-padding: 5 5 5 5;
+            /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+	
+	/* space for between tabs */
+	 -fx-padding: 0 0 10 0; 
+}
+.tab-pane {
+	-fx-background-color: transparent;
+	-fx-tab-min-width: 100px;
+	-fx-tab-min-height: 30px;
+	-fx-tab-max-height: 30px;
+         /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+}
+.tab-pane .tab {
+	-fx-background-color: transparent;
+         /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+     
+}
+.tab-pane:focused .tab-header-area .headers-region .tab:selected .focus-indicator {
+ 	-fx-border-width: 0;
+	-fx-border-insets: 0 0 0 0;
+	-fx-border-radius: 0;
+}

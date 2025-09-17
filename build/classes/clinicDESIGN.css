@@ -1,0 +1,411 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 13 Aug 2025, 15:11:48
+    Author     : ANNA MARGARETTE
+*/
+
+.LOGIN_BTN{
+   -fx-background-color:  #003380;
+ }
+ .LOGIN_BTN:hover{
+    -fx-background-color: linear-gradient(to bottom, #66ccff 0%, #cce0ff 100%)
+ }
+ .CREATE_BTN{
+     -fx-background-color: WHITE;
+     -fx-background-radius: 10px;
+     -fx-border-radius: 10px;
+     -fx-border-color:  #003380;
+     
+ }
+ .CREATE_BTN:hover{
+     -fx-background-color: linear-gradient(to bottom, #66ccff 0%, #cce0ff 100%)
+ }
+ 
+.textfield{
+    -fx-background-color:transparent;
+    -fx-text-inner-color:black;
+    -fx-border-color:black;
+    -fx-border-width: 0px 0px .4px 0px;
+    -fx-font-size: 18px;
+ }
+ 
+ .textfieldConsultation{
+    -fx-background-color:transparent;
+    -fx-text-inner-color:black;
+    -fx-border-color:black;
+    -fx-border-width: 0px 0px .4px 0px;
+    -fx-font-size: 17px;
+ }
+ 
+ .textfieldVisitLog{
+    -fx-background-color:transparent;
+    -fx-text-inner-color:black;
+    -fx-border-color:black;
+    -fx-border-width: 0px 0px .4px 0px;
+    -fx-font-size: 17px;
+ }
+ 
+ .SIDE_nav{
+   -fx-background-color:  linear-gradient(to bottom, #00ffcc 0%, #006600 100%)
+ }
+ 
+ .SIDE_btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+
+.SIDE_btn:hover {
+    -fx-background-color:  #e6ffe6;
+    -fx-background-radius: 5px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.SIDE_btn:selected {
+    -fx-background-color:  #e6ffe6;
+    -fx-background-radius: 5px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+ 
+ 
+ .bg-head{
+      -fx-background-color: #fff;
+      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);
+ }
+ .search-container{
+     -fx-border-color: #6f6f6f;
+     -fx-border-radius: 5px;
+ }
+ 
+ .search-container1{
+     -fx-border-color: #6f6f6f;
+     -fx-border-radius: 20px;
+ }
+ 
+ /*STUDENT RECORDS*/
+ 
+ .Student_tab{
+    -fx-background-color:transparent;
+    -fx-text-inner-color:black;
+    -fx-border-color:black;
+    -fx-border-width: 0px 0px .9px 0px;
+    -fx-font-size: 15px;
+ }
+ 
+ /* Style of entire tableView when is getting focused
+*/.table-view:focused{
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    
+}
+/*Style of each column header in the tableView*/
+.table-view .column-header {
+     -fx-background-color: transparent;
+} 
+
+/*Style of each column header's background in the tableView*/
+.table-view .column-header-background{
+    -fx-background-color: linear-gradient(#131313 0.0%, #424141 100.0%);
+}
+
+ /*Style of each column header's label  in the tableView*/
+.table-view .column-header-background .label{
+     -fx-background-color: transparent; 
+    -fx-font-weight:bold;
+    -fx-text-fill: white;
+}
+
+/*Style of each column in the tableView*/
+.table-view .table-column{
+    -fx-alignment:center;
+}
+
+ /*Style of each table cell*/
+.table-view .table-cell{
+    -fx-font-weight:bold;
+    -fx-font-size:14px;           /*the font size you asked in the comments below*/
+    /* -fx-text-fill:orange; */
+
+}
+
+
+/*Style for each < non odd> row of table view*/
+ .table-row-cell{
+    -fx-background-color: white;
+    -fx-background-insets: 0.0, 0.0 0.0 1.0 0.0;
+    -fx-padding: 0.0em; 
+}
+
+/*Style for each <odd> row of table view*/
+.table-row-cell:odd{
+    -fx-background-color: white;
+    -fx-background-insets: 0.0, 0.0 0.0 1.0 0.0;
+    -fx-padding: 0.0em;  
+}
+
+
+/*Style of each entire row in the table view*/
+/* Selected row: darker green gradient, black text */
+.table-row-cell:selected {
+    -fx-background-color: linear-gradient(
+        #99e6cc 0%,   /* lighter mint green */
+        #66d9a6 25%,  /* medium green */
+        #33cc88 75%,  /* deeper green */
+        #00b36b 100%  /* darker base */
+    );
+    -fx-text-fill: black;
+}
+
+
+
+
+/*Style of each entire row in the table view when is hovered*/
+.table-row-cell:hover {
+    -fx-background-color:#ccffdd;
+    -fx-text-fill: black;
+}
+
+/*Style of each entire row in the table view when is getting focused*/
+/*.table-row-cell:focused {
+    -fx-background-color:purple; 
+   -fx-background-color: linear-gradient( #b3ffd9 0%, #80ffbf 25%, #4dffa6 75%, #1aff8c 100%);
+    -fx-text-fill: black;
+}*/
+
+
+
+
+* {
+	-fx-primary-color:  transparent;
+	/*-fx-secondary-color:  #c1f0c1;*/
+
+	/*-fx-focus-color: -fx-secondary-color;*/
+}
+
+.tab-header-area .tab-header-background {
+ 	-fx-background-color: -fx-primary-color;
+         /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+}
+.tab-pane .tab:selected {
+	/*-fx-background-color: -fx-secondary-color;*/
+        -fx-border-color:black;
+       -fx-border-width: 0px 0px .9px 0px;
+	-fx-background-insets: 0 0 0 0;
+	-fx-background-radius: 0 0 0 0;
+          -fx-font-size:15px; 
+}
+.tab .tab-label { 
+ 	-fx-alignment: CENTER;
+	/*-fx-text-fill: #169618;*/
+	-fx-font-weight: bold;
+	-fx-padding: 0 0 0 0;
+}
+.tab-pane:top *.tab-header-area {
+	-fx-padding: 2 2 2 2;
+            /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+	
+	/* NO SPACE LEFT OF FIRST TAB */
+	/* -fx-padding: 0 0 0 30; */
+}
+.tab-pane {
+	-fx-background-color: transparent;
+	-fx-tab-min-width: 100px;
+	-fx-tab-min-height: 30px;
+	-fx-tab-max-height: 30px;
+         /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+}
+.tab-pane .tab {
+	-fx-background-color: transparent;
+         /*-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,.3),8,0,0,0);*/
+     
+}
+.tab-pane:focused .tab-header-area .headers-region .tab:selected .focus-indicator {
+ 	-fx-border-width: 0;
+	-fx-border-insets: 0 0 0 0;
+	-fx-border-radius: 0;
+      
+       -fx-text-fill:#169618;
+}
+
+/* First series (BSFAS) */
+.chart-bar.default-color0 {
+    -fx-bar-fill: #e74c3c; /* RED */
+}
+
+/* Second series (BSIT) */
+.chart-bar.default-color1 {
+    -fx-bar-fill: #3498db; /* BLUE */
+}
+
+/* Optional: legend symbol color 
+.chart-legend-item-symbol.default-color0 {
+    -fx-background-color: #3498db;
+}
+.chart-legend-item-symbol.default-color1 {
+    -fx-background-color: #e74c3c;
+}*/
+
+/* Rounded bars */
+.chart-bar {
+    -fx-background-radius: 5;
+    -fx-padding: 5;
+}
+
+/* Change gap between bars */
+.bar-chart .chart-plot-background {
+    -fx-padding: 2;
+}
+
+/* Force text color black on all table rows and cells */
+.table-view .table-cell {
+    -fx-text-fill: black;   /* text always black */
+}
+
+/* Also ensure selected rows keep black text */
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: black;
+}
+
+/* Hover state keeps black text too */
+.table-row-cell:hover .table-cell {
+    -fx-text-fill: black;
+}
+
+
+
+/* ========== ACTION BUTTON INSIDE TABLEVIEW ========== */
+.action-menu-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;          /* black ⋮ to match white table */
+    -fx-font-size: 18px;
+    -fx-padding: 0 8 0 8;
+    -fx-cursor: hand;
+}
+
+.action-menu-btn:hover {
+    -fx-background-color: #e6ffe6; /* same hover shade as your SIDE_hbox */
+    -fx-background-radius: 5px;
+    -fx-text-fill: black;
+}
+
+/* ========== VIEW STUDENT PANE ========== */
+#viewStudent_pane {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-border-color: #003380;     /* matches LOGIN/CREATE button theme */
+    -fx-border-radius: 10px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 10, 0, 0, 0);
+}
+
+/* Labels inside the pane */
+#viewStudent_pane .label {
+    -fx-text-fill: #003380;
+    -fx-font-weight: bold;
+}
+
+/* TextFields and TextAreas inside the pane */
+#viewStudent_pane .text-field,
+#viewStudent_pane .text-area {
+    -fx-background-color: transparent;
+    -fx-border-color: black;
+    -fx-border-width: 0 0 0.8px 0;
+    -fx-font-size: 15px;
+    -fx-text-fill: black;
+}
+
+#viewStudent_pane .text-field:focused,
+#viewStudent_pane .text-area:focused {
+    -fx-border-color: #66ccff;
+}
+
+/* Buttons inside the view pane (Upload, Edit, Save, Cancel) */
+#viewStudent_pane .button {
+    -fx-background-color: #003380;
+    -fx-text-fill: white;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+#viewStudent_pane .button:hover {
+    -fx-background-color: linear-gradient(to bottom, #66ccff 0%, #cce0ff 100%);
+    -fx-text-fill: black;
+}
+
+/* Base style for all toggle buttons */
+.toggle-button1 {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #333;        /* Dark text */
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 5 15 5 15;     /* some spacing */
+}
+
+/* Hover effect */
+.toggle-button1:hover {
+    -fx-font-size: 15px;        /* slightly bigger on hover */
+}
+
+/* Selected (clicked) state */
+.toggle-button1:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #333 transparent; /* bottom border only */
+    -fx-border-width: 0 0 2px 0;  /* only bottom border visible */
+    -fx-font-size: 16px;          /* bigger font when active */
+    -fx-font-weight: bold;
+}
+
+/*for student name list in adding consultation*/
+.combo-boxNAME {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #ccc transparent; /* only bottom border */
+    -fx-border-width: 0 0 1 0; /* bottom only */
+    -fx-padding: 4 8 4 4; /* right padding leaves room for arrow */
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+/* Highlight bottom line on focus */
+.combo-boxNAME:focused {
+    -fx-border-color: transparent transparent #4CAF50 transparent;
+    -fx-border-width: 0 0 2 0; /* thicker bottom when focused */
+}
+
+/* Arrow button (drop-down) */
+.combo-boxNAME .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 4 0 4;
+}
+
+.combo-boxNAME .arrow {
+    -fx-background-color: #555; /* arrow color */
+}
+
+/* Optional: editor text style */
+.combo-boxNAME .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #333; /* text color */
+    -fx-font-size: 17px;
+}
+
+/* inventory action column */
+.action-dots {
+    -fx-background-color: transparent;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-padding: 0 6 0 6;
+}
+.action-dots:hover {
+    -fx-background-color: rgba(0,0,0,0.08);
+    -fx-background-radius: 4px;
+}
+
+
+

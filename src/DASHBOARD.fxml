@@ -1,0 +1,1502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1261.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="DASHBOARDController">
+   <children>
+      <Pane layoutX="211.0" layoutY="140.0" prefHeight="587.0" prefWidth="1101.0" AnchorPane.bottomAnchor="-77.0" AnchorPane.leftAnchor="211.0" AnchorPane.rightAnchor="-51.0">
+         <children>
+            <ImageView fitHeight="544.0" fitWidth="1038.0" opacity="0.5" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/IMG_20240313_103647.png" />
+               </image>
+            </ImageView>
+            <Pane fx:id="VisitLog_pane" layoutX="-3.0" layoutY="11.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+               <children>
+                  <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@image/backBUTTON.png" />
+                     </image>
+                  </ImageView>
+                  <Label layoutX="56.0" layoutY="5.0" prefHeight="52.0" prefWidth="983.0" text="Visit Log">
+                     <font>
+                        <Font name="System Bold" size="25.0" />
+                     </font>
+                  </Label>
+                  <TableView fx:id="visitLog_tv" layoutX="53.0" layoutY="109.0" prefHeight="341.0" prefWidth="761.0" stylesheets="@clinicDESIGN.css">
+                    <columns>
+                      <TableColumn fx:id="visitDate_col" prefWidth="124.66668701171875" text="Date" />
+                      <TableColumn fx:id="visitName_col" prefWidth="213.99990844726562" text="Name" />
+                        <TableColumn fx:id="visitReason_col" prefWidth="421.3333740234375" text="Reason for visits" />
+                    </columns>
+                  </TableView>
+                  <Button layoutX="864.0" layoutY="212.0" mnemonicParsing="false" onAction="#VisitLog_AddNew" prefHeight="52.0" prefWidth="144.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Add New">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Button>
+                  <Button layoutX="864.0" layoutY="279.0" mnemonicParsing="false" onAction="#VisitLog_Delete" prefHeight="52.0" prefWidth="144.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Delete">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Button>
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="Dashboard_pane" layoutX="209.0" layoutY="137.0" prefHeight="512.0" prefWidth="1053.0">
+         <children>
+            <Label layoutX="6.0" layoutY="12.0" prefHeight="64.0" prefWidth="1041.0" text="Dashboard Overview">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <Label layoutX="6.0" layoutY="65.0" prefHeight="64.0" prefWidth="1041.0" text="Key Statistics">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font>
+            </Label>
+            <Pane layoutX="49.0" layoutY="128.0" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/USERaccounts.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="37.0" prefWidth="148.0" text="Total Students">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <Label fx:id="TotalStudents_label" alignment="CENTER" prefHeight="40.0" prefWidth="145.0" text="303">
+                                 <font>
+                                    <Font name="System Bold" size="28.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="387.0" layoutY="129.0" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/visit.jpg" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="37.0" prefWidth="148.0" text="Today's Visits">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <Label fx:id="TodayVisit_label" alignment="CENTER" prefHeight="40.0" prefWidth="145.0" text="12">
+                                 <font>
+                                    <Font name="System Bold" size="28.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="734.0" layoutY="129.0" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/med.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="37.0" prefWidth="148.0" text="Med Supplies">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <Label fx:id="TotalMedSupplies_label" alignment="CENTER" prefHeight="40.0" prefWidth="145.0" text="6">
+                                 <font>
+                                    <Font name="System Bold" size="28.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Label layoutX="6.0" layoutY="220.0" prefHeight="64.0" prefWidth="1041.0" text="Quick Access Modules">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font>
+            </Label>
+            <Pane layoutX="49.0" layoutY="279.0" onMouseClicked="#StudentRecord_action" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/records.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="77.0" prefWidth="172.0" text="Student Records">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="49.0" layoutY="378.0" onMouseClicked="#Inventory_action" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/inventory.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="92.0" prefWidth="148.0" text="Inventory">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="388.0" layoutY="280.0" onMouseClicked="#Consultation_action" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/stethoscope2.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="83.0" prefWidth="148.0" text="Consultations">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="388.0" layoutY="378.0" onMouseClicked="#VisitLog_action" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/visit.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="119.0" prefWidth="148.0" text="Visit Log">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="734.0" layoutY="281.0" onMouseClicked="#Reports_action" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/report.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="77.0" prefWidth="168.0" text="Reports">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+            <Pane layoutX="735.0" layoutY="379.0" onMouseClicked="#Notification_action" prefHeight="83.0" prefWidth="241.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <HBox layoutX="-6.0" layoutY="2.0" prefHeight="77.0" prefWidth="248.0">
+                     <children>
+                        <ImageView fitHeight="62.0" fitWidth="62.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/notification.png" />
+                           </image>
+                           <HBox.margin>
+                              <Insets left="20.0" top="10.0" />
+                           </HBox.margin>
+                        </ImageView>
+                        <VBox prefHeight="77.0" prefWidth="167.0">
+                           <children>
+                              <Label prefHeight="96.0" prefWidth="148.0" text="Notifications">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets left="15.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="StudentRecord_pane" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <Pane layoutX="31.0" layoutY="96.0" prefHeight="396.0" prefWidth="1002.0">
+               <children>
+                  <HBox layoutX="2.0" layoutY="-40.0" prefHeight="38.0" prefWidth="319.0">
+                     <children>
+                        <ToggleButton fx:id="btnALL" mnemonicParsing="false" prefHeight="38.0" prefWidth="68.0" selected="true" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="ALL">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="courseFilter" />
+                           </toggleGroup>
+                        </ToggleButton>
+                        <ToggleButton fx:id="btn_BSFAS" mnemonicParsing="false" prefHeight="37.0" prefWidth="89.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BSFAS" toggleGroup="$courseFilter" />
+                        <ToggleButton fx:id="btnBSIT" mnemonicParsing="false" prefHeight="37.0" prefWidth="73.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BSIT" toggleGroup="$courseFilter" />
+                        <ToggleButton fx:id="btnBIT" mnemonicParsing="false" prefHeight="43.0" prefWidth="69.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BIT" toggleGroup="$courseFilter" />
+                     </children>
+                  </HBox>
+                  <TableView fx:id="student_tv" layoutX="1.0" layoutY="8.0" prefHeight="381.0" prefWidth="996.0" stylesheets="@clinicDESIGN.css">
+                    <columns>
+                      <TableColumn fx:id="id_col" prefWidth="75.0" text="ID Number" />
+                      <TableColumn fx:id="lastName_col" prefWidth="155.33331298828125" text="Last Name" />
+                        <TableColumn fx:id="firstName_col" prefWidth="169.99996948242188" text="First Name" />
+                        <TableColumn fx:id="middleName_col" prefWidth="126.0" text="Middle Name" />
+                        <TableColumn fx:id="course_col" prefWidth="48.666748046875" text="Course" />
+                        <TableColumn fx:id="yearLevel_col" prefWidth="82.0" text="Year Level" />
+                        <TableColumn fx:id="gender_col" prefWidth="76.6666259765625" text="Gender" />
+                        <TableColumn fx:id="age_col" prefWidth="52.666748046875" text="Age" />
+                        <TableColumn fx:id="contact_col" prefWidth="136.00006103515625" text="Contact No." />
+                        <TableColumn fx:id="action_col" prefWidth="72.6666259765625" text="Action" />
+                    </columns>
+                  </TableView>
+               </children>
+            </Pane>
+            <Label layoutX="56.0" layoutY="4.0" prefHeight="52.0" prefWidth="983.0" text="Student Records">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <ComboBox fx:id="yearLevel_cb" layoutX="885.0" layoutY="53.0" prefHeight="26.0" prefWidth="60.0" promptText="All" styleClass="bg-head" stylesheets="@clinicDESIGN.css" />
+            <Label layoutX="819.0" layoutY="53.0" prefHeight="29.0" prefWidth="60.0" text="Year level" />
+            <HBox fx:id="filterField" alignment="CENTER_LEFT" layoutX="355.0" layoutY="56.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="447.0" styleClass="search-container1" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <ImageView fitHeight="19.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@image/search.png" />
+                     </image>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="10.0" top="5.0" />
+                     </HBox.margin>
+                  </ImageView>
+                  <TextField fx:id="filterField1" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="21.0" prefWidth="431.0" promptText="Search student name / ID" style="-fx-background-color: TRANSPARENT;">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </TextField>
+               </children>
+            </HBox>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <Button layoutX="954.0" layoutY="52.0" mnemonicParsing="false" onAction="#addNewStudent" prefHeight="29.0" prefWidth="69.0" text="Add New" />
+         </children>
+      </Pane>
+      <Pane layoutX="211.0" layoutY="6.0" prefHeight="127.0" prefWidth="1038.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css" AnchorPane.bottomAnchor="516.6666666666666" AnchorPane.leftAnchor="211.0">
+         <children>
+            <Label layoutX="14.0" layoutY="22.0" prefHeight="44.0" prefWidth="792.0" text="SLSU ALABAT CLINIC MANAGEMENT SYSTEM" textFill="#169618">
+               <font>
+                  <Font name="System Bold" size="33.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="113.0" fitWidth="79.0" layoutX="907.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/main_campus_logo-removebg-preview.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="113.0" fitWidth="79.0" layoutX="821.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/slsu_alabat_logo-removebg-preview.png" />
+               </image>
+            </ImageView>
+         </children>
+      </Pane>
+      <VBox layoutX="-1.0" layoutY="-2.0" prefHeight="655.0" prefWidth="206.0" styleClass="SIDE_nav" stylesheets="@clinicDESIGN.css">
+         <children>
+            <ImageView fitHeight="62.0" fitWidth="58.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/adminFINAL.png" />
+               </image>
+               <VBox.margin>
+                  <Insets left="75.0" top="50.0" />
+               </VBox.margin>
+            </ImageView>
+            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="36.0" prefWidth="206.0" text="Juan P. Dela Cruz" textAlignment="CENTER" wrapText="true">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+            <Label alignment="CENTER" prefHeight="26.0" prefWidth="206.0" text="Campus Nurse">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="-10.0" />
+               </VBox.margin>
+            </Label>
+            <HBox prefHeight="38.0" prefWidth="251.0">
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" top="60.0" />
+               </VBox.margin>
+               <children>
+                  <ToggleButton fx:id="sidebtn_dashboard" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#dashboard_sideNav" prefHeight="36.0" prefWidth="205.0" selected="true" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Dashboard">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/dboard.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <toggleGroup>
+                        <ToggleGroup fx:id="sideNav" />
+                     </toggleGroup>
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </ToggleButton>
+               </children>
+            </HBox>
+            <HBox prefHeight="38.0" prefWidth="251.0" styleClass="SIDE_hbox" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <ToggleButton fx:id="sidebtn_addStudent" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#AddStudent_sideNav" prefHeight="36.0" prefWidth="205.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Add Student" toggleGroup="$sideNav">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/addStudent.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </ToggleButton>
+               </children>
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </VBox.margin>
+            </HBox>
+            <HBox prefHeight="38.0" prefWidth="251.0" styleClass="SIDE_hbox" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <ToggleButton fx:id="sidebtn_calendar" alignment="CENTER_LEFT" mnemonicParsing="false" prefHeight="36.0" prefWidth="218.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Calendar" toggleGroup="$sideNav">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/calendar.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></ToggleButton>
+               </children>
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </VBox.margin>
+            </HBox>
+            <HBox prefHeight="38.0" prefWidth="251.0" styleClass="SIDE_hbox" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <ToggleButton fx:id="sidebtn_settings" alignment="CENTER_LEFT" mnemonicParsing="false" prefHeight="36.0" prefWidth="222.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Settings" toggleGroup="$sideNav">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/settings.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </ToggleButton>
+               </children>
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </VBox.margin>
+            </HBox>
+            <HBox prefHeight="16.0" prefWidth="206.0">
+               <children>
+                  <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="237.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Log Out" toggleGroup="$sideNav">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/sign-out-icon-3.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets left="10.0" right="10.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+               </children>
+               <VBox.margin>
+                  <Insets top="230.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+      <Pane fx:id="StudentRecord_pane1" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <Label layoutX="56.0" layoutY="4.0" prefHeight="52.0" prefWidth="983.0" text="Student Details">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton_STUDENTLIST" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <Pane fx:id="viewStudent_pane" layoutX="36.0" layoutY="71.0" prefHeight="416.0" prefWidth="974.0" style="-fx-background-color: white;" visible="false">
+               <children>
+                  <Label fx:id="fullName_label" layoutX="143.0" layoutY="12.0" prefHeight="41.0" prefWidth="261.0" text="Janine Nolial Silverio">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="145.0" layoutY="45.0" prefHeight="18.0" prefWidth="60.0" text="SLSU ID:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="idNumber_label" layoutX="208.0" layoutY="45.0" prefHeight="20.0" prefWidth="91.0" text="22A - 1124">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <ImageView fx:id="image_imageView" fitHeight="71.0" fitWidth="73.0" layoutX="33.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@image/photo.png" />
+                     </image>
+                  </ImageView>
+                  <Button layoutX="25.0" layoutY="93.0" mnemonicParsing="false" onAction="#uploadPhoto_btn" prefHeight="22.0" prefWidth="90.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="Upload Photo" />
+                  <TextArea fx:id="history_textArea" editable="false" layoutX="143.0" layoutY="102.0" prefHeight="256.0" prefWidth="358.0" />
+                  <Label alignment="CENTER" layoutX="142.0" layoutY="77.0" prefHeight="26.0" prefWidth="361.0" text="Student History" wrapText="true">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+                  <Line endX="15.5555419921875" endY="374.888916015625" layoutX="530.0" layoutY="33.0" opacity="0.1" startX="15.5555419921875" startY="-4.666656494140625" />
+                  <Pane layoutX="569.0" layoutY="28.0" prefHeight="369.0" prefWidth="391.0">
+                     <children>
+                        <Label alignment="CENTER" layoutX="-1.0" layoutY="7.0" prefHeight="17.0" prefWidth="394.0" text="Personal Details">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <HBox layoutX="1.0" layoutY="27.0" prefHeight="22.0" prefWidth="389.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#editStudent_btn" prefHeight="23.0" prefWidth="52.0" style="-fx-background-color: white; -fx-border-color: green; -fx-border-radius: 5;" text="Edit" textFill="#015715">
+                                 <graphic>
+                                    <ImageView fitHeight="13.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/edit%20green.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets left="110.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#saveStudent_btn" opacity="0.5" prefHeight="23.0" prefWidth="54.0" style="-fx-background-color: green; -fx-border-radius: 5;" text="Save" textFill="WHITE">
+                                 <graphic>
+                                    <ImageView fitHeight="13.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/save.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets left="5.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#cancelStudent_btn" opacity="0.5" prefHeight="23.0" prefWidth="62.0" style="-fx-background-color: white; -fx-border-radius: 5;" text="Cancel">
+                                 <graphic>
+                                    <ImageView fitHeight="13.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/cancel.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </HBox>
+                        <GridPane layoutX="15.0" layoutY="71.0" prefHeight="258.0" prefWidth="369.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="109.33331298828125" minWidth="10.0" prefWidth="69.33331298828125" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="157.0" minWidth="10.0" prefWidth="110.66666666666667" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="215.00008138020834" minWidth="10.0" prefWidth="85.33333333333331" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="157.0" minWidth="10.0" prefWidth="99.66666666666669" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label prefHeight="17.0" prefWidth="45.0" text="Age:" />
+                              <Label prefHeight="17.0" prefWidth="45.0" text="Gender:" GridPane.columnIndex="2" />
+                              <Label prefHeight="17.0" prefWidth="64.0" text="Birthday:" GridPane.rowIndex="1" />
+                              <Label prefHeight="17.0" prefWidth="63.0" text="Birthplace:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Label prefHeight="17.0" prefWidth="45.0" text="Course:" GridPane.rowIndex="2" />
+                              <Label prefHeight="17.0" prefWidth="45.0" text="Height:" GridPane.rowIndex="4" />
+                              <Label prefHeight="17.0" prefWidth="62.0" text="Religion:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <Label prefHeight="17.0" prefWidth="62.0" text="Civil Status:" GridPane.rowIndex="3" />
+                              <Label prefHeight="17.0" prefWidth="62.0" text="Year Level:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <Label prefHeight="17.0" prefWidth="45.0" text="Status:" GridPane.rowIndex="6" />
+                              <Label prefHeight="17.0" prefWidth="89.0" text="Facebook/Email:" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                              <Label prefHeight="17.0" prefWidth="68.0" text="Contact No." GridPane.rowIndex="5" />
+                              <Label prefHeight="17.0" prefWidth="45.0" text="Weight:" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                              <TextField fx:id="age_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="22" GridPane.columnIndex="1">
+                                 <GridPane.margin>
+                                    <Insets bottom="15.0" right="10.0" top="15.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="gender_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="Female" GridPane.columnIndex="3">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                              </TextField>
+                              <TextField fx:id="birthday_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="09/09/02" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="birthplace_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="113.0" style="-fx-background-color: #e6e6e6;" text="Alabat, Quezon" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                              </TextField>
+                              <TextField fx:id="course_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="BSIT" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="yearLevel_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="4th year" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                              </TextField>
+                              <TextField fx:id="civilStatus_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="Single" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="religion_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="Catholic" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                              </TextField>
+                              <TextField fx:id="height_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="155 cm" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="weight_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="56 kg" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                              </TextField>
+                              <TextField fx:id="contactNo_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="0919 123 1234" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <TextField fx:id="email_tf" alignment="CENTER_RIGHT" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="janine@gmail.com" GridPane.columnIndex="3" GridPane.rowIndex="5">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                              </TextField>
+                              <TextField fx:id="status_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="Active" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </TextField>
+                              <Label prefHeight="17.0" prefWidth="85.0" text="Address:" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                              <TextField fx:id="address_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" style="-fx-background-color: #e6e6e6;" text="Alabat. Quezon" GridPane.columnIndex="3" GridPane.rowIndex="6">
+                                 <padding>
+                                    <Insets right="20.0" />
+                                 </padding>
+                              </TextField>
+                           </children>
+                        </GridPane>
+                     </children>
+                  </Pane>
+                  <Button layoutX="296.0" layoutY="373.0" mnemonicParsing="false" onAction="#edit_HISTORY" prefHeight="25.0" prefWidth="56.0" text="EDIT" />
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="Consultations_pane" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <Label layoutX="56.0" layoutY="4.0" prefHeight="52.0" prefWidth="983.0" text="Consultations">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <TableView fx:id="consultation_tv" layoutX="57.0" layoutY="84.0" prefHeight="400.0" prefWidth="967.0" stylesheets="@clinicDESIGN.css">
+              <columns>
+                <TableColumn fx:id="consultationName_col" prefWidth="294.6667175292969" text="Name" />
+                <TableColumn fx:id="consultationDate_col" prefWidth="142.6666259765625" text="Date of Consultation" />
+                  <TableColumn fx:id="consultationReason_col" prefWidth="433.33331298828125" text="Reason for visits" />
+                  <TableColumn fx:id="consultationAction_col" prefWidth="96.0" text="Action" />
+              </columns>
+            </TableView>
+            <Button layoutX="920.0" layoutY="52.0" mnemonicParsing="false" onAction="#AddNewConsultation" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="Add New">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
+            <Pane fx:id="AddEditConsultation_pane" layoutX="15.0" layoutY="13.0" prefHeight="470.0" prefWidth="1017.0" style="-fx-background-color: white;" visible="false">
+               <children>
+                  <Label layoutX="661.0" layoutY="23.0" prefHeight="41.0" prefWidth="74.0" text="Date:">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <ComboBox fx:id="consultationName_cb" editable="true" layoutX="157.0" layoutY="19.0" prefHeight="49.0" prefWidth="319.0" promptText="Select or search student..." styleClass="combo-boxNAME" stylesheets="@clinicDESIGN.css" />
+                  <GridPane layoutX="101.0" layoutY="78.0" prefHeight="279.0" prefWidth="834.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="369.333251953125" minWidth="10.0" prefWidth="140.66665649414062" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="694.6666768391927" minWidth="10.0" prefWidth="694.6666768391927" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Reason for visit:">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Blood Pressure:" GridPane.rowIndex="1">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Temperature:" GridPane.rowIndex="4">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Diagnosis:" GridPane.rowIndex="5">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Treatment given:" GridPane.rowIndex="6">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Referral:" GridPane.rowIndex="7">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="consultationReason_tf" prefHeight="0.0" prefWidth="695.0" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" />
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <children>
+                              <TextField fx:id="consultationBP_tf" prefHeight="38.0" prefWidth="139.0" promptText="ex: 120/80" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" />
+                              <Label alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="64.0" text="Status:">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Label fx:id="BPstatus_label" prefHeight="50.0" prefWidth="218.0" text="Label">
+                                 <HBox.margin>
+                                    <Insets left="8.0" top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <children>
+                              <TextField fx:id="consultationPR_tf" prefHeight="38.0" prefWidth="140.0" promptText="ex: 90" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" />
+                              <Label alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="64.0" text="Status:">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Label fx:id="PRstatus_label" prefHeight="50.0" prefWidth="218.0" text="Label">
+                                 <HBox.margin>
+                                    <Insets left="8.0" top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                           <children>
+                              <TextField fx:id="consultationRR_tf" prefHeight="38.0" prefWidth="140.0" promptText="ex: 16" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" />
+                              <Label alignment="CENTER_RIGHT" prefHeight="46.0" prefWidth="64.0" text="Status:">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Label fx:id="RRstatus_label" prefHeight="50.0" prefWidth="218.0" text="Label">
+                                 <HBox.margin>
+                                    <Insets left="8.0" top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                           <children>
+                              <TextField fx:id="consultationTemperature_tf" prefHeight="38.0" prefWidth="79.0" promptText="ex: 37" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" />
+                              <Circle fill="WHITE" radius="3.0" stroke="BLACK" strokeType="INSIDE">
+                                 <HBox.margin>
+                                    <Insets left="5.0" top="10.0" />
+                                 </HBox.margin>
+                              </Circle>
+                              <Label prefHeight="38.0" prefWidth="63.0" text="C">
+                                 <font>
+                                    <Font size="17.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets top="8.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <TextField fx:id="consultationDiagnosis_tf" prefHeight="13.0" prefWidth="695.0" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Pulse Rate:" GridPane.rowIndex="2">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="111.0" prefWidth="296.0" text="Respiratory Rate:" GridPane.rowIndex="3">
+                           <font>
+                              <Font size="17.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="consultationTreatment_tf" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <TextField fx:id="consultationReferral_tf" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                     </children>
+                  </GridPane>
+                  <Label layoutX="99.0" layoutY="23.0" prefHeight="41.0" prefWidth="84.0" text="Name:">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="consultationDate_tf" layoutX="710.0" layoutY="21.0" onMouseClicked="#consultationDate_auto" prefHeight="38.0" prefWidth="227.0" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </TextField>
+                  <Button fx:id="saveBtn" layoutX="831.0" layoutY="391.0" mnemonicParsing="false" onAction="#saveConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="SAVE">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="cancelBtn" layoutX="717.0" layoutY="392.0" mnemonicParsing="false" onAction="#cancelConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="CANCEL">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="editBtn" layoutX="603.0" layoutY="393.0" mnemonicParsing="false" onAction="#editConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="EDIT" textFill="#058826">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="deleteBtn" layoutX="489.0" layoutY="393.0" mnemonicParsing="false" onAction="#deleteConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="DELETE" textFill="#cc2020">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Button>
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="Reports_pane" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="56.0" layoutY="5.0" prefHeight="52.0" prefWidth="983.0" text="Reports">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <Pane layoutX="57.0" layoutY="62.0" prefHeight="410.0" prefWidth="926.0" style="-fx-background-color: white;">
+               <children>
+                  <Pane layoutX="30.0" layoutY="33.0" prefHeight="81.0" prefWidth="195.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+                     <children>
+                        <VBox layoutX="3.0" layoutY="6.0" prefHeight="71.0" prefWidth="185.0">
+                           <children>
+                              <Label alignment="CENTER" prefHeight="33.0" prefWidth="251.0" text="Daily Summary Consultations">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" prefHeight="36.0" prefWidth="185.0" text="20">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+                  <Pane layoutX="240.0" layoutY="32.0" prefHeight="81.0" prefWidth="215.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+                     <children>
+                        <VBox layoutX="3.0" layoutY="6.0" prefHeight="71.0" prefWidth="202.0">
+                           <children>
+                              <Label alignment="CENTER" prefHeight="33.0" prefWidth="213.0" text="Monthly Summary Consultations">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" prefHeight="36.0" prefWidth="215.0" text="110">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+                  <Label alignment="CENTER" layoutX="30.0" layoutY="230.0" prefHeight="44.0" prefWidth="429.0" text="Most Common Health Complaints">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <GridPane layoutX="38.0" layoutY="271.0" prefHeight="117.0" prefWidth="418.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="199.6666259765625" minWidth="10.0" prefWidth="158.99995930989584" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="363.66668701171875" minWidth="10.0" prefWidth="258.3333740234375" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="37.0" prefWidth="204.0" text="1.">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="37.0" prefWidth="208.0" text="2." GridPane.rowIndex="1">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="37.0" prefWidth="209.0" text="3." GridPane.rowIndex="2">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <Label prefHeight="35.0" prefWidth="357.0" text="Fever" GridPane.columnIndex="1">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="35.0" prefWidth="357.0" text="Injury" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="35.0" prefWidth="357.0" text="Headache" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                     </children>
+                  </GridPane>
+                  <Label alignment="CENTER" layoutX="496.0" layoutY="31.0" prefHeight="31.0" prefWidth="408.0" text="Total number of clinic visits each Year/Level">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </Label>
+                 <BarChart fx:id="barChart" layoutX="500.0" layoutY="63.0" legendVisible="false" prefHeight="333.0" prefWidth="396.0" styleClass="bar-chart" stylesheets="@clinicDESIGN.css">
+    <xAxis>
+        <NumberAxis label="Total Visits" side="BOTTOM" />
+    </xAxis>
+    <yAxis>
+        <CategoryAxis label="Year/Level" side="LEFT" />
+    </yAxis>
+</BarChart>
+                  <Pane layoutX="134.0" layoutY="132.0" prefHeight="81.0" prefWidth="195.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css">
+                     <children>
+                        <VBox layoutX="3.0" layoutY="6.0" prefHeight="71.0" prefWidth="185.0">
+                           <children>
+                              <Label alignment="CENTER" prefHeight="33.0" prefWidth="251.0" text="Total Medicine Used">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label alignment="CENTER" prefHeight="36.0" prefWidth="185.0" text="300">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="Inventory_pane" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="56.0" layoutY="5.0" prefHeight="52.0" prefWidth="983.0" text="Inventory">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <HBox layoutX="860.0" layoutY="63.0" prefHeight="26.0" prefWidth="137.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#AddNewStock" prefHeight="26.0" prefWidth="136.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Add New Stock" />
+               </children></HBox>
+            <HBox fx:id="filterField_hbox" alignment="CENTER_LEFT" layoutX="55.0" layoutY="66.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="695.0" styleClass="search-container1" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <ImageView fitHeight="19.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@image/search.png" />
+                     </image>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="10.0" top="5.0" />
+                     </HBox.margin>
+                  </ImageView>
+                  <TextField fx:id="filterField_inventory" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="27.0" prefWidth="653.0" promptText="Search item /code /type /status" style="-fx-background-color: TRANSPARENT;">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </TextField>
+               </children>
+            </HBox>
+            <TableView fx:id="inventory_tv" layoutX="57.0" layoutY="100.0" prefHeight="382.0" prefWidth="939.0" stylesheets="@clinicDESIGN.css">
+              <columns>
+                  <TableColumn fx:id="inventoryCode_col" prefWidth="75.0" text="Code" />
+                <TableColumn fx:id="inventoryName_col" prefWidth="155.33331298828125" text="Item Name" />
+                <TableColumn fx:id="inventoryType_col" prefWidth="115.33334350585938" text="Type" />
+                  <TableColumn fx:id="inventoryQuantity_col" prefWidth="179.3333740234375" text="Quantity" />
+                  <TableColumn fx:id="inventoryUnit_col" prefWidth="124.666748046875" text="Unit" />
+                  <TableColumn fx:id="inventoryExpiry_col" prefWidth="112.00018310546875" text="Expiry Date" />
+                  <TableColumn fx:id="inventoryStatus_col" prefWidth="110.666748046875" text="Status" />
+                  <TableColumn fx:id="inventoryAction_col" prefWidth="62.6666259765625" text="Action" />
+              </columns>
+            </TableView>
+            <Pane fx:id="AddEdit_InventoryPane" layoutX="54.0" layoutY="55.0" prefHeight="427.0" prefWidth="944.0" style="-fx-background-color: WHITE;" visible="false">
+               <children>
+                  <GridPane layoutX="76.0" layoutY="72.0" prefHeight="219.0" prefWidth="781.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="186.6666259765625" minWidth="10.0" prefWidth="88.66670735677083" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="394.0" minWidth="10.0" prefWidth="368.6666259765625" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="276.0" minWidth="10.0" prefWidth="72.33337402343744" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="247.6666259765625" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="139.0" text="Item Name:">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" prefHeight="45.0" prefWidth="132.0" text="Type:" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" prefHeight="55.0" prefWidth="76.0" text="Quantity:" GridPane.columnIndex="2">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" prefHeight="45.0" prefWidth="67.0" text="Unit:" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" prefHeight="47.0" prefWidth="113.0" text="Expiry Date:" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="inventoryItem_tf" prefHeight="41.0" prefWidth="377.0" styleClass="textfield" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" />
+                        <TextField fx:id="inventoryType_tf" prefHeight="45.0" prefWidth="377.0" promptText="ex: Medical Supply" styleClass="textfield" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="inventoryExpiry_tf" prefHeight="44.0" prefWidth="377.0" promptText="yyyy-mm-dd" styleClass="textfield" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <TextField fx:id="inventoryQuantity_tf" prefHeight="43.0" prefWidth="249.0" styleClass="textfield" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="3" />
+                        <TextField fx:id="inventoryUnit_tf" prefHeight="51.0" prefWidth="249.0" styleClass="textfield" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+                  <Button layoutX="756.0" layoutY="342.0" mnemonicParsing="false" onAction="#InventorySave" prefHeight="41.0" prefWidth="98.0" text="Save" />
+                  <Button layoutX="645.0" layoutY="342.0" mnemonicParsing="false" onAction="#inventoryCancel" prefHeight="41.0" prefWidth="98.0" text="Cancel" />
+                  <Label alignment="CENTER" layoutX="417.0" layoutY="37.0" prefHeight="17.0" prefWidth="121.0" text="Inventory Form">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="VisitLog_addpane" layoutX="412.0" layoutY="195.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="318.0" prefWidth="519.0" style="-fx-background-color: white;" visible="false">
+         <children>
+            <GridPane layoutX="31.0" layoutY="40.0" prefHeight="200.0" prefWidth="443.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="211.3333740234375" minWidth="10.0" prefWidth="91.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="352.0" minWidth="10.0" prefWidth="352.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label alignment="CENTER" prefHeight="76.0" prefWidth="224.0" text="Date:">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="76.0" prefWidth="224.0" text="Name:" GridPane.rowIndex="1">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="76.0" prefWidth="224.0" text="Reasons:" GridPane.rowIndex="2">
+                     <font>
+                        <Font size="17.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="visitDate_tf" prefHeight="52.0" prefWidth="316.0" styleClass="textfieldVisitLog" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1">
+                     <GridPane.margin>
+                        <Insets bottom="20.0" />
+                     </GridPane.margin>
+                  </TextField>
+                  <ComboBox fx:id="visitName_cb" prefHeight="48.0" prefWidth="360.0" styleClass="combo-boxNAME" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="visitReason_tf" prefHeight="52.0" prefWidth="316.0" styleClass="textfieldVisitLog" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <GridPane.margin>
+                        <Insets bottom="20.0" />
+                     </GridPane.margin>
+                  </TextField>
+               </children>
+            </GridPane>
+            <Button layoutX="155.0" layoutY="249.0" mnemonicParsing="false" onAction="#addVL_cancel" prefHeight="37.0" prefWidth="108.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Cancel">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button layoutX="269.0" layoutY="248.0" mnemonicParsing="false" onAction="#addVL_add" prefHeight="37.0" prefWidth="108.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Add">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+         </children>
+      </Pane>
+      <Pane fx:id="Notification_pane" layoutX="418.0" layoutY="233.0" prefHeight="270.0" prefWidth="492.0" style="-fx-background-color: white;" styleClass="bg-head" stylesheets="@clinicDESIGN.css" visible="false">
+         <children>
+            <ImageView fitHeight="29.0" fitWidth="27.0" layoutX="13.0" layoutY="25.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <TableView layoutX="42.0" layoutY="25.0" prefHeight="205.0" prefWidth="407.0">
+              <columns>
+                <TableColumn prefWidth="416.6666564941406" text="Notifications" />
+              </columns>
+            </TableView>
+            <Button layoutX="224.0" layoutY="238.0" mnemonicParsing="false" style="-fx-background-color: f2f2f2; -fx-background-radius: 3;" styleClass="bg-head" stylesheets="@clinicDESIGN.css" text="Delete" />
+         </children>
+      </Pane>
+      <Pane fx:id="HistoryForm_pane" layoutX="367.0" layoutY="253.0" prefHeight="308.0" prefWidth="673.0" style="-fx-background-color: WHITE; -fx-border-color: BLACK;" visible="false">
+         <children>
+            <GridPane layoutX="37.0" layoutY="40.0" prefHeight="209.0" prefWidth="594.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="297.77777099609375" minWidth="10.0" prefWidth="107.11118570963541" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="504.22216796875" minWidth="10.0" prefWidth="501.55548095703125" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label alignment="CENTER_RIGHT" prefHeight="43.0" prefWidth="160.0" text="Past Illnesses:">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="43.0" prefWidth="160.0" text="Family History:" GridPane.rowIndex="4">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="43.0" prefWidth="160.0" text="Immunizations:" GridPane.rowIndex="3">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="43.0" prefWidth="160.0" text="Medications:" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="43.0" prefWidth="160.0" text="Allergies:" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <TextArea fx:id="pastIllnesses_ta" prefHeight="27.0" prefWidth="501.0" GridPane.columnIndex="1" />
+                  <TextArea fx:id="allergies_ta" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextArea fx:id="medications_ta" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextArea fx:id="immunizations_ta" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextArea fx:id="familyHistory_ta" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+               </children>
+            </GridPane>
+            <Button layoutX="282.0" layoutY="260.0" mnemonicParsing="false" onAction="#cancelHistory" prefHeight="25.0" prefWidth="90.0" text="CANCEL" />
+            <Button layoutX="379.0" layoutY="261.0" mnemonicParsing="false" onAction="#saveHistory" prefHeight="25.0" prefWidth="90.0" text="SAVE" />
+            <Label layoutX="312.0" layoutY="16.0" text="History Form">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+      <Pane fx:id="AddStudent_pane" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton_ADDstudentFORM" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="56.0" layoutY="5.0" prefHeight="52.0" prefWidth="983.0" text="Add Student">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <Pane layoutX="60.0" layoutY="69.0" prefHeight="397.0" prefWidth="913.0" style="-fx-background-color: white;">
+               <children>
+                  <GridPane layoutX="61.0" layoutY="42.0" prefHeight="327.0" prefWidth="664.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="122.0" minWidth="10.0" prefWidth="114.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="204.0" minWidth="10.0" prefWidth="193.33331298828125" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="148.00002034505206" minWidth="10.0" prefWidth="123.3333740234375" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="226.6666259765625" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <TextField fx:id="addStudent_idNum_tf" promptText="ID Number" GridPane.columnIndex="1" />
+                        <TextField fx:id="addStudent_lastName_tf" promptText="Last Name" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="addStudent_firstName_tf" promptText="First Name" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <TextField fx:id="addStudent_middleName_tf" promptText="Middle Name" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <TextField fx:id="addStudent_age_tf" promptText="Age" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <TextField fx:id="addStudent_address_tf" promptText="Address" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <TextField fx:id="addStudent_contact_tf" promptText="Contact Number" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <TextField fx:id="addStudent_civil_tf" promptText="Civil Status " GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <TextField fx:id="addStudent_email_tf" promptText="Email" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                        <ComboBox fx:id="addStudent_course_cb" prefHeight="25.0" prefWidth="245.0" promptText="Course" GridPane.columnIndex="3" />
+                        <ComboBox fx:id="addStudent_year_cb" prefHeight="25.0" prefWidth="235.0" promptText="Year Level" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="addStudent_gender_cb" prefHeight="25.0" prefWidth="229.0" promptText="Gender" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <DatePicker fx:id="addStudent_birthday_dp" prefHeight="25.0" prefWidth="231.0" promptText="Birthday" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                        <TextField fx:id="addStudent_birthplace_tf" promptText="Birthplace" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                        <TextField fx:id="addStudent_height_tf" promptText="Height" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                        <TextField fx:id="addStudent_weight_tf" promptText="Weight" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                        <TextField fx:id="addStudent_religion_tf" promptText="Religion" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="ID Number:">
+                           <GridPane.margin>
+                              <Insets right="5.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Last Name: " GridPane.rowIndex="1" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="First Name: " GridPane.rowIndex="2" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Middle Name: " GridPane.rowIndex="3" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Age: " GridPane.rowIndex="4" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Address: " GridPane.rowIndex="5" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Contact Number: " GridPane.rowIndex="6" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Civil Status: " GridPane.rowIndex="7" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Email: " GridPane.rowIndex="8" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Course: " GridPane.columnIndex="2" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Year Level: " GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Gender: " GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Birthday: " GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Birthplace: " GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Height: " GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Weight: " GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                        <Label alignment="CENTER_RIGHT" prefHeight="33.0" prefWidth="120.0" text="Religion: " GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                        <Button mnemonicParsing="false" onAction="#addStudent_addHistory" prefHeight="25.0" prefWidth="95.0" text="Add History" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+                     </children>
+                  </GridPane>
+                  <ImageView fx:id="addStudent_imageview" fitHeight="73.0" fitWidth="91.0" layoutX="788.0" layoutY="44.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@image/addStudent.png" />
+                     </image>
+                  </ImageView>
+                  <Button layoutX="777.0" layoutY="127.0" mnemonicParsing="false" onAction="#addStudent_upload" prefHeight="25.0" prefWidth="94.0" text="Upload Photo" />
+                  <Button layoutX="793.0" layoutY="217.0" mnemonicParsing="false" onAction="#addStudent_cancel" prefHeight="27.0" prefWidth="63.0" text="Cancel" />
+                  <Button layoutX="793.0" layoutY="252.0" mnemonicParsing="false" onAction="#addStudent_save" prefHeight="27.0" prefWidth="63.0" text="Save" />
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+         <children>
+            <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@image/backBUTTON.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="56.0" layoutY="5.0" prefHeight="52.0" prefWidth="983.0" text="extra">
+               <font>
+                  <Font name="System Bold" size="25.0" />
+               </font>
+            </Label>
+            <Pane layoutX="315.0" layoutY="154.0" prefHeight="200.0" prefWidth="200.0" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
