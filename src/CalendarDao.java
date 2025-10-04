@@ -60,7 +60,15 @@ public class CalendarDao {
 
 
     public List<CalendarItem> findUpcoming(int limit) throws SQLException {
-        String sql = "SELECT * FROM calendar_item WHERE start_date >= CURDATE() ORDER BY start_date, start_time LIMIT ?";
+//        String sql = "SELECT * FROM calendar_item WHERE start_date >= CURDATE() ORDER BY start_date, start_time LIMIT ?";
+        String sql = """
+        SELECT * FROM calendar_item
+        WHERE start_date >= CURDATE()
+          AND status <> 'done'               -- <--
+        ORDER BY start_date, COALESCE(start_time,'23:59:59')
+        LIMIT ?
+    """;
+    // ...map rows to CalendarItem...
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Math.max(1, limit));
             try (ResultSet rs = ps.executeQuery()) {

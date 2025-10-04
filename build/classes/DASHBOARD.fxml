@@ -1729,8 +1729,8 @@
                               <Button fx:id="btnPrev" mnemonicParsing="false" styleClass="icon-btn" text="◀" />
                               <Label fx:id="lblMonthYear" alignment="CENTER" prefHeight="25.0" prefWidth="140.0" styleClass="month-title" text="November 2024" />
                               <Button fx:id="btnNext" mnemonicParsing="false" styleClass="icon-btn" text="▶" />
-                              <Button fx:id="btnToday" mnemonicParsing="false" prefHeight="28.0" prefWidth="73.0" styleClass="chip-active" text="Today" />
-                              <Separator orientation="VERTICAL" prefHeight="200.0" />
+                              <Button fx:id="btnToday" mnemonicParsing="false" prefHeight="28.0" prefWidth="51.0" styleClass="labelForDay" text="Today" />
+                              <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="32.0" />
                               <ToggleButton fx:id="tglMonth" mnemonicParsing="false" prefHeight="28.0" prefWidth="71.0" selected="true" styleClass="month-week-listTOGGLE" text="Month">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="viewToggleGroup" />
@@ -1738,7 +1738,7 @@
                               </ToggleButton>
                               <ToggleButton fx:id="tglWeek" mnemonicParsing="false" prefHeight="28.0" prefWidth="67.0" styleClass="month-week-listTOGGLE" text="Week" toggleGroup="$viewToggleGroup" />
                               <ToggleButton fx:id="tglList" mnemonicParsing="false" prefHeight="28.0" prefWidth="56.0" styleClass="month-week-listTOGGLE" text="List" toggleGroup="$viewToggleGroup" />
-                              <Separator orientation="VERTICAL" prefHeight="200.0" />
+                              <Separator orientation="VERTICAL" prefHeight="28.0" prefWidth="37.0" />
                               <ToggleButton fx:id="fltAll" mnemonicParsing="false" prefHeight="28.0" prefWidth="49.0" selected="true" styleClass="chip" text="All">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="filterToggleGroup" />
@@ -1751,7 +1751,7 @@
                               
                                  </children>
                         </HBox>
-                        <StackPane prefHeight="195.0" prefWidth="818.0" VBox.vgrow="ALWAYS">
+                        <StackPane fx:id="calendarStack" prefHeight="468.0" prefWidth="797.0" VBox.vgrow="ALWAYS">
                            <styleClass>
                               <String fx:value="card" />
                               <String fx:value="shadow-soft" />
@@ -1802,7 +1802,7 @@
                                   <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <StackPane.margin>
-                                    <Insets top="34.0" />
+                                    <Insets top="28.0" />
                                  </StackPane.margin>
                               </GridPane>
                               <ScrollPane fx:id="listViewWrapper" fitToWidth="true" prefHeight="509.0" prefWidth="1036.0" visible="false">

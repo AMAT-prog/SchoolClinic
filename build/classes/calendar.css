@@ -75,20 +75,31 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-color: transparent;
     -fx-border-color: -divider;
     -fx-text-fill: -text-strong;
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
 }
 .chip:selected, .chip-active, .chip:hover:selected {
     -fx-background-color: -accent;
     -fx-text-fill: white;
     -fx-border-color: transparent;
 }
-
+.labelForDay {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 3 5 3 5;
+    -fx-cursor: hand;
+    
+    -fx-background-color: transparent;
+    -fx-border-color: -accent;
+    -fx-text-fill: -text-strong;
+    -fx-font-size: 9px;
+}
 .month-week-listTOGGLE, .month-week-listTOGGLE-active {
     -fx-background-color:transparent;
     -fx-text-fill: blue;
     -fx-border-color:blue;
-    -fx-border-width: 0px 0px .6px 0px;
-    -fx-font-size: 13px;
+    -fx-border-width: 0px 0px .99px 0px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }
 .month-week-listTOGGLE {
     -fx-background-color: transparent;
@@ -100,8 +111,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-color:transparent;
     -fx-text-fill: blue;
     -fx-border-color:blue;
-    -fx-border-width: 0px 0px .6px 0px;
-    -fx-font-size: 13px;
+    -fx-border-width: 0px 0px .99px 0px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }
 
 
@@ -137,13 +149,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .today-ring {
     -fx-background-color: white;
     -fx-border-color: -accent;
-    -fx-border-width: 2;
+    -fx-border-width: 3;
     -fx-border-radius: 999;
 }
 
 .day-number {
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
     -fx-text-fill: -text-muted;
 }
 
@@ -156,8 +168,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 
 .pill {
     -fx-background-radius: 9;
-    -fx-padding: 2 6 2 6;
-    -fx-font-size: 9px; /*11px*/
+    -fx-padding: 1 5 1 5;
+    -fx-font-size: 11px; /*11px*/
     -fx-text-fill: white;
 }
 .pill.note     { -fx-background-color: -pill-gray; }
@@ -168,46 +180,54 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 
 /* Separators */
 .separator:horizontal .line { -fx-background-color: -divider; }
-/*--------------------------------------------------------------------------------------
 
+/*------------------------------when hover, DAY CARD will be larger-----*/
+/* small chips inside the grid */
+.pill--small { -fx-font-size: 10px; -fx-padding: 1 6; }
 
-/*.pill { -fx-background-radius: 999; -fx-padding: 2 8; }*/
-
-/*.pill {
-    -fx-background-radius: 999;
-    -fx-padding: 2 8 2 8;
-    -fx-background-color: rgba(0,0,0,0.06);
-    -fx-font-size: 11px;
-}*/
-
-/*.pill.task {     -fx-background-color: #2f80ed22; }     blue tint 
-.pill.event {    -fx-background-color: #27ae6022; }     green tint 
-.pill.inventory{-fx-background-color: #f2994a22; }     orange tint 
-.pill.note {     -fx-background-color: #9aa3af33; }     gray tint 
-
-.pill.done { -fx-opacity: 0.55; -fx-strikethrough: true; }
-
-.more-pill {
-    -fx-text-fill: #6b7280;     muted 
-    -fx-font-size: 11px;
-}*/
-
-/*.pill {                            base chip 
-    -fx-background-radius: 999;
-    -fx-padding: 2 8;
-    -fx-font-size: 11px;
+/* the floating peek card */
+.day-peek {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.18), 16, 0.2, 0, 6);
+    -fx-border-color: #ECEDF0;
+    -fx-border-radius: 10;
 }
+.day-peek .title {
+    -fx-font-weight: 700;
+    -fx-text-fill: -text;
+    -fx-padding: 0 0 6 0;
+}
+.day-peek .pill { -fx-font-size: 12px; -fx-padding: 2 8; }  /* readable size here */
 
- stronger tints so they don’t look washed out 
-.pill.task      { -fx-background-color: rgba(47,128,237,0.28);  -fx-text-fill: #1e3a8a; }
-.pill.event     { -fx-background-color: rgba(39,174,96,0.28);   -fx-text-fill: #065f46; }
-.pill.inventory { -fx-background-color: rgba(242,153,74,0.28);  -fx-text-fill: #7c2d12; }
-.pill.note      { -fx-background-color: rgba(107,114,128,0.22); -fx-text-fill: #374151; }
+/* chips inside the calendar grid only */
+.calendar-grid .pill { -fx-font-size: 10px; -fx-padding: 1 6; }
 
-.pill.done {                       ONLY for completed items 
-    -fx-opacity: 0.65;
-    -fx-strikethrough: true;
-}*/
+/* list mode / peek card use normal size */
+.list-panel .pill, .day-peek .pill { -fx-font-size: 12px; -fx-padding: 2 8; }
+
+
+
+/* dots in cells */
+.dot { -fx-fill: #cbd5e1; }                 /* default gray if kind missing */
+.dot.note      { -fx-fill: -pill-gray; }
+.dot.task      { -fx-fill: -pill-blue; }
+.dot.event     { -fx-fill: -pill-green; }
+.dot.inventory { -fx-fill: -pill-orange; }
+
+.more-dots { -fx-font-size: 10px; -fx-text-fill: -text-muted; }
+
+/* hover card */
+.peek-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 10 12;
+    -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.18), 18, 0.24, 0, 8);
+    -fx-max-width: 360;
+}
+.peek-title { -fx-font-size: 14px; -fx-font-weight: 700; }
+.peek-row   { -fx-spacing: 8; -fx-alignment: CENTER_LEFT; }
 
 
 
