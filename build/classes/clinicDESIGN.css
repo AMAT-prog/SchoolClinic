@@ -128,7 +128,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
  /*Style of each table cell*/
 .table-view .table-cell{
     -fx-font-weight:bold;
-    -fx-font-size:14px;           /*the font size you asked in the comments below*/
+    -fx-font-size:12px;          
     /* -fx-text-fill:orange; */
 
 }

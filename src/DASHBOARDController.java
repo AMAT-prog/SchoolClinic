@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
  */
 
+import com.itextpdf.text.Chunk;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -34,6 +36,7 @@ import javafx.stage.FileChooser;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.*;
 import java.time.LocalDate;
@@ -45,11 +48,71 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import javafx.beans.value.ChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.util.StringConverter;
 
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
+import org.apache.pdfbox.rendering.ImageType;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.fxml.FXML;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+// iText 5
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+
+// PDFBox
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.rendering.ImageType;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javafx.css.PseudoClass;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 
 
 
@@ -328,10 +391,104 @@ public class DASHBOARDController implements Initializable {
     @FXML
     private Label TotalMedSupplies_label;
     
+    // ====================== FXML FIELDS (MED CERTIFICATE) =================
+    @FXML private BorderPane medicalCertificate_pane;  // form + records (main pane)
+    @FXML private BorderPane medicalCertPreview;       // preview pane
+
+    // Left side (records)
+    @FXML private TextField search_tf;
+    @FXML private TableView<CertRow> certificates_tv;
+    @FXML private TableColumn<CertRow, String> colStudent;
+    @FXML private TableColumn<CertRow, String> colDate;
+    @FXML private TableColumn<CertRow, String> colCode;
+    @FXML private TableColumn<CertRow, String> colStatus;
+    @FXML private TableColumn<CertRow, HBox>   colAction;
+
+    // Right side (form)
+private TextField student_tf;
+    @FXML private DatePicker date_dp;
+    @FXML private TextField activity_tf;
+    @FXML private ComboBox<String> status_cb;
+    @FXML private TextArea remarks_ta;
+    @FXML private TextField bp_tf;
+    @FXML private TextField temp_tf;
+    @FXML private TextField pulse_tf;
+    @FXML private TextField resp_tf;
+
+    // Preview area (inside medicalCertPreview)
+    @FXML private ImageView imageView;
+    @FXML private Spinner<Integer> pageSpinner;
+    @FXML private ScrollPane scroll;
+
+    @FXML
+    private ToggleButton sidebtn_MedicalCertificate;
     
+    @FXML
+    private Label student_lbl;
+    @FXML
+    private Label studentID_lbl;
+    @FXML
+    private Label vitalsSource_lbl;
+    
+
+    
+   
+    @FXML
+    private BorderPane rootBorder;
+    @FXML
+    private VBox leftBar;
+    @FXML
+    private DatePicker miniDatePicker;
+    @FXML
+    private Button btnAdd;
+    @FXML
+    private ListView<CalendarItem> upcomingList;
+    @FXML
+    private ListView<CalendarItem> remindersList;
+    @FXML
+    private HBox topBar;
+    @FXML
+    private Button btnPrev;
+    @FXML
+    private Label lblMonthYear;
+    @FXML
+    private Button btnNext;
+    @FXML
+    private Button btnToday;
+    @FXML
+    private ToggleButton tglMonth;
+    @FXML
+    private ToggleGroup viewToggleGroup;
+    @FXML
+    private ToggleButton tglWeek;
+    @FXML
+    private ToggleButton tglList;
+    @FXML
+    private ToggleButton fltAll;
+    @FXML
+    private ToggleGroup filterToggleGroup;
+    @FXML
+    private ToggleButton fltNotes;
+    @FXML
+    private ToggleButton fltTasks;
+    @FXML
+    private ToggleButton fltEvents;
+    @FXML
+    private ToggleButton fltInventory;
+    @FXML
+    private GridPane weekdayHeader;
+    @FXML
+    private AnchorPane calendar_pane;
+    @FXML
+    private GridPane monthGrid;
+    @FXML
+    private ScrollPane listViewWrapper;
+    @FXML
+    private VBox listViewVBox;
+    
+    
+     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     //for adding new consultation
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
-    
     //for adding history during adding a new student
     //1. currentStudentId - already in controller
     //2. 
@@ -374,12 +531,55 @@ public class DASHBOARDController implements Initializable {
     
     //visit log
     private ObservableList<VisitLogRow> rows;
-    
-    
+   
     private javafx.collections.ObservableList<StudentOption> studentOptions;
     private FilteredList<StudentOption> studentFiltered;
     private boolean suppressEditorEvents = false;
     
+    // ============================ STATE / PREVIEW (MED CERT) ==============================
+    private int currentStudentIdMEDCERT = -1;    // currently selected student
+    private File lastGeneratedPdf = null;        // last generated PDF path
+
+    // Single set of PDFBox preview objects (NO duplicates)
+    private PDDocument doc = null;
+    private PDFRenderer renderer = null;
+    private int pageCount = 1;
+    private float zoom = 1.25f; // 1.0 ~ 96 dpi baseline
+    
+    // Track which student's vitals are currently shown
+    private Integer lastVitalsStudentId = null;
+    // Track if the nurse has typed in any vitals for the current student
+    private boolean vitalsUserEdited = false;
+    
+    // ============================== UTILITIES (MED CERT) ==================================
+    private boolean isEmpty(String s){ return s==null || s.trim().isEmpty(); }
+    private String emptyToNull(String s){ return isEmpty(s) ? null : s.trim(); }
+    private String emptyToNA(String s){ return isEmpty(s) ? "N/A" : s.trim(); }
+    private void alertInfo(String m){ new Alert(Alert.AlertType.INFORMATION,m).showAndWait(); }
+    private void alertError(String m){ new Alert(Alert.AlertType.ERROR,m).showAndWait(); }
+
+    private void showFormPane(){
+        medicalCertificate_pane.setVisible(true);
+        medicalCertificate_pane.setManaged(true);
+        medicalCertPreview.setVisible(false);
+        medicalCertPreview.setManaged(false);
+    }
+    private void showPreviewPane(){
+        medicalCertificate_pane.setVisible(false);
+        medicalCertificate_pane.setManaged(false);
+        medicalCertPreview.setVisible(true);
+        medicalCertPreview.setManaged(true);
+    }
+    
+    // wrap the ImageView so ScrollPane doesn't resize it
+    private Group imageGroup;
+    private boolean fitMode = false; // when true, re-fit on viewport resize
+
+    //CALENDAR
+    // ------- internal state -------
+    private YearMonth visibleMonth = YearMonth.now();
+    private final List<DayCell> cells = new ArrayList<>(42);
+    private CalendarDao dao;
     
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
     @FXML
@@ -392,6 +592,7 @@ public class DASHBOARDController implements Initializable {
         VisitLog_pane.setVisible(false);
         Notification_pane.setVisible(false);
         AddStudent_pane.setVisible(false);
+        medicalCertificate_pane.setVisible(false);
         
         Dashboard_pane.setVisible(true);
     }
@@ -408,9 +609,25 @@ public class DASHBOARDController implements Initializable {
         Inventory_pane.setVisible(false);
         VisitLog_pane.setVisible(false);
         Notification_pane.setVisible(false);
+        medicalCertificate_pane.setVisible(false);
         
         AddStudent_pane.setVisible(true);
         AddStudent_pane.toFront();
+    }
+    
+     @FXML
+    private void MedicalCertificate_sideNav(ActionEvent event) {
+        StudentRecord_pane.setVisible(false);
+        StudentRecord_pane1.setVisible(false);
+        Consultations_pane.setVisible(false);
+        Reports_pane.setVisible(false);
+        Inventory_pane.setVisible(false);
+        VisitLog_pane.setVisible(false);
+        Notification_pane.setVisible(false);
+        AddStudent_pane.setVisible(false);
+        Dashboard_pane.setVisible(false);
+        
+        medicalCertificate_pane.setVisible(true);
     }
     
     @FXML
@@ -482,6 +699,17 @@ public class DASHBOARDController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        Dashboard_pane.setVisible(true);
+        
+        StudentRecord_pane.setVisible(false);
+        StudentRecord_pane1.setVisible(false);
+        Consultations_pane.setVisible(false);
+        Reports_pane.setVisible(false);
+        Inventory_pane.setVisible(false);
+        VisitLog_pane.setVisible(false);
+        Notification_pane.setVisible(false);
+        AddStudent_pane.setVisible(false);
+        medicalCertificate_pane.setVisible(false);
       // Series 1
     XYChart.Series<Number, String> series1 = new XYChart.Series<>();
     series1.setName("BSFAS");
@@ -676,6 +904,115 @@ public class DASHBOARDController implements Initializable {
         });
         
         loadDashboardStats();  // call once on load (and after any CRUD for live)
+
+        // defaults (MED CERTIFICATE)
+        date_dp.setValue(LocalDate.now());
+        status_cb.setItems(FXCollections.observableArrayList("Fit","Not Fit"));
+        status_cb.getSelectionModel().selectFirst();
+
+        // table columns
+        colStudent.setCellValueFactory(d -> d.getValue().studentNameProp());
+        colDate.setCellValueFactory(d -> d.getValue().dateProp());
+        colCode.setCellValueFactory(d -> d.getValue().codeProp());
+        colStatus.setCellValueFactory(d -> d.getValue().statusProp());
+        colAction.setCellValueFactory(d -> d.getValue().actionProp());
+
+        // first load
+        loadCertificates(null);
+
+        // Any manual change marks vitals as user-edited (creating Med Certificate)
+        bp_tf.textProperty().addListener((o,a,b)    -> vitalsUserEdited = true);
+        temp_tf.textProperty().addListener((o,a,b)  -> vitalsUserEdited = true);
+        pulse_tf.textProperty().addListener((o,a,b) -> vitalsUserEdited = true);
+        resp_tf.textProperty().addListener((o,a,b)  -> vitalsUserEdited = true);
+        
+        //delete records in recycle bin which is 90 days old
+        purgeOldDeleted();
+        
+        // ImageView defaults for pixel-true zooming
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setCache(true);
+
+        // IMPORTANT: disable any "fit to width/height" scaling from ImageView itself
+        imageView.setFitWidth(0);   // 0 = do not scale via fitWidth
+        imageView.setFitHeight(0);  // 0 = do not scale via fitHeight
+
+        // Put ImageView inside a Group so ScrollPane uses image's actual pixel size
+        imageGroup = new Group(imageView);
+        scroll.setContent(imageGroup);
+
+        // Let the user pan around when zoomed in
+        scroll.setPannable(true);
+
+        // IMPORTANT: don't force content to the viewport size
+        scroll.setFitToWidth(false);
+        scroll.setFitToHeight(false);
+
+        // If user pressed "Fit", re-fit when the pane is resized
+        scroll.viewportBoundsProperty().addListener((obs, o, n) -> {
+            if (fitMode && doc != null) renderPreviewPage(currentPageIndex());
+        });
+
+        ////////////////////////////// CALENDAR on initialize ////////////////////////////////
+        // 1) DB
+        Connection conn = MySQL.connect(); 
+        dao = new CalendarDao(conn);
+
+        // 2) Build weekday header (Mon..Sun)
+        buildWeekdayHeader();
+
+        // 3) Build static 7x6 grid once
+        buildMonthGrid();
+
+        // 4) Hook up controls
+        btnPrev.setOnAction(e -> { visibleMonth = visibleMonth.minusMonths(1); refresh(); });
+        btnNext.setOnAction(e -> { visibleMonth = visibleMonth.plusMonths(1); refresh(); });
+        btnToday.setOnAction(e -> { visibleMonth = YearMonth.now(); refresh(); });
+
+        miniDatePicker.setValue(LocalDate.now());
+        miniDatePicker.valueProperty().addListener((obs, old, d) -> {
+            if (d != null) { visibleMonth = YearMonth.from(d); refresh(); }
+        });
+
+        // View toggles
+        viewToggleGroup.selectedToggleProperty().addListener((obs, o, n) -> {
+            boolean listMode = n == tglList;
+            monthGrid.setVisible(!listMode);
+            monthGrid.setManaged(!listMode);
+            listViewWrapper.setVisible(listMode);
+            listViewWrapper.setManaged(listMode);
+            refresh();
+        });
+
+        // Filters
+        fltAll.setOnAction(e -> {
+            if (fltAll.isSelected()) {
+                fltNotes.setSelected(false); fltTasks.setSelected(false);
+                fltEvents.setSelected(false); fltInventory.setSelected(false);
+            }
+            refresh();
+        });
+        fltNotes.setOnAction(e -> { fltAll.setSelected(false); refresh(); });
+        fltTasks.setOnAction(e -> { fltAll.setSelected(false); refresh(); });
+        fltEvents.setOnAction(e -> { fltAll.setSelected(false); refresh(); });
+        fltInventory.setOnAction(e -> { fltAll.setSelected(false); refresh(); });
+
+        // Add button (quick add)
+        btnAdd.setOnAction(e -> quickAdd(LocalDate.now()));
+
+        // First paint
+        refresh();
+        
+        setupLists();//upcoming listview
+        
+        // after buildMonthGrid(), before refresh()
+        applyViewToggleState();   // <-- set initial visible/managed correctly
+
+        viewToggleGroup.selectedToggleProperty().addListener((obs, o, n) -> {
+            applyViewToggleState();
+            refresh();
+        });
 
     }  
     ////////////////////////////////////////////////////////////////////////////end initialization
@@ -2216,7 +2553,6 @@ public class DASHBOARDController implements Initializable {
     
     // small helpers
     private String obj(Object o) { return o == null ? "" : o.toString(); }
-    private String emptyToNull(String s) { return (s == null || s.isBlank()) ? null : s; }
     private void appendIf(StringBuilder sb, String label, String val) {
         if (val != null && !val.isBlank()) {
             sb.append("• ").append(label).append(": ").append(val).append('\n');
@@ -2302,6 +2638,984 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
     if (v == null) ps.setNull(idx, java.sql.Types.DECIMAL);
     else ps.setDouble(idx, v);
 }
+////////////////////////////////////////////////////////////////////////////////MEDICAL CERTIFICATE
+
+    // =================== LEFT PANE: SEARCH + RECORDS TABLE =====================
+    @FXML private void onSearch(){ loadCertificates(search_tf.getText()); }
+
+    @FXML private void onCreateNew() {
+//        String q = search_tf.getText();
+//        List<Student1> choices = MySQL.findStudents(q);
+//        if (choices.isEmpty()) {
+//            alertInfo("No students found. Type a name or ID in the search box first.");
+//            return;
+//        }
+//        Student1 s = choices.get(0);                 // you can replace with a ChoiceDialog
+//        setStudentOnForm(s.studentId, s.fullName()); // sets currentStudentIdMEDCERT
+//        applyLatestVitals(s.studentId);              // auto-fill vitals from last consultation
+         onPickStudent();
+    }
+
+    private void loadCertificates(String query){
+        ObservableList<CertRow> rows = FXCollections.observableArrayList();
+        String sql =
+            "SELECT mc.cert_id, mc.cert_code, mc.issued_date, mc.status, " +
+            "CONCAT(st.last_name, ', ', st.first_name, ' ', COALESCE(st.middle_name,'')) fullname " +
+            "FROM medical_certificates mc " +
+            "JOIN students st ON st.student_id = mc.student_id " +
+            "WHERE mc.is_deleted = 0 AND " +
+            "      (? IS NULL OR st.id_number LIKE CONCAT('%',?,'%') " +
+            "       OR st.first_name LIKE CONCAT('%',?,'%') " +
+            "       OR st.last_name LIKE CONCAT('%',?,'%') " +
+            "       OR mc.cert_code LIKE CONCAT('%',?,'%')) " +
+            "ORDER BY mc.issued_date DESC, mc.cert_id DESC";
+        // ... (bind 5 params as before, fill table)
+        try (Connection con = MySQL.connect(); PreparedStatement ps = con.prepareStatement(sql)) {
+            String k = (query==null || query.trim().isEmpty()) ? null : query.trim();
+            for (int i=1;i<=5;i++) ps.setString(i, k);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    int certId = rs.getInt("cert_id");
+                    String code = rs.getString("cert_code");
+                    LocalDate date = rs.getDate("issued_date").toLocalDate();
+                    String name = rs.getString("fullname");
+                    String status = rs.getString("status");
+                    rows.add(CertRow.of(certId, code, date, name, status,
+                            this::viewExisting, this::printExisting, this::openExisting, this::deleteCertToRecycle));
+
+                }
+            }
+        } catch (SQLException e){ e.printStackTrace(); alertError("Load failed:\n"+e.getMessage()); }
+        certificates_tv.setItems(rows);
+    }
+
+    private void viewExisting(int certId){
+        File f = fetchPdfPath(certId);
+        if (f==null || !f.exists()){ alertError("File not found for this certificate."); return; }
+        openPreview(f);
+    }
+    private void printExisting(int certId){
+        File f = fetchPdfPath(certId);
+        if (f!=null && f.exists()) try { java.awt.Desktop.getDesktop().print(f); }
+        catch(Exception ex){ alertError("Print failed:\n"+ex.getMessage()); }
+    }
+    private void openExisting(int certId){
+        File f = fetchPdfPath(certId);
+        if (f!=null && f.exists()) try { java.awt.Desktop.getDesktop().open(f); }
+        catch(Exception ex){ alertError("Open failed:\n"+ex.getMessage()); }
+    }
+    private File fetchPdfPath(int certId){
+        try (Connection con = MySQL.connect();
+             PreparedStatement ps = con.prepareStatement("SELECT file_path FROM medical_certificates WHERE cert_id=?")){
+            ps.setInt(1, certId);
+            try(ResultSet rs = ps.executeQuery()){
+                if (rs.next()){
+                    String p = rs.getString(1);
+                    return p==null ? null : new File(p);
+                }
+            }
+        } catch (SQLException e){ e.printStackTrace(); }
+        return null;
+    }
+
+    // ======================= RIGHT PANE: FORM ACTIONS ==========================
+    private void setStudentOnForm(int studentId, String fullName){
+        currentStudentIdMEDCERT = studentId;
+        student_tf.setText(fullName); //student_lbl.setText("Please pick a student...);
+        date_dp.setValue(LocalDate.now());
+    }
 
 
+    private void applyLatestVitals(int studentId, boolean forceOverwrite) {
+        String sql =
+            "SELECT consultation_date, " +
+            "       COALESCE(blood_pressure, CONCAT(COALESCE(systolic,''),'/',COALESCE(diastolic,''))) AS bp, " +
+            "       temperature, pulse_rate, respiratory_rate " +
+            "FROM consultations " +
+            "WHERE student_id=? " +
+            "ORDER BY consultation_date DESC, consultation_id DESC " +
+            "LIMIT 1";
+
+        try (Connection con = MySQL.connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, studentId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    vitalsSource_lbl.setText("No consultation found.");
+                    vitalsSource_lbl.setStyle("-fx-font-size: 11; -fx-text-fill: gray;");
+                    lastVitalsStudentId = studentId;  // still track
+                    return;
+                }
+
+                String bp = rs.getString("bp");
+
+                java.math.BigDecimal tempBD = (java.math.BigDecimal) rs.getObject("temperature");
+                String tempStr = (tempBD != null) ? tempBD.stripTrailingZeros().toPlainString() : null;
+
+                Integer pulse = (Integer) rs.getObject("pulse_rate");
+                Integer rr    = (Integer) rs.getObject("respiratory_rate");
+
+                // Decide whether to overwrite fields
+                boolean overwrite = forceOverwrite || !vitalsUserEdited;
+
+                if (overwrite) {
+                    // Overwrite all four (use "N/A" only if you prefer — here we clear if null)
+                    bp_tf.setText( bp != null && !bp.isBlank() ? bp : "" );
+                    temp_tf.setText( tempStr != null && !tempStr.isBlank() ? tempStr : "" );
+                    pulse_tf.setText( pulse != null ? pulse.toString() : "" );
+                    resp_tf.setText( rr != null ? rr.toString() : "" );
+                } else {
+                    // Legacy behavior: only fill empties
+                    if (isEmpty(bp_tf.getText())   && bp != null && !bp.isBlank())       bp_tf.setText(bp);
+                    if (isEmpty(temp_tf.getText()) && tempStr != null && !tempStr.isBlank()) temp_tf.setText(tempStr);
+                    if (isEmpty(pulse_tf.getText())&& pulse != null)                     pulse_tf.setText(pulse.toString());
+                    if (isEmpty(resp_tf.getText()) && rr != null)                        resp_tf.setText(rr.toString());
+                }
+
+                // Label + stale warning
+                LocalDate consultDate = rs.getDate("consultation_date").toLocalDate();
+                vitalsSource_lbl.setText("Loaded from consultation on " + consultDate);
+                if (consultDate.isBefore(LocalDate.now().minusDays(30))) {
+                    vitalsSource_lbl.setStyle("-fx-font-size: 11; -fx-text-fill: red; -fx-font-weight: bold;");
+                    vitalsSource_lbl.setText(vitalsSource_lbl.getText() + " ⚠ Outdated");
+                } else {
+                    vitalsSource_lbl.setStyle("-fx-font-size: 11; -fx-text-fill: gray;");
+                }
+
+                // Remember which student's vitals are shown now
+                lastVitalsStudentId = studentId;
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            alertError("Failed to fetch latest vitals:\n" + e.getMessage());
+        }
+    }
+
+
+    private void clearVitalsFields() {
+        bp_tf.clear();
+        temp_tf.clear();
+        pulse_tf.clear();
+        resp_tf.clear();
+    }
+
+
+    @FXML private void onCancel(){ clearFormMedCert(); }
+    private void clearFormMedCert(){
+        currentStudentIdMEDCERT = -1;
+        student_lbl.setText("Please pick a student..."); 
+        studentID_lbl.setText("");
+        vitalsSource_lbl.setText("");
+        activity_tf.clear(); remarks_ta.clear();
+        bp_tf.clear(); temp_tf.clear(); pulse_tf.clear(); resp_tf.clear();
+        date_dp.setValue(LocalDate.now());
+        status_cb.getSelectionModel().selectFirst();
+        lastGeneratedPdf = null; 
+    }
+
+    // ===================== SAVE + GENERATE + PREVIEW ===========================
+    @FXML
+    private void onSaveGenerate(ActionEvent e){
+        if (currentStudentIdMEDCERT <= 0){
+            alertInfo("Pick a student or Create New before generating."); return;
+        }
+        try (Connection con = MySQL.connect()){
+            String code = nextCertCode(con);
+            File dest = ensureOutputFile(code);
+
+            // 1) Make PDF first
+            createPdf(dest,
+                    student_lbl.getText(),
+                    activity_tf.getText(),
+                    status_cb.getValue(),
+                    remarks_ta.getText(),
+                    emptyToNA(bp_tf.getText()),
+                    emptyToNA(temp_tf.getText()),
+                    emptyToNA(pulse_tf.getText()),
+                    emptyToNA(resp_tf.getText()),
+                    code,
+                    currentNurseName(con),
+                    date_dp.getValue()==null ? LocalDate.now().toString() : date_dp.getValue().toString());
+
+            // 2) Save DB row
+            insertCert(con, code, dest.getAbsolutePath());
+
+            // 3) Refresh & Preview
+            lastGeneratedPdf = dest;
+            loadCertificates(search_tf.getText());
+            openPreview(dest);
+
+        } catch (Exception ex){
+            ex.printStackTrace();
+            alertError("Failed to generate/save:\n"+ex.getMessage());
+        }
+    }
+
+    @FXML private void onPrint(){
+        if (lastGeneratedPdf==null){ alertInfo("Generate a certificate first."); return; }
+        try { java.awt.Desktop.getDesktop().print(lastGeneratedPdf); }
+        catch(Exception ex){ alertError("Print failed:\n"+ex.getMessage()); }
+    }
+
+    // ============================ PREVIEW (PDFBox) =============================
+
+    // === Open PDF in Preview ===
+    private void openPreview(File pdfFile) {
+        try {
+            if (doc != null) doc.close(); // close old one
+            doc = PDDocument.load(pdfFile);
+            renderer = new PDFRenderer(doc);
+            pageCount = doc.getNumberOfPages();
+
+            // Spinner setup 1..pageCount
+            SpinnerValueFactory<Integer> vf =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Math.max(1,pageCount), 1);
+            pageSpinner.setValueFactory(vf);
+            pageSpinner.valueProperty().addListener((obs, oldV, newV) -> renderPreviewPage(newV-1));
+
+            renderPreviewPage(0);   // first page
+            showPreviewPane();      // switch panes
+        } catch (IOException ex) {
+            alertError("Cannot open preview:\n" + ex.getMessage());
+        }
+    }
+
+    // === Render page with current zoom ===
+       
+    private void renderPreviewPage(int pageIndex) {
+        if (doc == null || renderer == null) return;
+        try {
+            float dpi = 96f * zoom;                    // 96 dpi base * zoom factor
+            BufferedImage bim = renderer.renderImageWithDPI(pageIndex, dpi, ImageType.RGB);
+            imageView.setImage(SwingFXUtils.toFXImage(bim, null));
+            // NO setFitWidth here — let the pixel size of the rendered image drive the size
+             imageView.setPreserveRatio(true);
+             imageView.setSmooth(true);   // smoother panning
+             imageView.setCache(false);   // avoid caching low-res
+            
+        } catch (IOException ex) {
+            alertError("Render failed:\n" + ex.getMessage());
+        }
+       
+
+    }
+
+    
+//    @FXML private void onZoomIn(){  zoom = Math.min(zoom + .25f, 4f);  renderPreviewPage(pageSpinner.getValue()-1); }
+//    @FXML private void onZoomOut(){ zoom = Math.max(zoom - .25f, .5f); renderPreviewPage(pageSpinner.getValue()-1); }
+//    @FXML private void onFit(){
+//        double viewportW = (scroll!=null && scroll.getViewportBounds()!=null) ? scroll.getViewportBounds().getWidth() : 820;
+//        // A4 width ≈ 8.27in → target dpi so image width ~ viewport
+//        zoom = (float)((viewportW / 8.27) / 96.0);
+//        zoom = Math.max(.5f, Math.min(zoom, 4f));
+//        renderPreviewPage(pageSpinner.getValue()-1);
+//    }
+    
+    // === Zoom Buttons (connect in FXML onAction) ===
+    @FXML private void onZoomIn() {
+//        zoom = Math.min(zoom + 0.25f, 4.0f);
+//        renderPreviewPage(pageSpinner.getValue()-1);
+
+        // Increase zoom by 0.25 each click, but cap at 4x (prevents memory blowups).
+        zoom = Math.min(zoom + 0.25f, 4.0f);
+
+        // We leave "fit mode", because user is manually zooming now.
+        fitMode = false;
+
+        // Re-render the current page with the new DPI (96 * zoom).
+        renderPreviewPage(currentPageIndex());
+    }
+
+    @FXML private void onZoomOut() {
+        // Decrease zoom by 0.25 each click, don’t allow smaller than 0.5x (too small to see).
+        zoom = Math.max(zoom - 0.25f, 0.5f);
+
+        // Manual zoom → disable fit mode.
+        fitMode = false;
+
+        // Re-render the current page at the new lower DPI.
+        renderPreviewPage(currentPageIndex());
+    }
+
+    @FXML private void onFit() {
+        // Get the viewport width (visible area of the ScrollPane, in screen pixels).
+        double viewportW = scroll.getViewportBounds().getWidth();
+        if (viewportW <= 0) viewportW = 800;  // fallback when not laid out yet
+
+        // Your old code assumed A4 ≈ 8.27in, then estimated zoom from that.
+        // That’s okay, but not exact if the PDF isn't A4 or has a different rotation/margins.
+        // We replaced it with computeFitZoom() that reads the *actual* PDF page width:
+
+        zoom = computeFitZoom(currentPageIndex());
+
+        // We are now in "fit mode": if the window resizes, we’ll re-fit automatically.
+        fitMode = true;
+
+        // Re-render at the fit DPI so the image exactly matches the viewport width.
+        renderPreviewPage(currentPageIndex());
+
+    }
+    private float computeFitZoom(int pageIndex) {
+        // viewport width in screen pixels
+        double viewportW = scroll.getViewportBounds().getWidth();
+        if (viewportW <= 0) viewportW = scroll.getWidth() - 18; // fallback for early calls
+
+        // PDF page width in points (1/72 inch)
+        float pageWidthPts = doc.getPage(pageIndex).getMediaBox().getWidth();
+        double pageWidthInches = pageWidthPts / 72.0;
+
+        // we render at (96 * zoom) DPI; to match viewportW pixels:
+        double targetDpi = viewportW / pageWidthInches;   // pixels / inches
+        double z = targetDpi / 96.0;                      // zoom = dpi / 96
+
+        return (float) Math.max(0.5, Math.min(z, 4.0));   // clamp
+    }
+
+    @FXML private void onOpenExternal(){
+        if (lastGeneratedPdf==null){ alertInfo("No file."); return; }
+        try { java.awt.Desktop.getDesktop().open(lastGeneratedPdf); }
+        catch(Exception ex){ alertError("Open failed:\n"+ex.getMessage()); }
+    }
+    // === Close preview ===
+    @FXML private void onClose() {
+        try { if (doc != null) doc.close(); clearFormMedCert(); } catch (Exception ignore) {}
+        showFormPane();
+    }
+    private int currentPageIndex() {
+        Integer v = (pageSpinner != null ? pageSpinner.getValue() : 1);
+        if (v == null) v = 1;
+        return Math.max(0, Math.min(pageCount - 1, v - 1)); // convert 1-based spinner to 0-based index
+    }
+
+    // ============================== DB HELPERS =================================
+    private String nextCertCode(Connection con) throws SQLException {
+        String year = String.valueOf(LocalDate.now().getYear());
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT COUNT(*) FROM medical_certificates WHERE YEAR(created_at)=?")){
+            ps.setString(1, year);
+            try (ResultSet rs = ps.executeQuery()){
+                rs.next();
+                int next = rs.getInt(1) + 1;
+                return String.format("MED-%s-%04d", year, next);
+            }
+        }
+    }
+
+    private int insertCert(Connection con, String code, String filePath) throws SQLException {
+        String sql = "INSERT INTO medical_certificates " +
+                "(student_id, issued_date, activity, status, remarks, bp, temperature, pulse_rate, respiratory_rate, cert_code, file_path) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            ps.setInt(1, currentStudentIdMEDCERT);
+            ps.setDate(2, Date.valueOf(date_dp.getValue()));
+            ps.setString(3, emptyToNull(activity_tf.getText()));
+            ps.setString(4, status_cb.getValue());
+            ps.setString(5, emptyToNull(remarks_ta.getText()));
+            ps.setString(6, emptyToNull(bp_tf.getText()));
+            ps.setObject(7, isEmpty(temp_tf.getText())? null : Double.valueOf(temp_tf.getText().trim()));
+            ps.setObject(8, isEmpty(pulse_tf.getText())? null : Integer.valueOf(pulse_tf.getText().trim()));
+            ps.setObject(9, isEmpty(resp_tf.getText())? null : Integer.valueOf(resp_tf.getText().trim()));
+            ps.setString(10, code);
+            ps.setString(11, filePath);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()){ rs.next(); return rs.getInt(1); }
+        }
+    }
+
+    private String currentNurseName(Connection con){
+        // TODO: return logged-in user; placeholder for now
+        return "University Health Services Nurse";
+    }
+
+    // ========================== PDF GENERATION (iText 5) =======================
+    private void createPdf(File dest,
+                       String studentName, String activity, String status, String remarks,
+                       String bp, String temp, String pulse, String resp,
+                       String certCode, String nurseName, String dateText) throws Exception {
+
+    dest.getParentFile().mkdirs();
+    Document d = new Document();
+    PdfWriter.getInstance(d, new FileOutputStream(dest));
+    d.open();
+
+    d.add(new Paragraph("REPUBLIC OF THE PHILIPPINES", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+    d.add(new Paragraph("SOUTHERN LUZON STATE UNIVERSITY", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+    d.add(new Paragraph("Health Services\n\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+
+    Paragraph title = new Paragraph("MEDICAL CERTIFICATE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14));
+    title.setAlignment(Element.ALIGN_CENTER);
+    d.add(title);
+    d.add(new Paragraph("\nDate: " + dateText + "\n\n"));
+
+    // ---- Body with bold name, status, activity ----
+    // ---- Fonts (iText 5) ----
+    com.itextpdf.text.Font normal = FontFactory.getFont(FontFactory.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
+    com.itextpdf.text.Font bold   = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, com.itextpdf.text.Font.BOLD);
+
+    // ---- Body with mixed styles ----
+    Paragraph bodyPara = new Paragraph();
+    bodyPara.setFont(normal);
+
+    bodyPara.add(new Chunk("To Whom It May Concern:\n\nThis is to certify that Mr./Ms. ", normal));
+    bodyPara.add(new Chunk(studentName, bold)); // student name bold
+    bodyPara.add(new Chunk(" of Southern Luzon State University, Alabat Campus, is Physically and Mentally ", normal));
+    bodyPara.add(new Chunk(status.toUpperCase(), bold)); // status bold
+    bodyPara.add(new Chunk(" for: ", normal));
+    bodyPara.add(new Chunk(activity, bold)); // activity bold
+    bodyPara.add(new Chunk(".\n\n", normal));
+
+    d.add(bodyPara);
+
+
+    Paragraph remarksPara = new Paragraph();
+    remarksPara.add(new Chunk("Remarks: ", bold));
+    remarksPara.add(new Chunk(isEmpty(remarks) ? "N/A" : remarks, normal));
+    remarksPara.add(new Chunk("\n\n", normal));
+    d.add(remarksPara);
+
+    d.add(new Paragraph("Vital Signs: BP: " + bp + "   Temp: " + temp + " °C   Pulse: " + pulse + " bpm   Resp: " + resp + " cpm\n\n"));
+
+    Paragraph sig = new Paragraph("______________________________\n" + nurseName + "\nUniversity Health Services");
+    sig.setAlignment(Element.ALIGN_RIGHT);
+    d.add(sig);
+
+    Paragraph footer = new Paragraph("\n*Generated by School Clinic System | Certificate ID: " + certCode + "*",
+            FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9));
+    footer.setAlignment(Element.ALIGN_CENTER);
+    d.add(footer);
+
+    d.close();
+}
+
+
+    private File ensureOutputFile(String code){
+        File dir = new File(System.getProperty("user.home"), "SchoolClinic/Certificates");
+        if (!dir.exists()) dir.mkdirs();
+        return new File(dir, code + ".pdf");
+    }
+    
+    @FXML
+    private void onPickStudent() {
+        StudentPickerDialog dlg = new StudentPickerDialog();
+        // If this line NPEs, it means the label is not in a showing scene yet;
+        // you can omit initOwner() safely.
+        if (student_lbl != null && student_lbl.getScene() != null) {
+            dlg.initOwner(student_lbl.getScene().getWindow());
+        }
+        dlg.showAndWait().ifPresent(s -> {
+            currentStudentIdMEDCERT = s.studentId;
+            student_lbl.setText(s.fullName());
+            studentID_lbl.setText("   •   ID: " + s.studentId);
+            date_dp.setValue(LocalDate.now());
+            
+            // If switching to a different student, clear previous vitals
+            if (lastVitalsStudentId == null || !lastVitalsStudentId.equals(s.studentId)) {
+                clearVitalsFields();
+                vitalsUserEdited = false; // new student — reset edit flag
+            }
+            // Force overwrite when changing student (so new vitals always appear)
+            applyLatestVitals(s.studentId, /*forceOverwrite=*/ true);
+        });
+    }
+    /////////////////deleting
+    private void deleteCertToRecycle(int certId){
+        Alert confirm = new Alert(Alert.AlertType.WARNING,
+            "This certificate will be moved to the Recycle Bin.\n" +
+            "You can restore it within 90 days, otherwise it will be permanently deleted.\n\n" +
+            "Proceed?",
+            ButtonType.CANCEL, ButtonType.OK);
+        confirm.setHeaderText("Delete Certificate");
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn != ButtonType.OK) return;
+            try (Connection con = MySQL.connect()) {
+                con.setAutoCommit(false);
+
+                // 1) Get current file path
+                String path=null, code=null;
+                try (PreparedStatement ps = con.prepareStatement(
+                        "SELECT file_path, cert_code FROM medical_certificates WHERE cert_id=? AND is_deleted=0")) {
+                    ps.setInt(1, certId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (!rs.next()) { alertError("Not found or already deleted."); con.rollback(); return; }
+                        path = rs.getString("file_path");
+                        code = rs.getString("cert_code");
+                    }
+                }
+
+                // 2) Move file to RecycleBin/
+                String newPath = path;
+                if (path != null) {
+                    File f = new File(path);
+                    File recycleDir = new File(f.getParentFile(), "RecycleBin");
+                    recycleDir.mkdirs();
+                    File target = new File(recycleDir, f.getName());
+                    if (f.exists() && f.renameTo(target)) newPath = target.getAbsolutePath();
+                }
+
+                // 3) Mark as deleted
+                try (PreparedStatement ps = con.prepareStatement(
+                        "UPDATE medical_certificates SET is_deleted=1, deleted_at=NOW(), delete_reason=?, original_file_path=?, file_path=? WHERE cert_id=?")) {
+                    ps.setString(1, "Admin delete");
+                    ps.setString(2, path);
+                    ps.setString(3, newPath);
+                    ps.setInt(4, certId);
+                    ps.executeUpdate();
+                }
+
+                // 4) Optional audit
+                MySQL.insertAudit(con, certId, "DELETE", "Moved to Recycle Bin");
+
+                con.commit();
+                loadCertificates(search_tf.getText());
+                alertInfo("Moved to Recycle Bin.");
+            } catch (Exception ex){
+                ex.printStackTrace();
+                alertError("Delete failed:\n" + ex.getMessage());
+            }
+        });
+    }
+
+    
+    @FXML
+    private void onOpenRecycleBin() {
+        if (!checkAdminPasswordLoop()) return;
+        // pass a callback that refreshes the main table immediately on any change made in the dialog
+        new RecycleBinDialog(() -> loadCertificates(search_tf.getText())).showAndWait();
+    }
+
+    // same masked-password loop we did earlier
+    private boolean checkAdminPasswordLoop() {
+        while (true) {
+            Dialog<String> dialog = new Dialog<>();
+            dialog.setTitle("Recycle Bin (Admin)");
+            dialog.setHeaderText("Enter admin password to continue.");
+            ButtonType loginBtn = new ButtonType("Login", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(loginBtn, ButtonType.CANCEL);
+            PasswordField pf = new PasswordField(); pf.setPromptText("••••••••");
+            dialog.getDialogPane().setContent(pf);
+            dialog.setResultConverter(btn -> btn == loginBtn ? pf.getText() : null);
+            var result = dialog.showAndWait();
+            if (result.isEmpty()) return false;                   // cancelled
+            if (result.get().equals(adminPassword())) return true; // correct
+            new Alert(Alert.AlertType.ERROR, "Incorrect password. Try again.").showAndWait();
+        }
+    }
+
+
+    // Simple hardcoded admin password (replace with config/hashed check later)
+    private String adminPassword() {
+        return "admin123"; // TODO read from config or env
+    }
+    
+    private void purgeOldDeleted(){
+        try (Connection con = MySQL.connect()){
+            // collect victims first (to delete files)
+            List<File> toDelete = new ArrayList<>();
+            try (PreparedStatement ps = con.prepareStatement(
+                "SELECT file_path FROM medical_certificates WHERE is_deleted=1 AND deleted_at < NOW() - INTERVAL 90 DAY");
+                 ResultSet rs = ps.executeQuery()) {
+                while (rs.next()){
+                    String p = rs.getString(1);
+                    if (p != null) toDelete.add(new File(p));
+                }
+            }
+            // delete rows
+            try (PreparedStatement ps = con.prepareStatement(
+                "DELETE FROM medical_certificates WHERE is_deleted=1 AND deleted_at < NOW() - INTERVAL 90 DAY")) {
+                ps.executeUpdate();
+            }
+            // delete files on disk
+            for (File f : toDelete) { if (f.exists()) f.delete(); }
+        } catch (SQLException e){ e.printStackTrace(); }
+    }
+    ////////////////////////////////////////////////////////////////////////////end of medical certificate
+    ////////////////////////////////////////////////////////////////////////////CALENDAR
+    // ===== UI builders =====
+    private void buildWeekdayHeader() {
+        weekdayHeader.getChildren().clear();
+        for (int c = 0; c < 7; c++) {
+            DayOfWeek dow = DayOfWeek.MONDAY.plus(c);
+            Label lbl = new Label(dow.getDisplayName(TextStyle.SHORT, Locale.getDefault()));
+            lbl.getStyleClass().add("weekday");
+            GridPane.setColumnIndex(lbl, c);
+            weekdayHeader.getChildren().add(lbl);
+        }
+    }
+
+    private void buildMonthGrid() {
+        monthGrid.getChildren().clear();
+        cells.clear();
+
+        for (int r = 0; r < 6; r++) {
+            for (int c = 0; c < 7; c++) {
+                DayCell cell = new DayCell();
+                bindCellSize(cell);                    //  important
+                GridPane.setRowIndex(cell, r);
+                GridPane.setColumnIndex(cell, c);
+                monthGrid.getChildren().add(cell);
+                cells.add(cell);
+            }
+        }
+    }
+    
+    private void bindCellSize(Region cell) {
+        cell.prefWidthProperty().bind(
+            monthGrid.widthProperty().subtract((7 - 1) * monthGrid.getHgap()).divide(7)
+        );
+        cell.prefHeightProperty().bind(
+            monthGrid.heightProperty().subtract((6 - 1) * monthGrid.getVgap()).divide(6)
+        );
+        cell.minWidthProperty().bind(cell.prefWidthProperty());
+        cell.maxWidthProperty().bind(cell.prefWidthProperty());
+        cell.minHeightProperty().bind(cell.prefHeightProperty());
+        cell.maxHeightProperty().bind(cell.prefHeightProperty());
+    }
+
+
+
+    // ===== refresh data + paint =====
+    private void refresh() {
+        lblMonthYear.setText(visibleMonth.getMonth().name().charAt(0) +
+                visibleMonth.getMonth().name().substring(1).toLowerCase(Locale.getDefault()) +
+                " " + visibleMonth.getYear());
+
+        // 1) compute the first date shown (Mon-start)
+        LocalDate firstOfMonth = visibleMonth.atDay(1);
+        LocalDate start = firstOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        // 2) load items from DB
+        EnumSet<CalendarItem.Kind> kinds = activeKinds();
+        LocalDate end = start.plusDays(41);
+        List<CalendarItem> items;
+        try {
+            items = dao.findBetween(start, end, kinds);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            items = List.of();
+        }
+        Map<LocalDate, List<CalendarItem>> byDay;
+        byDay = items.stream().collect(Collectors.groupingBy(CalendarItem::getStartDate));
+
+        // 3) paint day cells
+        LocalDate d = start;
+        for (DayCell cell : cells) {
+            cell.setDate(d, visibleMonth);
+            cell.render(byDay.getOrDefault(d, List.of()));
+            d = d.plusDays(1);
+        }
+
+        // 4) sidebar lists
+        try {
+            upcomingList.getItems().setAll(dao.findUpcoming(6));
+            remindersList.getItems().setAll(dao.remindersDueToday());
+        } catch (Exception ex) { ex.printStackTrace(); }
+
+        // 5) list mode view
+        if (tglList.isSelected()) renderListMode(byDay);
+    }
+
+    private EnumSet<CalendarItem.Kind> activeKinds() {
+        if (fltAll.isSelected() || (!fltNotes.isSelected() && !fltTasks.isSelected()
+                && !fltEvents.isSelected() && !fltInventory.isSelected())) {
+            return EnumSet.allOf(CalendarItem.Kind.class);
+        }
+        EnumSet<CalendarItem.Kind> set = EnumSet.noneOf(CalendarItem.Kind.class);
+        if (fltNotes.isSelected()) set.add(CalendarItem.Kind.Note);
+        if (fltTasks.isSelected()) set.add(CalendarItem.Kind.Task);
+        if (fltEvents.isSelected()) set.add(CalendarItem.Kind.Event);
+        if (fltInventory.isSelected()) set.add(CalendarItem.Kind.Inventory);
+        return set;
+    }
+
+    // ===== quick add dialog (minimal) =====
+    private void quickAdd(LocalDate date) {
+        Dialog<CalendarItem> dlg = new Dialog<>();
+        dlg.setTitle("Add Calendar Item");
+
+        // Form
+        DialogPane pane = dlg.getDialogPane();
+        pane.getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+        TextField tfTitle = new TextField();
+        tfTitle.setPromptText("Title");
+
+        ComboBox<CalendarItem.Kind> cbKind = new ComboBox<>();
+        cbKind.getItems().setAll(CalendarItem.Kind.values());
+        cbKind.getSelectionModel().select(CalendarItem.Kind.Note);
+
+        DatePicker dpDate = new DatePicker(date);
+        CheckBox cbAllDay = new CheckBox("All-day");
+        cbAllDay.setSelected(true);
+        Spinner<Integer> spHour = new Spinner<>(0,23,9);
+        Spinner<Integer> spMin  = new Spinner<>(0,59,0);
+        spHour.setDisable(true); spMin.setDisable(true);
+        cbAllDay.selectedProperty().addListener((o,was,now)->{
+            spHour.setDisable(now); spMin.setDisable(now);
+        });
+
+        GridPane g = new GridPane();
+        g.setHgap(10); g.setVgap(8); g.setPadding(new Insets(10));
+        g.addRow(0, new Label("Title"), tfTitle);
+        g.addRow(1, new Label("Type"), cbKind);
+        g.addRow(2, new Label("Date"), dpDate);
+        g.addRow(3, new Label("Time"), new HBox(6, cbAllDay, new Label("Hour"), spHour, new Label("Min"), spMin));
+        pane.setContent(g);
+
+        dlg.setResultConverter(bt -> {
+            if (bt == ButtonType.OK && !tfTitle.getText().isBlank()) {
+                CalendarItem c = new CalendarItem();
+                c.setTitle(tfTitle.getText().trim());
+                c.setKind(cbKind.getValue());
+                c.setStartDate(dpDate.getValue());
+                if (!cbAllDay.isSelected()) {
+                    c.setAllDay(false);
+                    c.setStartTime(LocalTime.of(spHour.getValue(), spMin.getValue()));
+                } else c.setAllDay(true);
+                return c;
+            }
+            return null;
+        });
+
+        Optional<CalendarItem> res = dlg.showAndWait();
+        res.ifPresent(c -> {
+            try {
+                int id = dao.insert(c);
+                c.setCalendarId(id);
+                refresh();
+            } catch (Exception ex) { ex.printStackTrace(); }
+        });
+    }
+
+    // ===== list mode renderer =====
+    private void renderListMode(Map<LocalDate, List<CalendarItem>> byDay) {
+        listViewVBox.getChildren().clear();
+        List<LocalDate> days = byDay.keySet().stream().sorted().collect(Collectors.toList());
+        for (LocalDate d : days) {
+            Label dateLabel = new Label(d.toString());
+            dateLabel.getStyleClass().add("section-title");
+            VBox dayBox = new VBox(6);
+            dayBox.getChildren().add(dateLabel);
+
+            for (CalendarItem it : byDay.get(d)) {
+                HBox row = new HBox(8);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                CheckBox cb = new CheckBox();
+                cb.setSelected(it.getStatus() == CalendarItem.Status.done);
+
+                Label title = new Label(it.getTitle());
+                title.getStyleClass().addAll("pill", cssByKind(it.getKind()));
+                if (it.getStatus() == CalendarItem.Status.done) {
+                    title.getStyleClass().add("done");
+                }
+
+                cb.selectedProperty().addListener((o, was, now) -> {
+                    try {
+                        dao.markDone(it.getCalendarId(), now);
+                        it.setStatus(now ? CalendarItem.Status.done : CalendarItem.Status.pending);
+                        if (now) title.getStyleClass().add("done");
+                        else title.getStyleClass().remove("done");
+                    } catch (Exception ex) { ex.printStackTrace(); }
+                });
+
+                row.getChildren().addAll(cb, title, new Text(timeText(it)));
+                dayBox.getChildren().add(row);
+            }
+
+
+            dayBox.setPadding(new Insets(6,0,10,0));
+            listViewVBox.getChildren().add(dayBox);
+        }
+    }
+    
+
+    private String timeText(CalendarItem it) {
+        return it.isAllDay() ? "all-day" :
+                it.getStartTime().toString();
+    }
+
+    private String cssByKind(CalendarItem.Kind k) {
+        return switch (k) {
+            case Note -> "note";
+            case Task -> "task";
+            case Event -> "event";
+            case Inventory -> "inventory";
+        };
+    }
+
+    // ===== DayCell control (one per grid cell) =====
+    private class DayCell extends VBox {
+        private final Label dayNumber = new Label();
+//        private final FlowPane pills = new FlowPane(4, 4);
+        private LocalDate date;
+        private final StackPane badge = new StackPane();
+        
+        // AFTER
+        private final VBox pillColumn = new VBox(4);
+        private static final int MAX_PILLS = 3;
+
+        
+        DayCell() {
+            getStyleClass().add("daycell");
+            setPadding(new Insets(6));
+            setSpacing(6);
+
+            dayNumber.getStyleClass().add("day-number");
+            badge.getChildren().setAll(dayNumber);
+            badge.getStyleClass().add("day-badge");
+
+
+            Button addBtn = new Button("+");
+            addBtn.getStyleClass().add("icon-btn");
+            addBtn.setOnAction(e -> quickAdd(date));
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            HBox header = new HBox(6, badge, spacer, addBtn);
+
+            // --- pills container (vertical stack) ---
+            pillColumn.setFillWidth(true);              // children can fill width
+            VBox.setVgrow(pillColumn, Priority.NEVER);  // don't ask for extra height
+
+            // Clip anything that would overflow the cell (safety)
+            Rectangle clip = new Rectangle();
+            clip.widthProperty().bind(widthProperty());
+            clip.heightProperty().bind(heightProperty());
+            setClip(clip);
+
+            getChildren().addAll(header, pillColumn);
+
+            setOnMouseClicked(e -> {
+                if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) quickAdd(date);
+            });
+        }
+
+        private static final PseudoClass OTHER_MONTH = PseudoClass.getPseudoClass("other-month");
+
+        void setDate(LocalDate d, YearMonth currentMonth) {
+            this.date = d;
+            dayNumber.setText(Integer.toString(d.getDayOfMonth()));
+
+            boolean otherMonth = !d.getMonth().equals(currentMonth.getMonth());
+            pseudoClassStateChanged(OTHER_MONTH, otherMonth);
+
+            // ring for today
+            if (LocalDate.now().equals(d)) {
+                if (!badge.getStyleClass().contains("today-ring")) {
+                    badge.getStyleClass().add("today-ring");
+                }
+            } else {
+                badge.getStyleClass().remove("today-ring");
+            }
+        }
+
+
+        void render(List<CalendarItem> items) {
+            pillColumn.getChildren().clear();
+
+            // sort: all-day first, then time, then kind (Task/Event/Inventory/Note)
+            List<CalendarItem> sorted = new ArrayList<>(items);
+            sorted.sort(Comparator
+                .comparing(CalendarItem::isAllDay).reversed()
+                .thenComparing(it -> Optional.ofNullable(it.getStartTime()).orElse(LocalTime.MAX))
+                .thenComparing(it -> switch (it.getKind()) {
+                    case Task -> 0; case Event -> 1; case Inventory -> 2; case Note -> 3; })
+                .thenComparing(CalendarItem::getTitle, String.CASE_INSENSITIVE_ORDER));
+
+            int shown = 0;
+            for (CalendarItem it : sorted) {
+                if (shown == MAX_PILLS) break;
+                Label chip = buildChip(it);
+                pillColumn.getChildren().add(chip);
+                shown++;
+            }
+
+            int remaining = sorted.size() - shown;
+            if (remaining > 0) {
+                Label more = new Label("+" + remaining + " more");
+                more.getStyleClass().add("more-pill");
+                pillColumn.getChildren().add(more);
+            }
+        }
+
+        private Label buildChip(CalendarItem it) {
+            Label chip = new Label(it.getTitle());
+            chip.getStyleClass().setAll("pill", cssByKind(it.getKind())); // reset
+            chip.setWrapText(false);
+            chip.setTextOverrun(OverrunStyle.ELLIPSIS);
+
+            // exactly one line tall
+            chip.setPrefHeight(22);
+            chip.setMinHeight(22);
+            chip.setMaxHeight(22);
+
+            // width constrained to the column (prevents clipping)
+            chip.maxWidthProperty().bind(pillColumn.widthProperty());
+
+            if (it.getStatus() == CalendarItem.Status.done) {
+                chip.getStyleClass().add("done");
+            }
+
+            Tooltip.install(chip, new Tooltip(detailText(it)));
+
+            // quick toggle for Tasks
+            chip.setOnMouseClicked(e -> {
+                if (it.getKind() == CalendarItem.Kind.Task) {
+                    boolean nowDone = it.getStatus() != CalendarItem.Status.done;
+                    try { dao.markDone(it.getCalendarId(), nowDone); it.setStatus(nowDone ? CalendarItem.Status.done : CalendarItem.Status.pending); }
+                    catch (Exception ex) { ex.printStackTrace(); }
+                    refresh();
+                }
+            });
+            return chip;
+        }
+
+
+
+        private String detailText(CalendarItem it) {
+            return (it.isAllDay() ? "All-day" : it.getStartTime()+"") +
+                    " • " + it.getKind() + (it.getDescription()==null ? "" : " • " + it.getDescription());
+        }
+    }
+    
+    private static String fmt(CalendarItem it) {
+        String when = it.isAllDay() ? it.getStartDate().toString()
+                                    : it.getStartDate() + " " + it.getStartTime();
+        return when + "  •  " + it.getTitle();
+    }
+
+    private void setupLists() {
+        upcomingList.setFixedCellSize(28);
+        remindersList.setFixedCellSize(28);
+        
+        
+        upcomingList.setPrefHeight(6 * 28 + 2);
+        upcomingList.setMinHeight(Region.USE_PREF_SIZE);
+        upcomingList.setMaxHeight(Region.USE_PREF_SIZE);
+
+        // Optional: disable horizontal scrollbars via CSS
+        upcomingList.setStyle("-fx-padding: 0; -fx-background-insets: 0; -fx-skin: 'com.sun.javafx.scene.control.skin.ListViewSkin';");
+
+
+        Callback<ListView<CalendarItem>, ListCell<CalendarItem>> factory = lv -> new ListCell<>() {
+            @Override protected void updateItem(CalendarItem it, boolean empty) {
+                super.updateItem(it, empty);
+                if (empty || it == null) { setText(null); }
+                else { setText(fmt(it)); }
+            }
+        };
+        upcomingList.setCellFactory(factory);
+        remindersList.setCellFactory(factory);
+    }
+
+    private void applyViewToggleState() {
+        boolean listMode = viewToggleGroup.getSelectedToggle() == tglList;
+        monthGrid.setVisible(!listMode);
+        monthGrid.setManaged(!listMode);
+        listViewWrapper.setVisible(listMode);
+        listViewWrapper.setManaged(listMode);
+    }
 }

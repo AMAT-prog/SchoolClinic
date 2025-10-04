@@ -1,27 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Line?>
@@ -29,7 +40,7 @@
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1261.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="DASHBOARDController">
    <children>
-      <Pane layoutX="211.0" layoutY="140.0" prefHeight="587.0" prefWidth="1101.0" AnchorPane.bottomAnchor="-77.0" AnchorPane.leftAnchor="211.0" AnchorPane.rightAnchor="-51.0">
+      <Pane layoutX="211.0" layoutY="140.0" prefHeight="587.0" prefWidth="1101.0" AnchorPane.bottomAnchor="-52.0" AnchorPane.leftAnchor="211.0" AnchorPane.rightAnchor="-51.0">
          <children>
             <ImageView fitHeight="544.0" fitWidth="1038.0" opacity="0.5" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -69,7 +80,7 @@
             </Pane>
          </children>
       </Pane>
-      <Pane fx:id="Dashboard_pane" layoutX="209.0" layoutY="137.0" prefHeight="512.0" prefWidth="1053.0">
+      <Pane fx:id="Dashboard_pane" layoutX="209.0" layoutY="140.0" prefHeight="509.0" prefWidth="1053.0" visible="false">
          <children>
             <Label layoutX="6.0" layoutY="12.0" prefHeight="64.0" prefWidth="1041.0" text="Dashboard Overview">
                <font>
@@ -513,6 +524,25 @@
             </HBox>
             <HBox prefHeight="38.0" prefWidth="251.0" styleClass="SIDE_hbox" stylesheets="@clinicDESIGN.css">
                <children>
+                  <ToggleButton fx:id="sidebtn_MedicalCertificate" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#MedicalCertificate_sideNav" prefHeight="36.0" prefWidth="205.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Medical Certificate" toggleGroup="$sideNav">
+                     <graphic>
+                        <ImageView fitHeight="28.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image/MedCert.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </ToggleButton>
+               </children>
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </VBox.margin>
+            </HBox>
+            <HBox prefHeight="38.0" prefWidth="251.0" styleClass="SIDE_hbox" stylesheets="@clinicDESIGN.css">
+               <children>
                   <ToggleButton fx:id="sidebtn_calendar" alignment="CENTER_LEFT" mnemonicParsing="false" prefHeight="36.0" prefWidth="218.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Calendar" toggleGroup="$sideNav">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
@@ -550,7 +580,7 @@
             </HBox>
             <HBox prefHeight="16.0" prefWidth="206.0">
                <children>
-                  <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="237.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Log Out" toggleGroup="$sideNav">
+                  <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="237.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Log Out">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -1498,5 +1528,306 @@
             <Pane layoutX="315.0" layoutY="154.0" prefHeight="200.0" prefWidth="200.0" />
          </children>
       </Pane>
+      <BorderPane fx:id="medicalCertificate_pane" layoutX="211.0" layoutY="141.0" prefHeight="509.0" prefWidth="1038.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css" visible="false">
+         <left>
+            <VBox prefHeight="509.0" prefWidth="437.0" spacing="10.0" style="-fx-background-color: #f9f9f9; -fx-padding: 10;" BorderPane.alignment="CENTER">
+               <children>
+                  <Label prefHeight="25.0" prefWidth="413.0" text="Medical Certificate Records">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox prefHeight="38.0" prefWidth="380.0" spacing="5.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="28.0" prefWidth="414.0" style="-fx-border-color: #6f6f6f; -fx-border-radius: 5;">
+                           <children>
+                              <TextField fx:id="search_tf" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="34.0" prefWidth="346.0" promptText="Search Student Name / ID" style="-fx-background-color: TRANSPARENT;" />
+                              <Button mnemonicParsing="false" onAction="#onSearch" prefHeight="25.0" prefWidth="71.0" style="-fx-background-color: transparent;" text="Enter">
+                                 <graphic>
+                                    <ImageView fitHeight="14.0" fitWidth="17.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@image/search.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </HBox>
+                  <TableView fx:id="certificates_tv" prefHeight="600.0" prefWidth="200.0" stylesheets="@clinicDESIGN.css">
+                    <columns>
+                      <TableColumn fx:id="colStudent" prefWidth="121.99995422363281" text="Student" />
+                      <TableColumn fx:id="colDate" prefWidth="100.66668701171875" text="Date" />
+                        <TableColumn fx:id="colCode" prefWidth="105.99996948242188" text="Code" />
+                        <TableColumn fx:id="colStatus" prefWidth="43.333251953125" text="Status" />
+                        <TableColumn fx:id="colAction" prefWidth="45.9998779296875" text="Action" />
+                    </columns>
+                  </TableView>
+                  <Hyperlink onAction="#onOpenRecycleBin" text="Recycle Bin" textFill="#d22b2b" underline="true" />
+               </children>
+            </VBox>
+         </left>
+         <center>
+            <VBox maxWidth="-Infinity" prefHeight="485.0" prefWidth="592.0" style="-fx-padding: 20; -fx-border-radius: 5; -fx-border-color: #4CAF50;" BorderPane.alignment="CENTER">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onCreateNew" prefHeight="25.0" prefWidth="597.0" style="-fx-background-color: #4CAF50;" text="➕ Create New Certificate" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font></Button>
+                  <GridPane hgap="10.0" prefHeight="417.0" prefWidth="552.0" vgap="10.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="30.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="70.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Student:" />
+                        <Label text="Date:" GridPane.rowIndex="1" />
+                        <Label text="Activity (Purpose):" GridPane.rowIndex="2" />
+                        <DatePicker fx:id="date_dp" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextField fx:id="activity_tf" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Status:" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="status_cb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <TextArea fx:id="remarks_ta" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Remarks:" GridPane.rowIndex="4" />
+                        <Label text="Blood Pressure:" GridPane.rowIndex="5" />
+                        <TextField fx:id="bp_tf" promptText="e.g. 120/80" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label text="Temperature (C):" GridPane.rowIndex="6" />
+                        <Label text="Pulse Rate:" GridPane.rowIndex="7" />
+                        <Label text="Respiratory Rate:" GridPane.rowIndex="8" />
+                        <TextField fx:id="temp_tf" promptText="e.g. 37" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <TextField fx:id="pulse_tf" promptText="e.g. 85" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <TextField fx:id="resp_tf" promptText="e.g. 18" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                        <Label fx:id="student_lbl" prefHeight="23.0" prefWidth="185.0" text="Please pick a student..." GridPane.columnIndex="1">
+                           <padding>
+                              <Insets left="3.0" />
+                           </padding>
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Label>
+                        <Hyperlink onAction="#onPickStudent" prefHeight="24.0" prefWidth="100.0" text="Pick Student" underline="true" GridPane.columnIndex="1">
+                           <GridPane.margin>
+                              <Insets left="300.0" />
+                           </GridPane.margin>
+                        </Hyperlink>
+                        <Label fx:id="studentID_lbl" prefHeight="27.0" prefWidth="89.0" GridPane.columnIndex="1">
+                           <GridPane.margin>
+                              <Insets left="190.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <Label fx:id="vitalsSource_lbl" prefHeight="27.0" prefWidth="407.0" style="-fx-text-fill: gray; -fx-font-size: 11;" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                           <padding>
+                              <Insets left="5.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="25.0" />
+                     </VBox.margin>
+                  </GridPane>
+                  <HBox alignment="CENTER_RIGHT" prefHeight="34.0" prefWidth="552.0" spacing="10.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
+                        <Button mnemonicParsing="false" onAction="#onPrint" text="Print" />
+                        <Button mnemonicParsing="false" onAction="#onSaveGenerate" text="Save &amp; Generate PDF" />
+                     </children>
+                  </HBox>
+               </children>
+               <BorderPane.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </BorderPane.margin>
+            </VBox>
+         </center>
+      </BorderPane>
+      <BorderPane fx:id="medicalCertPreview" layoutX="262.0" layoutY="77.0" prefHeight="533.0" prefWidth="900.0" style="-fx-background-radius: 5;" styleClass="bg-head" stylesheets="@clinicDESIGN.css" visible="false">
+         <top>
+            <ToolBar prefHeight="25.0" prefWidth="900.0" style="-fx-background-color: #4CAF50; -fx-background-radius: 5;" BorderPane.alignment="CENTER">
+              <items>
+                  <Label text="Page:" textFill="WHITE" />
+                  <Spinner fx:id="pageSpinner" />
+                  <Separator prefHeight="25.0" prefWidth="82.0" />
+                  <Button mnemonicParsing="false" onAction="#onFit" text="⤢ Fit" />
+                  <Button mnemonicParsing="false" onAction="#onZoomIn" text="＋" />
+                  <Button mnemonicParsing="false" onAction="#onZoomOut" text="－" />
+                  <Separator orientation="VERTICAL" prefHeight="25.0" prefWidth="98.0" />
+                  <Button mnemonicParsing="false" onAction="#onPrint" text="Print..." />
+                  <Button mnemonicParsing="false" onAction="#onOpenExternal" text="Open External" />
+                  <Region prefHeight="25.0" prefWidth="182.0" />
+                  <Button mnemonicParsing="false" onAction="#onClose" text="Close" />
+              </items>
+               <BorderPane.margin>
+                  <Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
+               </BorderPane.margin>
+            </ToolBar>
+         </top>
+         <center>
+            <ScrollPane fx:id="scroll" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <content>
+                  <StackPane prefHeight="481.0" prefWidth="898.0">
+                     <children>
+                        <ImageView fx:id="imageView" fitHeight="237.0" fitWidth="151.0" pickOnBounds="true" preserveRatio="true">
+                           <viewport>
+                              <Rectangle2D />
+                           </viewport></ImageView>
+                     </children>
+                  </StackPane>
+               </content>
+               <BorderPane.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+               </BorderPane.margin>
+            </ScrollPane>
+         </center>
+      </BorderPane>
+      <AnchorPane fx:id="calendar_pane" layoutX="210.0" layoutY="135.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="513.0" prefWidth="1038.0" styleClass="calendar_pane" stylesheets="@calendar.css">
+         <children>
+            <BorderPane fx:id="rootBorder" layoutX="16.0" layoutY="10.0" styleClass="pane-bg" stylesheets="@calendar.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <left>
+                  <VBox fx:id="leftBar" prefHeight="200.0" prefWidth="220.0" spacing="12.0" stylesheets="@calendar.css" BorderPane.alignment="CENTER">
+                     <styleClass>
+                        <String fx:value="card" />
+                        <String fx:value="shadow-soft" />
+                     </styleClass>
+                     <padding>
+                        <Insets bottom="16.0" left="16.0" right="12.0" top="16.0" />
+                     </padding>
+                     <children>
+                        <Label styleClass="section-title" stylesheets="@calendar.css" text="Jump to date" />
+                        <DatePicker fx:id="miniDatePicker" maxWidth="Infinity" />
+                        <Button fx:id="btnAdd" maxWidth="Infinity" mnemonicParsing="false" styleClass="btn-primary" text="+ New" />
+                        <Label styleClass="section-title" text="Upcoming" />
+                        <ListView fx:id="upcomingList" prefHeight="140.0" prefWidth="200.0" />
+                        <Label styleClass="section-title" text="Reminders" />
+                        <ListView fx:id="remindersList" prefHeight="100.0" prefWidth="200.0" />
+                     </children>
+                  </VBox>
+               </left>
+               <center>
+                  <VBox prefHeight="200.0" prefWidth="100.0" spacing="12.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <HBox fx:id="topBar" alignment="CENTER_LEFT" prefHeight="46.0" prefWidth="797.0" spacing="5.0">
+                           <styleClass>
+                              <String fx:value="card" />
+                              <String fx:value="shadow-soft" />
+                           </styleClass>
+                           <padding>
+                              <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+                           </padding>
+                           <children>
+                              <Button fx:id="btnPrev" mnemonicParsing="false" styleClass="icon-btn" text="◀" />
+                              <Label fx:id="lblMonthYear" alignment="CENTER" prefHeight="25.0" prefWidth="140.0" styleClass="month-title" text="November 2024" />
+                              <Button fx:id="btnNext" mnemonicParsing="false" styleClass="icon-btn" text="▶" />
+                              <Button fx:id="btnToday" mnemonicParsing="false" prefHeight="28.0" prefWidth="73.0" styleClass="chip-active" text="Today" />
+                              <Separator orientation="VERTICAL" prefHeight="200.0" />
+                              <ToggleButton fx:id="tglMonth" mnemonicParsing="false" prefHeight="28.0" prefWidth="71.0" selected="true" styleClass="month-week-listTOGGLE" text="Month">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="viewToggleGroup" />
+                                 </toggleGroup>
+                              </ToggleButton>
+                              <ToggleButton fx:id="tglWeek" mnemonicParsing="false" prefHeight="28.0" prefWidth="67.0" styleClass="month-week-listTOGGLE" text="Week" toggleGroup="$viewToggleGroup" />
+                              <ToggleButton fx:id="tglList" mnemonicParsing="false" prefHeight="28.0" prefWidth="56.0" styleClass="month-week-listTOGGLE" text="List" toggleGroup="$viewToggleGroup" />
+                              <Separator orientation="VERTICAL" prefHeight="200.0" />
+                              <ToggleButton fx:id="fltAll" mnemonicParsing="false" prefHeight="28.0" prefWidth="49.0" selected="true" styleClass="chip" text="All">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="filterToggleGroup" />
+                                 </toggleGroup>
+                              </ToggleButton>
+                              <ToggleButton fx:id="fltNotes" mnemonicParsing="false" prefHeight="28.0" prefWidth="67.0" styleClass="chip" text="Notes" toggleGroup="$filterToggleGroup" />
+                              <ToggleButton fx:id="fltTasks" mnemonicParsing="false" prefHeight="28.0" prefWidth="63.0" styleClass="chip" text="Tasks" toggleGroup="$filterToggleGroup" />
+                              <ToggleButton fx:id="fltEvents" mnemonicParsing="false" prefHeight="28.0" prefWidth="71.0" styleClass="chip" text="Events" toggleGroup="$filterToggleGroup" />
+                              <ToggleButton fx:id="fltInventory" mnemonicParsing="false" prefHeight="28.0" prefWidth="78.0" styleClass="chip" text="Inventory" toggleGroup="$filterToggleGroup" />
+                              
+                                 </children>
+                        </HBox>
+                        <StackPane prefHeight="195.0" prefWidth="818.0" VBox.vgrow="ALWAYS">
+                           <styleClass>
+                              <String fx:value="card" />
+                              <String fx:value="shadow-soft" />
+                           </styleClass>
+                           <padding>
+                              <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                           </padding>
+                           <children>
+                              <GridPane fx:id="weekdayHeader" hgap="8.0" prefHeight="169.0" prefWidth="800.0" vgap="8.0">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label alignment="CENTER" prefHeight="20.0" prefWidth="107.0" styleClass="weekday" text="Mon" />
+                                    <Label alignment="CENTER" prefHeight="13.0" prefWidth="117.0" styleClass="weekday" text="Tue" GridPane.columnIndex="1" />
+                                    <Label alignment="CENTER" prefHeight="13.0" prefWidth="117.0" styleClass="weekday" text="Wed" GridPane.columnIndex="2" />
+                                    <Label alignment="CENTER" prefHeight="13.0" prefWidth="120.0" styleClass="weekday" text="Thu" GridPane.columnIndex="3" />
+                                    <Label alignment="CENTER" prefHeight="13.0" prefWidth="129.0" styleClass="weekday" text="Fri" GridPane.columnIndex="4" />
+                                    <Label alignment="CENTER" prefHeight="13.0" prefWidth="129.0" styleClass="weekday" text="Sat" GridPane.columnIndex="5" />
+                                    <Label alignment="CENTER" prefHeight="13.0" prefWidth="121.0" styleClass="weekday" text="Sun" GridPane.columnIndex="6" />
+                                 </children>
+                              </GridPane>
+                              <GridPane fx:id="monthGrid" hgap="8.0" prefHeight="130.0" prefWidth="800.0" vgap="8.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" percentHeight="16.6667" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <StackPane.margin>
+                                    <Insets top="34.0" />
+                                 </StackPane.margin>
+                              </GridPane>
+                              <ScrollPane fx:id="listViewWrapper" fitToWidth="true" prefHeight="509.0" prefWidth="1036.0" visible="false">
+                                 <styleClass>
+                                    <String fx:value="card" />
+                                    <String fx:value="shadow-soft" />
+                                 </styleClass>
+                                 <content>
+                                    <VBox fx:id="listViewVBox" prefHeight="200.0" prefWidth="100.0" spacing="8.0">
+                                       <padding>
+                                          <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                       </padding>
+                                    </VBox>
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </StackPane>
+                     </children>
+                     <BorderPane.margin>
+                        <Insets left="5.0" />
+                     </BorderPane.margin>
+                  </VBox>
+               </center>
+            </BorderPane>
+         </children>
+      </AnchorPane>
    </children>
 </AnchorPane>

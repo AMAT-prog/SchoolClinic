@@ -1,0 +1,213 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 4 Oct 2025, 13:23:34
+    Author     : Anna Margarette
+*/
+/* Color tokens (tweak to match your School Clinic green gradient) */
+.calendar_pane {
+    -accent: #23a455;           /* clinic green */
+    -accent-strong: #198e46;
+    -pill-blue: #3B82F6;
+    -pill-green: #10B981;
+    -pill-gray: #9CA3AF;
+    -pill-orange: #F59E0B;
+    -bg: #F7F9FC;               /* soft background */
+    -card: #FFFFFF;
+    -text-strong: #0F172A;
+    -text-muted: #475569;
+    -divider: #E5E7EB;
+}
+
+/* Pane background */
+.pane-bg {
+    -fx-background-color: -bg;
+    -fx-padding: 8;
+}
+
+/* Neumorphic-ish cards */
+.card {
+    -fx-background-color: -card;
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(0,0,0,0.04);
+    -fx-border-radius: 14;
+}
+.shadow-soft {
+    -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.10), 16, 0.2, 0, 6);
+}
+
+/* Typography */
+.month-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -text-strong;
+}
+.section-title {
+    -fx-font-size: 9px;
+    -fx-text-fill: -text-muted;
+    -fx-font-weight: 700;
+    -fx-padding: 4 0 0 0;
+}
+.weekday {
+    -fx-font-size: 9px;
+    -fx-text-fill: -text-muted;
+    -fx-font-weight: 700;
+}
+
+/* Chips & buttons */
+.icon-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 1 4 1 4;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+.icon-btn:hover { -fx-background-color: rgba(0,0,0,0.04); }
+
+.chip, .chip-active {
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+}
+.chip {
+    -fx-background-color: transparent;
+    -fx-border-color: -divider;
+    -fx-text-fill: -text-strong;
+    -fx-font-size: 11px;
+}
+.chip:selected, .chip-active, .chip:hover:selected {
+    -fx-background-color: -accent;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.month-week-listTOGGLE, .month-week-listTOGGLE-active {
+    -fx-background-color:transparent;
+    -fx-text-fill: blue;
+    -fx-border-color:blue;
+    -fx-border-width: 0px 0px .6px 0px;
+    -fx-font-size: 13px;
+}
+.month-week-listTOGGLE {
+    -fx-background-color: transparent;
+    -fx-border-color: -divider;
+    -fx-text-fill: -text-strong;
+    -fx-font-size: 11px;
+}
+.month-week-listTOGGLE:selected, .month-week-listTOGGLE-active, .month-week-listTOGGLE:hover:selected {
+    -fx-background-color:transparent;
+    -fx-text-fill: blue;
+    -fx-border-color:blue;
+    -fx-border-width: 0px 0px .6px 0px;
+    -fx-font-size: 13px;
+}
+
+
+.btn-primary {
+    -fx-background-color: linear-gradient(to bottom, -accent, -accent-strong);
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-padding: 8 12 8 12;
+    -fx-font-weight: 700;
+}
+.btn-primary:hover { -fx-opacity: 0.80; }
+
+
+/* ---- Day cell tokens (apply to nodes you add programmatically) ---- */
+.daycell {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-padding: 8;
+    -fx-border-color: #ECEDF0;
+    -fx-border-radius: 10;
+}
+.daycell:hover { -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.10), 12, 0.16, 0, 4); }
+
+
+/*.daycell { -fx-alignment: TOP_LEFT; }*/
+
+
+.day-badge { /* container for the number */
+    -fx-padding: 2 6;
+    -fx-background-radius: 999;
+}
+
+.today-ring {
+    -fx-background-color: white;
+    -fx-border-color: -accent;
+    -fx-border-width: 2;
+    -fx-border-radius: 999;
+}
+
+.day-number {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -text-muted;
+}
+
+.daycell:other-month {         /* subtle background for prev/next month days */
+    -fx-background-color: #f8fafc;
+}
+.daycell:other-month .day-number {
+    -fx-text-fill: #9ca3af;
+}
+
+.pill {
+    -fx-background-radius: 9;
+    -fx-padding: 2 6 2 6;
+    -fx-font-size: 9px; /*11px*/
+    -fx-text-fill: white;
+}
+.pill.note     { -fx-background-color: -pill-gray; }
+.pill.task     { -fx-background-color: -pill-blue; }
+.pill.event    { -fx-background-color: -pill-green; }
+.pill.inventory{ -fx-background-color: -pill-orange; }
+.pill.done     { -fx-opacity: 0.55; -fx-strikethrough: true; }
+
+/* Separators */
+.separator:horizontal .line { -fx-background-color: -divider; }
+/*--------------------------------------------------------------------------------------
+
+
+/*.pill { -fx-background-radius: 999; -fx-padding: 2 8; }*/
+
+/*.pill {
+    -fx-background-radius: 999;
+    -fx-padding: 2 8 2 8;
+    -fx-background-color: rgba(0,0,0,0.06);
+    -fx-font-size: 11px;
+}*/
+
+/*.pill.task {     -fx-background-color: #2f80ed22; }     blue tint 
+.pill.event {    -fx-background-color: #27ae6022; }     green tint 
+.pill.inventory{-fx-background-color: #f2994a22; }     orange tint 
+.pill.note {     -fx-background-color: #9aa3af33; }     gray tint 
+
+.pill.done { -fx-opacity: 0.55; -fx-strikethrough: true; }
+
+.more-pill {
+    -fx-text-fill: #6b7280;     muted 
+    -fx-font-size: 11px;
+}*/
+
+/*.pill {                            base chip 
+    -fx-background-radius: 999;
+    -fx-padding: 2 8;
+    -fx-font-size: 11px;
+}
+
+ stronger tints so they don’t look washed out 
+.pill.task      { -fx-background-color: rgba(47,128,237,0.28);  -fx-text-fill: #1e3a8a; }
+.pill.event     { -fx-background-color: rgba(39,174,96,0.28);   -fx-text-fill: #065f46; }
+.pill.inventory { -fx-background-color: rgba(242,153,74,0.28);  -fx-text-fill: #7c2d12; }
+.pill.note      { -fx-background-color: rgba(107,114,128,0.22); -fx-text-fill: #374151; }
+
+.pill.done {                       ONLY for completed items 
+    -fx-opacity: 0.65;
+    -fx-strikethrough: true;
+}*/
+
+
+
