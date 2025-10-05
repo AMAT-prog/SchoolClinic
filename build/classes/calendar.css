@@ -45,7 +45,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-text-fill: -text-strong;
 }
 .section-title {
-    -fx-font-size: 9px;
+    -fx-font-size: 12px;
     -fx-text-fill: -text-muted;
     -fx-font-weight: 700;
     -fx-padding: 4 0 0 0;
@@ -229,5 +229,37 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .peek-title { -fx-font-size: 14px; -fx-font-weight: 700; }
 .peek-row   { -fx-spacing: 8; -fx-alignment: CENTER_LEFT; }
 
+
+/* The “small card” that wraps only the week strip */
+.week-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14 14 14;
+    -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.10), 16, 0.22, 0, 6);
+}
+
+/* Optional: make the big calendar area transparent in week view
+   (so you don’t see a large white panel behind the tiny card). */
+.calendarStack { /* assign this style class to your StackPane in FXML or in code */
+    -fx-background-color: transparent;
+}
+
+/* default .month-title already exists – add a smaller variant for week */
+.month-title--small { -fx-font-size: 12px; -fx-font-weight: 700; }
+
+/* optional: keep top bar from reflowing when the week title is long */
+#lblMonthYear { -fx-max-width: 220; -fx-text-overrun: ellipsis; }
+
+/*for deleting events,tasks,etc.*/
+.icon-btn.danger {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b42318;         /* red-ish */
+    -fx-padding: 2 6 2 6;
+    -fx-font-size: 14px;
+}
+.icon-btn.danger:hover {
+    -fx-background-color: rgba(180,35,24,0.06);
+    -fx-background-radius: 8;
+}
 
 

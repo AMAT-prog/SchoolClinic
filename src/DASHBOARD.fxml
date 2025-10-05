@@ -543,7 +543,7 @@
             </HBox>
             <HBox prefHeight="38.0" prefWidth="251.0" styleClass="SIDE_hbox" stylesheets="@clinicDESIGN.css">
                <children>
-                  <ToggleButton fx:id="sidebtn_calendar" alignment="CENTER_LEFT" mnemonicParsing="false" prefHeight="36.0" prefWidth="218.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Calendar" toggleGroup="$sideNav">
+                  <ToggleButton fx:id="sidebtn_calendar" alignment="CENTER_LEFT" mnemonicParsing="false" onAction="#calendar_sideNav" prefHeight="36.0" prefWidth="218.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Calendar" toggleGroup="$sideNav">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -1708,9 +1708,16 @@
                         <DatePicker fx:id="miniDatePicker" maxWidth="Infinity" />
                         <Button fx:id="btnAdd" maxWidth="Infinity" mnemonicParsing="false" styleClass="btn-primary" text="+ New" />
                         <Label styleClass="section-title" text="Upcoming" />
-                        <ListView fx:id="upcomingList" prefHeight="140.0" prefWidth="200.0" />
-                        <Label styleClass="section-title" text="Reminders" />
-                        <ListView fx:id="remindersList" prefHeight="100.0" prefWidth="200.0" />
+                        <ListView fx:id="upcomingList" prefHeight="255.0" prefWidth="189.0" />
+                        <Label styleClass="section-title" text="Legends" />
+                        <VBox fx:id="legendBox" alignment="CENTER" prefHeight="200.0" prefWidth="174.0" spacing="8.0" VBox.vgrow="NEVER">
+                           <padding>
+                              <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
+                           </padding>
+                           <VBox.margin>
+                              <Insets bottom="80.0" left="60.0" />
+                           </VBox.margin>
+                        </VBox>
                      </children>
                   </VBox>
                </left>
@@ -1818,7 +1825,50 @@
                                     </VBox>
                                  </content>
                               </ScrollPane>
+                              <GridPane fx:id="weekHeader" hgap="8.0" managed="false" vgap="8.0" visible="false">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="121.0" styleClass="weekday" text="Mon" />
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="137.0" styleClass="weekday" text="Tue" GridPane.columnIndex="1" />
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="121.0" styleClass="weekday" text="Wed" GridPane.columnIndex="2" />
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="146.0" styleClass="weekday" text="Thu" GridPane.columnIndex="3" />
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="122.0" styleClass="weekday" text="Fri" GridPane.columnIndex="4" />
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="123.0" styleClass="weekday" text="Sat" GridPane.columnIndex="5" />
+                                    <Label alignment="CENTER" prefHeight="17.0" prefWidth="117.0" styleClass="weekday" text="Sun" GridPane.columnIndex="6" />
+                                 </children>
+                              </GridPane>
+                              <GridPane fx:id="weekGrid" hgap="8.0" managed="false" vgap="8.0" visible="false">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="14.2857" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                                </rowConstraints>
+                                 <StackPane.margin>
+                                    <Insets top="28.0" />
+                                 </StackPane.margin>
+                              </GridPane>
                            </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
                         </StackPane>
                      </children>
                      <BorderPane.margin>

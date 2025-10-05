@@ -90,6 +90,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
@@ -107,6 +108,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
@@ -451,8 +453,6 @@ private TextField student_tf;
     @FXML
     private ListView<CalendarItem> upcomingList;
     @FXML
-    private ListView<CalendarItem> remindersList;
-    @FXML
     private HBox topBar;
     @FXML
     private Button btnPrev;
@@ -496,7 +496,18 @@ private TextField student_tf;
     @FXML
     private StackPane calendarStack;
      
-     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    @FXML
+    private GridPane weekHeader;
+    @FXML
+    private GridPane weekGrid;
+    
+    @FXML
+    private VBox legendBox;
+    
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    
+    
     //for adding new consultation
     //for adding history during adding a new student
     //1. currentStudentId - already in controller
@@ -585,28 +596,23 @@ private TextField student_tf;
     private boolean fitMode = false; // when true, re-fit on viewport resize
 
     //CALENDAR
-    // ------- internal state -------
-//    private YearMonth visibleMonth = YearMonth.now();
+    // ========= CALENDAR STATE (keep only these) =========
     private final List<DayCell> cells = new ArrayList<>(42);
     private CalendarDao dao;
-    // overlay for hover cards
+
+    private enum ViewMode { MONTH, WEEK, LIST }
+    private ViewMode viewMode = ViewMode.MONTH;          // which main view is shown
+
+    private YearMonth visibleMonth = YearMonth.now();    // month anchor for MONTH view
+    private LocalDate weekStart = LocalDate.now()
+            .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // week anchor for WEEK view
+
+    // Hover “peek” overlay (shared for all day cells)
     private final Pane peekOverlay = new Pane();
     private final VBox peekCard = new VBox(8);
-
     private final PauseTransition hideDelay = new PauseTransition(Duration.millis(120));
-    
-    //for adding WEEK
-    // which main view is active
-    private enum ViewMode { MONTH, WEEK, LIST }
-    private ViewMode viewMode = ViewMode.MONTH;
-    // existing:
-    private YearMonth visibleMonth = YearMonth.now();
-    // anchor date that determines which week to show
-    private LocalDate anchorDate = LocalDate.now();
 
   
-
-
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
     @FXML
     private void dashboard_sideNav(ActionEvent event) {
@@ -619,6 +625,7 @@ private TextField student_tf;
         Notification_pane.setVisible(false);
         AddStudent_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
+        calendar_pane.setVisible(false);
         
         Dashboard_pane.setVisible(true);
     }
@@ -636,6 +643,7 @@ private TextField student_tf;
         VisitLog_pane.setVisible(false);
         Notification_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
+        calendar_pane.setVisible(false);
         
         AddStudent_pane.setVisible(true);
         AddStudent_pane.toFront();
@@ -652,13 +660,32 @@ private TextField student_tf;
         Notification_pane.setVisible(false);
         AddStudent_pane.setVisible(false);
         Dashboard_pane.setVisible(false);
+        calendar_pane.setVisible(false);
         
         medicalCertificate_pane.setVisible(true);
     }
     
     @FXML
+    private void calendar_sideNav(ActionEvent event) {
+        Dashboard_pane.setVisible(false);
+        StudentRecord_pane.setVisible(false);
+        StudentRecord_pane1.setVisible(false);
+        Consultations_pane.setVisible(false);
+        Reports_pane.setVisible(false);
+        Inventory_pane.setVisible(false);
+        VisitLog_pane.setVisible(false);
+        Notification_pane.setVisible(false);
+        AddStudent_pane.setVisible(false);
+        medicalCertificate_pane.setVisible(false);
+        
+        calendar_pane.setVisible(true);
+        
+    }
+    
+    @FXML
     private void backButton(MouseEvent event) {
         Dashboard_pane.setVisible(true);
+        
          Dashboard_pane.setDisable(false);
         StudentRecord_pane.setVisible(false);
         StudentRecord_pane1.setVisible(false);
@@ -667,6 +694,8 @@ private TextField student_tf;
         Inventory_pane.setVisible(false);
         VisitLog_pane.setVisible(false);
         Notification_pane.setVisible(false);
+        medicalCertificate_pane.setVisible(false);
+        calendar_pane.setVisible(false);
     }
 
     ////////////////////////////////////////////////////////////////////////////end side navigation
@@ -736,6 +765,7 @@ private TextField student_tf;
         Notification_pane.setVisible(false);
         AddStudent_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
+        calendar_pane.setVisible(false);
       // Series 1
     XYChart.Series<Number, String> series1 = new XYChart.Series<>();
     series1.setName("BSFAS");
@@ -981,81 +1011,70 @@ private TextField student_tf;
         });
 
         ////////////////////////////// CALENDAR on initialize ////////////////////////////////
+        // ========= INITIALIZE (wiring) =========
+
         // 1) DB
-        Connection conn = MySQL.connect(); 
+        Connection conn = MySQL.connect();
         dao = new CalendarDao(conn);
 
-        // 2) Build weekday header (Mon..Sun)
+        // 2) Static header (Mon..Sun)
         buildWeekdayHeader();
 
-        // 3) Build static 7x6 grid once
+        // 3) Build the grid for the current mode (MONTH -> 6x7)
         rebuildGridForView();
+
+        // 4) Peek overlay (always on top of the stack; never replaces nodes)
         initPeekOverlay();
-        // 4) Hook up controls
+
+        // 5) Navigation
         btnPrev.setOnAction(e -> {
             if (viewMode == ViewMode.WEEK) {
-                anchorDate = anchorDate.minusWeeks(1);
-                visibleMonth = YearMonth.from(anchorDate);
+                weekStart = weekStart.minusWeeks(1);
             } else {
                 visibleMonth = visibleMonth.minusMonths(1);
-                // keep anchor roughly within this month so week title makes sense if user flips to week later
-                anchorDate = visibleMonth.atDay(1);
             }
             refresh();
-            applySizingForView();
         });
-
         btnNext.setOnAction(e -> {
             if (viewMode == ViewMode.WEEK) {
-                anchorDate = anchorDate.plusWeeks(1);
-                visibleMonth = YearMonth.from(anchorDate);
+                weekStart = weekStart.plusWeeks(1);
             } else {
                 visibleMonth = visibleMonth.plusMonths(1);
-                anchorDate = visibleMonth.atDay(1);
             }
             refresh();
-            applySizingForView();
         });
-
         btnToday.setOnAction(e -> {
-            anchorDate = LocalDate.now();
-            visibleMonth = YearMonth.from(anchorDate);
+            if (viewMode == ViewMode.WEEK) {
+                weekStart = LocalDate.now()
+                        .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            } else {
+                visibleMonth = YearMonth.now();
+            }
             refresh();
-            applySizingForView();
         });
-
-        miniDatePicker.setValue(LocalDate.now());
-        miniDatePicker.valueProperty().addListener((obs, old, d) -> {
-            if (d != null) {
-                anchorDate = d;
+        miniDatePicker.valueProperty().addListener((obs, oldV, d) -> {
+            if (d == null) return;
+            if (viewMode == ViewMode.WEEK) {
+                weekStart = d.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            } else {
                 visibleMonth = YearMonth.from(d);
-                refresh();
             }
-        });
-
-
-        // View toggles
-        viewToggleGroup.selectedToggleProperty().addListener((obs, o, n) -> {
-            if (n == tglList) {
-                viewMode = ViewMode.LIST;
-            } else if (n == tglWeek) {
-                viewMode = ViewMode.WEEK;
-            } else { // tglMonth (default)
-                viewMode = ViewMode.MONTH;
-            }
-            applyViewToggleState();   // show/hide list vs grid
-            rebuildGridForView();     // 6x7 for month, 1x7 for week
             refresh();
-            applySizingForView();
-            
         });
 
+        // 6) View toggles — use one source of truth
+        tglMonth.setOnAction(e -> setMode(ViewMode.MONTH));
+        tglWeek.setOnAction(e  -> setMode(ViewMode.WEEK));
+        tglList.setOnAction(e  -> setMode(ViewMode.LIST));
+        setMode(ViewMode.MONTH);      // pick initial
 
-        // Filters
+        // 7) Filters
         fltAll.setOnAction(e -> {
             if (fltAll.isSelected()) {
-                fltNotes.setSelected(false); fltTasks.setSelected(false);
-                fltEvents.setSelected(false); fltInventory.setSelected(false);
+                fltNotes.setSelected(false);
+                fltTasks.setSelected(false);
+                fltEvents.setSelected(false);
+                fltInventory.setSelected(false);
             }
             refresh();
         });
@@ -1064,23 +1083,25 @@ private TextField student_tf;
         fltEvents.setOnAction(e -> { fltAll.setSelected(false); refresh(); });
         fltInventory.setOnAction(e -> { fltAll.setSelected(false); refresh(); });
 
-        // Add button (quick add)
+        // 8) Quick add
         btnAdd.setOnAction(e -> quickAdd(LocalDate.now()));
 
-        // First paint
+        // 9) First paint + sidebar lists
+        setupLists();
         refresh();
-        
-        setupLists();//upcoming listview
-        
-        // after buildMonthGrid(), before refresh()
-        applyViewToggleState();   // <-- set initial visible/managed correctly
 
-        viewToggleGroup.selectedToggleProperty().addListener((obs, o, n) -> {
-            applyViewToggleState();
-            refresh();
-            applySizingForView();
-        });
+
+        // Make sure both nodes are positioned from the same corner.
+        StackPane.setAlignment(weekdayHeader, Pos.TOP_LEFT);
+        StackPane.setAlignment(monthGrid,     Pos.TOP_LEFT);
+
+        // Good default: leave room for the weekday header in MONTH by default
+        StackPane.setMargin(monthGrid, new Insets(28, 0, 0, 0));
+
+        // Let the calendar area actually expand inside the VBox
+        VBox.setVgrow(calendarStack, Priority.ALWAYS);
         
+        buildLegend(); //for color/legend
 
     }  
     ////////////////////////////////////////////////////////////////////////////end initialization
@@ -3301,127 +3322,7 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
     }
     ////////////////////////////////////////////////////////////////////////////end of medical certificate
     ////////////////////////////////////////////////////////////////////////////CALENDAR
-    // ===== UI builders =====
-    private void buildWeekdayHeader() {
-        weekdayHeader.getChildren().clear();
-        for (int c = 0; c < 7; c++) {
-            DayOfWeek dow = DayOfWeek.MONDAY.plus(c);
-            Label lbl = new Label(dow.getDisplayName(TextStyle.SHORT, Locale.getDefault()));
-            lbl.getStyleClass().add("weekday");
-            GridPane.setColumnIndex(lbl, c);
-            weekdayHeader.getChildren().add(lbl);
-        }
-    }
-
-    private void rebuildGridForView() {
-        monthGrid.getChildren().clear();
-        cells.clear();
-
-        int rows = (viewMode == ViewMode.MONTH ? 6 : 1);
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < 7; c++) {
-                DayCell cell = new DayCell();
-                bindCellSize(cell, rows); // NOTE: rows param
-                GridPane.setRowIndex(cell, r);
-                GridPane.setColumnIndex(cell, c);
-                monthGrid.getChildren().add(cell);
-                cells.add(cell);
-            }
-        }
-        applySizingForView();
-    }
-
-    // same method name, but now it accepts the row count
-    private void bindCellSize(Region cell, int rows) {
-        // width: 7 columns
-        cell.prefWidthProperty().bind(
-            monthGrid.widthProperty().subtract((7 - 1) * monthGrid.getHgap()).divide(7)
-        );
-        // height: rows = 6 for month, 1 for week
-        cell.prefHeightProperty().bind(
-            monthGrid.heightProperty().subtract((rows - 1) * monthGrid.getVgap()).divide(rows)
-        );
-        cell.minWidthProperty().bind(cell.prefWidthProperty());
-        cell.maxWidthProperty().bind(cell.prefWidthProperty());
-        cell.minHeightProperty().bind(cell.prefHeightProperty());
-        cell.maxHeightProperty().bind(cell.prefHeightProperty());
-    }
-    // ===== refresh data + paint =====
-    private void refresh() {
-        // ---- 1) title ----
-        if (viewMode == ViewMode.WEEK) {
-            LocalDate ws = anchorDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-            LocalDate we = ws.plusDays(6);
-            lblMonthYear.setText(weekTitle(ws, we));
-        } else {
-            String m = visibleMonth.getMonth().getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault());
-            m = Character.toUpperCase(m.charAt(0)) + m.substring(1);
-            lblMonthYear.setText(m + " " + visibleMonth.getYear());
-        }
-
-        // ---- 2) compute range ----
-        LocalDate start;
-        LocalDate end; // inclusive for your DAO
-
-        if (viewMode == ViewMode.WEEK) {
-            start = anchorDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-            end   = start.plusDays(6);
-        } else {
-            LocalDate firstOfMonth = visibleMonth.atDay(1);
-            start = firstOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-            end   = start.plusDays(41); // 6 rows * 7 days - 1
-        }
-
-        // ---- 3) load items & group ----
-        EnumSet<CalendarItem.Kind> kinds = activeKinds();
-        List<CalendarItem> items;
-        try {
-            items = dao.findBetween(start, end, kinds);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            items = List.of();
-        }
-        Map<LocalDate, List<CalendarItem>> byDay =
-            items.stream().collect(Collectors.groupingBy(CalendarItem::getStartDate));
-
-        // ---- 4) paint cells ----
-        LocalDate d = start;
-        for (DayCell cell : cells) {
-            // In week view we don't gray “other month” days,
-            // so pass YearMonth.from(d) to avoid the pseudo-class.
-            YearMonth ym = (viewMode == ViewMode.MONTH) ? visibleMonth : YearMonth.from(d);
-            cell.setDate(d, ym);
-            cell.render(byDay.getOrDefault(d, List.of()));
-            d = d.plusDays(1);
-        }
-
-        // ---- 5) sidebars ----
-        try {
-            upcomingList.getItems().setAll(dao.findUpcoming(6));
-            remindersList.getItems().setAll(dao.remindersDueToday());
-        } catch (Exception ex) { ex.printStackTrace(); }
-
-        // ---- 6) list mode ----
-        if (viewMode == ViewMode.LIST) renderListMode(byDay);
-    }
-
-    private String weekTitle(LocalDate start, LocalDate end) {
-        var stMonth = start.getMonth().getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault());
-        var enMonth = end.getMonth().getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault());
-        stMonth = Character.toUpperCase(stMonth.charAt(0)) + stMonth.substring(1);
-        enMonth = Character.toUpperCase(enMonth.charAt(0)) + enMonth.substring(1);
-
-        if (start.getMonth() == end.getMonth()) {
-            return String.format("%s %d–%d %d", stMonth, start.getDayOfMonth(), end.getDayOfMonth(), start.getYear());
-        } else {
-            return String.format("%s %d – %s %d %d",
-                    stMonth, start.getDayOfMonth(),
-                    enMonth, end.getDayOfMonth(),
-                    end.getYear());
-        }
-    }
-
-    
+  
     private EnumSet<CalendarItem.Kind> activeKinds() {
         if (fltAll.isSelected() || (!fltNotes.isSelected() && !fltTasks.isSelected()
                 && !fltEvents.isSelected() && !fltInventory.isSelected())) {
@@ -3519,15 +3420,27 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
 
             cb.selectedProperty().addListener((o, was, now) -> {
                 it.setStatus(now ? CalendarItem.Status.done : CalendarItem.Status.pending);
-                if (now) title.getStyleClass().add("done");
-                else     title.getStyleClass().remove("done");
+                if (now) title.getStyleClass().add("done"); else title.getStyleClass().remove("done");
                 try { dao.markDone(it.getCalendarId(), now); } catch (Exception ex) { ex.printStackTrace(); }
-                refresh();  // keeps calendar grid + Upcoming sidebar consistent
+                refresh();
             });
 
-            row.getChildren().addAll(cb, title, new Text(timeText(it)));
+            Region spacer = new Region();
+//            HBox.setHgrow(spacer, Priority.ALWAYS); //to push it on the right side (but it's too far)
+
+            Button del = new Button("🗑");           // or "×"
+            del.getStyleClass().addAll("icon-btn", "danger"); // style as you like
+            del.setOnAction(ev -> {
+                if (confirmDelete(it)) {
+                    try { dao.delete(it.getCalendarId()); } catch (Exception ex) { ex.printStackTrace(); }
+                    refresh(); // reloads month/week/list + upcoming
+                }
+            });
+
+            row.getChildren().addAll(cb, title, new Text(timeText(it)), spacer, del);
             dayBox.getChildren().add(row);
         }
+
         dayBox.setPadding(new Insets(6, 0, 10, 0));
         listViewVBox.getChildren().add(dayBox);
         listViewVBox.getStyleClass().add("list-panel");
@@ -3708,7 +3621,7 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
 
     private void setupLists() {
         upcomingList.setFixedCellSize(28);
-        remindersList.setFixedCellSize(28);
+//        remindersList.setFixedCellSize(28);
         
         
         upcomingList.setPrefHeight(6 * 28 + 2);
@@ -3727,57 +3640,209 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
             }
         };
         upcomingList.setCellFactory(factory);
-        remindersList.setCellFactory(factory);
+//        remindersList.setCellFactory(factory);
     }
+
 
     
-    private void applyViewToggleState() {
-        boolean listMode = (viewMode == ViewMode.LIST);
-        monthGrid.setVisible(!listMode);
-        monthGrid.setManaged(!listMode);
-        listViewWrapper.setVisible(listMode);
-        listViewWrapper.setManaged(listMode);
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    // show/hide logic titles
+    // Never let the hover card stay when changing views
+    private void forceHidePeek() {
+        try { hideDelay.stop(); } catch (Exception ignore) {}
+        peekOverlay.setVisible(false);
     }
 
-    //overlay (when hovering on the calendar days)
+    // One unified entry point for Month / Week / List switching
+    private void setMode(ViewMode m) {
+        viewMode = m;
+        forceHidePeek();
+
+        boolean month = (m == ViewMode.MONTH);
+        boolean week  = (m == ViewMode.WEEK);
+        boolean list  = (m == ViewMode.LIST);
+
+        // Header visible in Month and Week (hidden in List)
+        weekdayHeader.setVisible(!list);
+        weekdayHeader.setManaged(!list);
+
+        // One grid for both Month and Week
+        monthGrid.setVisible(!list);
+        monthGrid.setManaged(!list);
+
+        // List panel
+        listViewWrapper.setVisible(list);
+        listViewWrapper.setManaged(list);
+
+        // Size & margin policy per mode
+        if (week) clampWeekHeight();
+        else      unclampMonthHeight();
+
+        rebuildGridForView();    // 1×7 in week, 6×7 in month
+        updateTitleForCurrentMode();
+        refresh();
+    }
+
+
+
+    // Shorter title & smaller font in Week
+    private void updateTitleForCurrentMode() {
+        if (viewMode == ViewMode.WEEK) {
+            LocalDate start = weekStart;
+            LocalDate end   = weekStart.plusDays(6);
+            String s = start.format(java.time.format.DateTimeFormatter.ofPattern("MMM d"));
+            String e = end.format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy"));
+            lblMonthYear.setText(s + " – " + e);
+            if (!lblMonthYear.getStyleClass().contains("month-title--small")) {
+                lblMonthYear.getStyleClass().add("month-title--small");
+            }
+        } else {
+            String mmm = visibleMonth.getMonth()
+                    .getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault()); // “Oct”
+            lblMonthYear.setText(mmm + " " + visibleMonth.getYear());
+            lblMonthYear.getStyleClass().remove("month-title--small");
+        }
+    }
+    
+    //building header & grid
+    // ---------- UI builders ----------
+
+    private void buildWeekdayHeader() {
+        weekdayHeader.getChildren().clear();
+        for (int c = 0; c < 7; c++) {
+            DayOfWeek dow = DayOfWeek.MONDAY.plus(c);
+            Label lbl = new Label(dow.getDisplayName(TextStyle.SHORT, Locale.getDefault()));
+            lbl.getStyleClass().add("weekday");
+            GridPane.setColumnIndex(lbl, c);
+            weekdayHeader.getChildren().add(lbl);
+        }
+    }
+
+    // Build 6x7 for Month or 1x7 for Week (reuse the same grid)
+    private void rebuildGridForView() {
+        monthGrid.getChildren().clear();
+        cells.clear();
+
+        int rows = (viewMode == ViewMode.WEEK ? 1 : 6);
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < 7; c++) {
+                DayCell cell = new DayCell();
+                bindCellSize(cell, rows);
+                GridPane.setRowIndex(cell, r);
+                GridPane.setColumnIndex(cell, c);
+                monthGrid.getChildren().add(cell);
+                cells.add(cell);
+            }
+        }
+
+        // A little spacing tune
+        monthGrid.setHgap(14);
+        monthGrid.setVgap(rows == 1 ? 8 : 14);
+        monthGrid.setPrefHeight(rows == 1 ? 320 : Region.USE_COMPUTED_SIZE);
+    }
+
+    // Bind a cell to the grid width / height based on number of rows
+    private void bindCellSize(Region cell, int rows) {
+        cell.prefWidthProperty().bind(
+                monthGrid.widthProperty().subtract((7 - 1) * monthGrid.getHgap()).divide(7)
+        );
+        cell.prefHeightProperty().bind(
+                monthGrid.heightProperty().subtract((rows - 1) * monthGrid.getVgap()).divide(rows)
+        );
+        cell.minWidthProperty().bind(cell.prefWidthProperty());
+        cell.maxWidthProperty().bind(cell.prefWidthProperty());
+        cell.minHeightProperty().bind(cell.prefHeightProperty());
+        cell.maxHeightProperty().bind(cell.prefHeightProperty());
+    }
+
+    //refresh (renders month/week/list)
+    private void refresh() {
+        updateTitleForCurrentMode();
+
+        EnumSet<CalendarItem.Kind> kinds = activeKinds();
+
+        // Date range to load
+        LocalDate start, end;
+        if (viewMode == ViewMode.WEEK) {
+            start = weekStart;
+            end   = weekStart.plusDays(6);
+        } else {
+            start = visibleMonth.atDay(1)
+                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            end   = start.plusDays(41);
+        }
+
+        List<CalendarItem> items;
+        try {
+            items = dao.findBetween(start, end, kinds);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            items = List.of();
+        }
+        Map<LocalDate, List<CalendarItem>> byDay =
+                items.stream().collect(Collectors.groupingBy(CalendarItem::getStartDate));
+
+        if (viewMode == ViewMode.LIST) {
+            renderListMode(byDay);
+        } else {
+            LocalDate d = start;
+            for (DayCell cell : cells) {
+                YearMonth currentYM = YearMonth.from(d);
+                // In MONTH view, highlight other-month cells.
+                // In WEEK view, every cell belongs to currentYM.
+                cell.setDate(d, (viewMode == ViewMode.MONTH) ? visibleMonth : currentYM);
+                cell.render(byDay.getOrDefault(d, List.of()));
+                d = d.plusDays(1);
+            }
+        }
+
+        // Sidebar stays in sync
+        try {
+            upcomingList.getItems().setAll(dao.findUpcoming(6));
+//            remindersList.getItems().setAll(dao.remindersDueToday());
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    //peek overlay
     private void initPeekOverlay() {
-        peekOverlay.setPickOnBounds(false);    // empty overlay doesn't eat input
-        peekOverlay.setMouseTransparent(true); // hover only; make false if you want it clickable
+        peekOverlay.setPickOnBounds(false);
+        peekOverlay.setMouseTransparent(true); // hover only
         peekOverlay.setVisible(false);
 
         peekCard.getStyleClass().add("peek-card");
         peekOverlay.getChildren().add(peekCard);
 
-        calendarStack.getChildren().add(peekOverlay); // on top of the grid
+        // IMPORTANT: add (not setAll) so header/grid/list remain in StackPane
+        calendarStack.getChildren().add(peekOverlay);
         StackPane.setAlignment(peekOverlay, Pos.TOP_LEFT);
 
         hideDelay.setOnFinished(e -> peekOverlay.setVisible(false));
     }
 
-    
     private void showPeek(DayCell cell) {
         hideDelay.stop();
 
         List<CalendarItem> items = cell.lastItems;
         if (items == null || items.isEmpty()) { hidePeek(); return; }
 
-        // Build the card content
         peekCard.getChildren().clear();
         Label title = new Label(cell.date.toString());
         title.getStyleClass().add("peek-title");
         peekCard.getChildren().add(title);
 
         for (CalendarItem it : items) {
-            Label pill = cell.buildCardPill(it);          // no width binding
+            Label pill = cell.buildCardPill(it);
             HBox row = new HBox(8, pill, new Text(" " + timeText(it)));
             row.getStyleClass().add("peek-row");
             row.setAlignment(Pos.CENTER_LEFT);
             peekCard.getChildren().add(row);
         }
 
-        // Position near the cell but keep inside the calendar
         Bounds b = peekOverlay.sceneToLocal(cell.localToScene(cell.getBoundsInLocal()));
-
         double prefW = Math.max(260, cell.getWidth() * 1.6);
         peekCard.setPrefWidth(prefW);
         double cardH = peekCard.prefHeight(-1);
@@ -3795,53 +3860,56 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
         peekOverlay.setVisible(true);
     }
 
-    private void hidePeek() {
-        hideDelay.playFromStart(); // short delay avoids flicker when moving between cells
-    }
-    //for week or month size of columns/grid
-    private void applySizingForView() {
-        if (viewMode == ViewMode.WEEK) {
-            // --- the grid (1 row x 7 cols) ---
-            StackPane.setAlignment(monthGrid, Pos.CENTER);
+    private void hidePeek() { hideDelay.playFromStart(); }
 
 
-            monthGrid.setPrefHeight(300);                    // your week strip height
-            monthGrid.setMinHeight(Region.USE_PREF_SIZE);
-            monthGrid.setMaxHeight(Region.USE_PREF_SIZE);    // <— prevents stretching
+    private void clampWeekHeight() {
+        // keep WEEK compact and below the top edge
+        monthGrid.setPrefHeight(25);                  // choose what looks good on your screen
+        monthGrid.setMinHeight(Region.USE_PREF_SIZE);
+        monthGrid.setMaxHeight(Region.USE_PREF_SIZE);  // <- critical so it won’t stretch
 
-            monthGrid.setHgap(16);
-            monthGrid.setVgap(12);
-
-            // --- the container (StackPane with overlay) ---
-            VBox.setVgrow(calendarStack, Priority.NEVER);    // <— DO NOT grow inside the VBox
-            calendarStack.setPrefHeight(Region.USE_COMPUTED_SIZE);
-            calendarStack.setMinHeight(Region.USE_PREF_SIZE);
-            calendarStack.setMaxHeight(Region.USE_PREF_SIZE); // <— clamp so VBox won't give it extra space
-
-            // (optional) small margins so it sits nicely under the header
-            StackPane.setMargin(monthGrid, new Insets(4, 0, 8, 0));
-        } else {
-            // MONTH (and LIST doesn’t show the grid)
-            StackPane.setAlignment(monthGrid, Pos.CENTER);
-
-
-            monthGrid.setPrefHeight(Region.USE_COMPUTED_SIZE);
-            monthGrid.setMinHeight(Region.USE_COMPUTED_SIZE);
-            monthGrid.setMaxHeight(Double.MAX_VALUE);
-
-            monthGrid.setHgap(14);
-            monthGrid.setVgap(14);
-
-            // Let the calendar area fill the remaining window height again
-            VBox.setVgrow(calendarStack, Priority.ALWAYS);
-            calendarStack.setPrefHeight(Region.USE_COMPUTED_SIZE);
-            calendarStack.setMinHeight(Region.USE_COMPUTED_SIZE);
-            calendarStack.setMaxHeight(Double.MAX_VALUE);
-
-            StackPane.setMargin(monthGrid, Insets.EMPTY);
-        }
+        // smaller top gap in WEEK (we don’t show a big weekday band)
+        StackPane.setMargin(monthGrid, new Insets(160, 0, 0, 0));
     }
 
+    private void unclampMonthHeight() {
+        // let MONTH fill the card
+        monthGrid.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        monthGrid.setMinHeight(Region.USE_COMPUTED_SIZE);
+        monthGrid.setMaxHeight(Double.MAX_VALUE);
 
+        // restore larger gap so labels sit above the grid
+        StackPane.setMargin(monthGrid, new Insets(28, 0, 0, 0));
+    }
+    
+    //delete a task/note/event, etc. 
+    private boolean confirmDelete(CalendarItem it) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+        a.setTitle("Delete item");
+        a.setHeaderText("Delete this item?");
+        a.setContentText(it.getTitle() + " (" + it.getKind() + ")");
+        a.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
+        return a.showAndWait().filter(bt -> bt == ButtonType.OK).isPresent();
+    }
+
+    //for legend color
+    private void buildLegend() {
+        legendBox.getChildren().setAll(
+            legendRow("Notes",     "note"),
+            legendRow("Tasks",     "task"),
+            legendRow("Events",    "event"),
+            legendRow("Inventory", "inventory")
+        );
+    }
+
+    private HBox legendRow(String text, String kindCss) {
+        Circle dot = new Circle(6);
+        dot.getStyleClass().addAll("dot", kindCss);
+        Label lbl = new Label(text);
+        HBox row = new HBox(8, dot, lbl);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
 
 }
