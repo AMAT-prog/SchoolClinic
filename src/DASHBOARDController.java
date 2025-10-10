@@ -88,6 +88,7 @@ import org.apache.pdfbox.rendering.ImageType;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.Month;
@@ -100,7 +101,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -111,17 +117,23 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
+import javafx.stage.Window;
 import javafx.util.Duration;
+import org.mindrot.jbcrypt.BCrypt;
 
 
 
@@ -504,9 +516,53 @@ private TextField student_tf;
     @FXML
     private VBox legendBox;
     
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     
+    @FXML
+    private ImageView AdminPhoto;
+    @FXML
+    private Label campusNurse_fullName;
+    @FXML
+    private ImageView AdminPhoto_edit;
+    @FXML
+    private TextField ADMINfirstName_tf;
+    @FXML
+    private TextField ADMINlastName_tf;
+    @FXML
+    private TextField ADMINusername_tf;
+    @FXML
+    private PasswordField current_pw;
+    @FXML
+    private PasswordField new_pw;
+    @FXML
+    private PasswordField confirm_pw;
+    @FXML
+    private TextField current_pw_tf;
+    @FXML
+    private TextField new_pw_tf;
+    @FXML
+    private TextField confirm_pw_tf;
+    @FXML
+    private ImageView currentPass_show;
+    @FXML
+    private ImageView newPass_show;
+    @FXML
+    private ImageView confirmPass_show;
+    @FXML
+    private GridPane Password_gridpane;
+    @FXML
+    private GridPane Profile_gridpane;
+
+    @FXML
+    private ToggleButton toggleProfile;
+    @FXML
+    private ToggleButton togglePassword;
+    @FXML
+    private TextField ADMINcontactNumber_tf;
+    
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    @FXML
+    private AnchorPane settings_pane;
+
     
     //for adding new consultation
     //for adding history during adding a new student
@@ -611,6 +667,16 @@ private TextField student_tf;
     private final Pane peekOverlay = new Pane();
     private final VBox peekCard = new VBox(8);
     private final PauseTransition hideDelay = new PauseTransition(Duration.millis(120));
+    
+    //SETTINGS
+    private int currentUserId = 1;            // set this at login
+    private String origFirst, origLast, origUser, origPhotoPath, origContact;
+    private File stagedPhoto = null;          // photo chosen but not saved
+    private final String APP_IMG_DIR = System.getProperty("user.home") + File.separator
+            + "AppData" + File.separator + "Roaming" + File.separator
+            + "SchoolClinic" + File.separator + "profiles";
+
+    private final UserDAO userDao = new UserDAO();
 
   
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -626,6 +692,7 @@ private TextField student_tf;
         AddStudent_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
         calendar_pane.setVisible(false);
+        settings_pane.setVisible(false);
         
         Dashboard_pane.setVisible(true);
     }
@@ -644,6 +711,7 @@ private TextField student_tf;
         Notification_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
         calendar_pane.setVisible(false);
+        settings_pane.setVisible(false);
         
         AddStudent_pane.setVisible(true);
         AddStudent_pane.toFront();
@@ -661,6 +729,7 @@ private TextField student_tf;
         AddStudent_pane.setVisible(false);
         Dashboard_pane.setVisible(false);
         calendar_pane.setVisible(false);
+        settings_pane.setVisible(false);
         
         medicalCertificate_pane.setVisible(true);
     }
@@ -677,9 +746,27 @@ private TextField student_tf;
         Notification_pane.setVisible(false);
         AddStudent_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
+        settings_pane.setVisible(false);
         
         calendar_pane.setVisible(true);
         
+    }
+    
+    @FXML
+    private void settings_sideNav(ActionEvent event) {
+        Dashboard_pane.setVisible(false);
+        StudentRecord_pane.setVisible(false);
+        StudentRecord_pane1.setVisible(false);
+        Consultations_pane.setVisible(false);
+        Reports_pane.setVisible(false);
+        Inventory_pane.setVisible(false);
+        VisitLog_pane.setVisible(false);
+        Notification_pane.setVisible(false);
+        AddStudent_pane.setVisible(false);
+        medicalCertificate_pane.setVisible(false);
+        calendar_pane.setVisible(false);
+        
+        settings_pane.setVisible(true);
     }
     
     @FXML
@@ -696,6 +783,7 @@ private TextField student_tf;
         Notification_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
         calendar_pane.setVisible(false);
+        settings_pane.setVisible(false);
     }
 
     ////////////////////////////////////////////////////////////////////////////end side navigation
@@ -766,6 +854,7 @@ private TextField student_tf;
         AddStudent_pane.setVisible(false);
         medicalCertificate_pane.setVisible(false);
         calendar_pane.setVisible(false);
+        settings_pane.setVisible(false);
       // Series 1
     XYChart.Series<Number, String> series1 = new XYChart.Series<>();
     series1.setName("BSFAS");
@@ -1102,6 +1191,43 @@ private TextField student_tf;
         VBox.setVgrow(calendarStack, Priority.ALWAYS);
         
         buildLegend(); //for color/legend
+        
+        //SETTINGS
+//        Circle clip = new Circle(60, 60, 60); // centerX, centerY, radius
+//        AdminPhoto_edit.setClip(clip);
+//
+//        Circle clip2 = new Circle(30, 30, 30);
+//        AdminPhoto.setClip(clip2);
+        
+        // 1) wire eyes (show/hide password)
+        wireEye(currentPass_show, current_pw, current_pw_tf);
+        wireEye(newPass_show, new_pw, new_pw_tf);
+        wireEye(confirmPass_show, confirm_pw, confirm_pw_tf);
+
+        // 2) circular photos
+        AdminPhoto.setFitWidth(70); AdminPhoto.setFitHeight(70);
+        AdminPhoto_edit.setFitWidth(120); AdminPhoto_edit.setFitHeight(120);
+        makeCircular(AdminPhoto);
+        makeCircular(AdminPhoto_edit);
+        loadUserFromDB();   // fills images & labels
+
+
+        // 3) load user (name + photo + fields)
+        loadUserFromDB();
+
+        // 4) ensure text-fields and password text-fields share managed/visible
+        current_pw_tf.managedProperty().bind(current_pw_tf.visibleProperty());
+        new_pw_tf.managedProperty().bind(new_pw_tf.visibleProperty());
+        confirm_pw_tf.managedProperty().bind(confirm_pw_tf.visibleProperty());
+        current_pw.managedProperty().bind(current_pw.visibleProperty());
+        new_pw.managedProperty().bind(new_pw.visibleProperty());
+        confirm_pw.managedProperty().bind(confirm_pw.visibleProperty());
+        
+//        animateThumb(toggleProfile); 
+//        animateThumb(togglePassword);
+        
+        wireSwitch(toggleProfile);
+        wireSwitch(togglePassword);
 
     }  
     ////////////////////////////////////////////////////////////////////////////end initialization
@@ -3911,5 +4037,464 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
         row.setAlignment(Pos.CENTER_LEFT);
         return row;
     }
+
+    ////////////////////////////////////////////////////////////////////////////SETTINGS
+    // Call after you load the user from DB
+    private void loadUserToUI(User u) {
+        currentUserId = u.getUserId();
+        origFirst = u.getFirstName();  origLast = u.getLastName();
+        origUser  = u.getUsername();   origPhotoPath = u.getPhotoPath();
+
+        ADMINfirstName_tf.setText(origFirst);
+        ADMINlastName_tf.setText(origLast);
+        ADMINusername_tf.setText(origUser);
+
+        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
+                ? new Image(new File(origPhotoPath).toURI().toString(), true)
+                : new Image(getClass().getResource("/img/avatar-default.png").toExternalForm());
+        AdminPhoto.setImage(img);
+        AdminPhoto_edit.setImage(img);
+
+        Profile_gridpane.setDisable(true);
+        Password_gridpane.setDisable(true);
+        clearPasswordSide();
+    }
+
+    private void clearPasswordSide() {
+        current_pw.clear(); new_pw.clear(); confirm_pw.clear();
+        current_pw_tf.clear(); new_pw_tf.clear(); confirm_pw_tf.clear();
+        // default to masked
+        current_pw.setVisible(true);  current_pw_tf.setVisible(false);
+        new_pw.setVisible(true);      new_pw_tf.setVisible(false);
+        confirm_pw.setVisible(true);  confirm_pw_tf.setVisible(false);
+    }
+
+    // ---- TOGGLE HANDLERS ----
+    @FXML private void Edit_AdminProfile(ActionEvent event) {
+        ToggleButton tb = (ToggleButton) event.getSource();
+        Profile_gridpane.setDisable(!tb.isSelected());
+    }
+
+    @FXML private void Edit_AdminPassword(ActionEvent event) {
+        ToggleButton tb = (ToggleButton) event.getSource();
+        Password_gridpane.setDisable(!tb.isSelected());
+    }
+
+    // ---- PHOTO HANDLERS ----
+    @FXML private void onChangePhoto(ActionEvent event) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Choose Profile Photo");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png","*.jpg","*.jpeg"));
+        File f = fc.showOpenDialog(ADMINusername_tf.getScene().getWindow());
+        if (f != null) {
+            stagedPhoto = f;
+            AdminPhoto_edit.setImage(new Image(f.toURI().toString(), true)); // preview only
+        }
+    }
+
+    private boolean stagedRemove = false;
+    @FXML private void onRemovePhoto(ActionEvent e) {
+        stagedPhoto = null;
+        stagedRemove = true;                // <--  want it removed
+        AdminPhoto_edit.setImage(defaultAvatar());  // preview only
+    }
+
+
+    @FXML
+    private void onSaveProfile(ActionEvent event) {
+        String f = ADMINfirstName_tf.getText().trim();
+        String l = ADMINlastName_tf.getText().trim();
+        String c = ADMINcontactNumber_tf.getText().trim();  // optional
+
+        if (f.isEmpty() || l.isEmpty()) {
+            showPopup("First and last name are required.", "warning");
+            return;
+        }
+
+        // Optional: simple contact validation
+        if (!c.isBlank() && !c.matches("[0-9+\\-() ]{7,20}")) {
+            showPopup("Contact number looks invalid.", "warning");
+            return;
+        }
+
+        // Decide final photo
+        String newPath = origPhotoPath;
+        try {
+            if (stagedPhoto != null) {
+                File dir = new File(APP_IMG_DIR);
+                if (!dir.exists()) dir.mkdirs();
+                String name = stagedPhoto.getName().toLowerCase();
+                String ext = (name.endsWith(".png")) ? ".png" : ".jpg";
+                File dest = new File(dir, "user_" + Session.userId + ext);
+                Files.copy(stagedPhoto.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                newPath = dest.getAbsolutePath();
+            } else if (stagedRemove) {
+                newPath = null;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showPopup("Error saving photo.", "error");
+            return;
+        }
+
+        // DB update (NO username here)
+        boolean ok = userDao.updateProfileNoUsername(Session.userId, f, l, c.isBlank()? null : c, newPath);
+        if (!ok) {
+            showPopup("Failed to update profile.", "error");
+            return;
+        }
+
+        // Commit originals
+        origFirst = f; origLast = l; origContact = c.isBlank()? null : c; origPhotoPath = newPath;
+        stagedPhoto = null; stagedRemove = false;
+
+        // UI refresh
+        campusNurse_fullName.setText(f + " " + l);
+        Image img = (newPath != null && new File(newPath).exists())
+                ? new Image(new File(newPath).toURI().toString(), true)
+                : defaultAvatar();
+        AdminPhoto.setImage(img);
+        AdminPhoto_edit.setImage(img);
+
+        showPopup("Profile updated.", "success");
+        Profile_gridpane.setDisable(true);
+        toggleProfile.setSelected(false);   // turn OFF the toggle
+    }
+
+    @FXML
+    private void onCancelProfile(ActionEvent event) {
+        ADMINfirstName_tf.setText(origFirst);
+        ADMINlastName_tf.setText(origLast);
+        ADMINcontactNumber_tf.setText(origContact == null ? "" : origContact);
+
+        stagedPhoto = null; stagedRemove = false;
+        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
+                ? new Image(new File(origPhotoPath).toURI().toString(), true)
+                : defaultAvatar();
+        AdminPhoto_edit.setImage(img);
+
+        Profile_gridpane.setDisable(true);
+        toggleProfile.setSelected(false);
+    }
+
+    // ---- PASSWORD SIDE ----
+    // Eye icon wiring (call once in initialize)
+    private void wireEye(ImageView eye, PasswordField pf, TextField tf) {
+        tf.managedProperty().bind(tf.visibleProperty());
+        pf.managedProperty().bind(pf.visibleProperty());
+        eye.setOnMouseClicked(e -> {
+            if (pf.isVisible()) { tf.setText(pf.getText()); pf.setVisible(false); tf.setVisible(true); tf.requestFocus(); tf.end(); }
+            else { pf.setText(tf.getText()); tf.setVisible(false); pf.setVisible(true); pf.requestFocus(); pf.end(); }
+        });
+    }
+
+
+    @FXML
+    private void onChangePassword(ActionEvent event) {
+        String cur = current_pw.isVisible() ? current_pw.getText() : current_pw_tf.getText();
+        String npw = newPassText();     // helper for reading new password
+        String cfm = confirmPassText(); // helper for reading confirm password
+        String desiredUser = ADMINusername_tf.getText().trim();
+
+        boolean wantUsername = !desiredUser.isBlank();
+        boolean wantPassword = !(npw.isBlank() && cfm.isBlank());
+
+        // Require at least one of username/password
+        if (!wantUsername && !wantPassword) {
+            showPopup("Please enter a new username and/or password.", "warning");
+            return;
+        }
+
+        // Validate new password if given
+        if (wantPassword) {
+            if (npw.length() < 8) {
+                showPopup("New password must be at least 8 characters.", "warning");
+                return;
+            }
+            if (!npw.equals(cfm)) {
+                showPopup("New password and confirm password do not match.", "warning");
+                return;
+            }
+        }
+
+        // Fetch stored password hash
+        String storedHash = userDao.getPasswordHash(Session.userId);
+        if (storedHash == null) {
+            showPopup("Unable to fetch stored password.", "error");
+            return;
+        }
+
+        // Verify current password (supports plaintext or BCrypt)
+        if (!verifyCurrentPassword(cur, storedHash)) {
+            showPopup("Current password is incorrect.", "error");
+            return;
+        }
+
+        // Generate new BCrypt hash if user entered new password
+        String newHash = null;
+        if (wantPassword) {
+            newHash = org.mindrot.jbcrypt.BCrypt.hashpw(npw, org.mindrot.jbcrypt.BCrypt.gensalt());
+        }
+
+        // Update username and/or password
+        boolean ok = userDao.updateCredentials(
+                Session.userId,
+                wantUsername ? desiredUser : null,
+                newHash // null if password unchanged
+        );
+
+        if (!ok) {
+            showPopup("Failed to update credentials.", "error");
+            return;
+        }
+
+        // Success — update local state
+        if (wantUsername) {
+            origUser = desiredUser;
+            ADMINusername_tf.setText(desiredUser);
+        }
+
+        showPopup("Credentials updated successfully.", "success");
+
+        // Reset form state
+        clearPasswordSide();
+        Password_gridpane.setDisable(true);
+        togglePassword.setSelected(false);
+    }
+
+
+    private String newPassText() {
+        return new_pw.isVisible()? new_pw.getText() : new_pw_tf.getText();
+    }
+    private String confirmPassText() {
+        return confirm_pw.isVisible()? confirm_pw.getText() : confirm_pw_tf.getText();
+    }
+
+
+
+
+    @FXML
+    private void onCancelPassword(ActionEvent event) {
+        clearPasswordSide();
+        Password_gridpane.setDisable(true);
+        togglePassword.setSelected(false);
+    }
+
+
+    // ---- DAO helpers (implement with your DB class) ----
+    private boolean updateUserProfile(int id, String first, String last, String user, String photoPath) {
+        String sql = "UPDATE users SET first_name=?, last_name=?, username=?, photo_path=? WHERE user_id=?";
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, first); ps.setString(2, last); ps.setString(3, user);
+            ps.setString(4, photoPath); ps.setInt(5, id);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
+    private String getUserPasswordHash(int id) {
+        String sql = "SELECT password FROM users WHERE user_id=?";
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next()? rs.getString(1) : ""; }
+        } catch (SQLException e) { e.printStackTrace(); return ""; }
+    }
+
+    private boolean updateUserPassword(int id, String hash) {
+        String sql = "UPDATE users SET password=? WHERE user_id=?";
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, hash); ps.setInt(2, id);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
+    // ---- tiny toast (optional) ----
+    private void showToast(String text) {
+        // replace with notifier/snackbar implementation
+        System.out.println(text);
+    }
+    
+    //to load profile, admin photo, and full name when user opens the system
+    private void makeCircular(ImageView iv) {
+        Circle clip = new Circle();
+        clip.centerXProperty().bind(iv.fitWidthProperty().divide(2));
+        clip.centerYProperty().bind(iv.fitHeightProperty().divide(2));
+        clip.radiusProperty().bind(Bindings.createDoubleBinding(
+            () -> Math.min(iv.getFitWidth(), iv.getFitHeight()) / 2, 
+            iv.fitWidthProperty(), iv.fitHeightProperty()
+        ));
+        iv.setClip(clip);
+    }
+
+    
+    /** Fallback image inside resources (put one): /img/avatar-default.png */
+    private Image defaultAvatar() {
+        URL u = getClass().getResource("/img/avatar-default.png");
+        if (u != null) return new Image(u.toExternalForm(), true);
+        // last-ditch fallback: a 1x1 transparent image so we never NPE
+        return new Image(new ByteArrayInputStream(new byte[] {
+            (byte)0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0,0,0,0 // …(omit)…
+        }));
+    }
+
+
+    private void loadUserFromDB() {
+        int uid = (Session.userId == 0) ? 1 : Session.userId;
+        User u = userDao.findById(uid);
+        if (u == null) return;
+
+        // originals
+        origFirst = u.getFirstName();
+        origLast  = u.getLastName();
+        origUser  = u.getUsername();
+        origPhotoPath = u.getPhotoPath();
+        origContact = u.getContactNumber();
+
+        // fill profile fields
+        ADMINfirstName_tf.setText(origFirst);
+        ADMINlastName_tf.setText(origLast);
+        ADMINcontactNumber_tf.setText(origContact == null ? "" : origContact);
+
+        // username now belongs to the Password card (still show current value there)
+        ADMINusername_tf.setText(origUser);
+
+        // photos (settings + sidebar)
+        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
+                ? new Image(new File(origPhotoPath).toURI().toString(), true)
+                : defaultAvatar();
+        AdminPhoto_edit.setImage(img);
+        AdminPhoto.setImage(img);
+
+        // sidebar label shows First Last
+        campusNurse_fullName.setText(origFirst + " " + origLast);
+
+        // start disabled
+        Profile_gridpane.setDisable(true);
+        Password_gridpane.setDisable(true);
+        toggleProfile.setSelected(false);
+        togglePassword.setSelected(false);
+    }
+
+    
+    private void animateThumb(ToggleButton tb) {
+        StackPane sw = (StackPane) tb.getGraphic();
+        Region thumb = (Region) sw.lookup(".thumb");
+        double offX = 2, onX = 22;
+        tb.selectedProperty().addListener((obs, oldV, sel) -> {
+            TranslateTransition t = new TranslateTransition(Duration.millis(120), thumb);
+            t.setToX(sel ? onX : offX);
+            t.play();
+        });
+    }
+
+    private void showPopup(String message, String colorOrType) {
+    String hex = switch (colorOrType.toLowerCase()) {
+        case "success" -> "#18A558";
+        case "warning" -> "#F4B400";
+        case "error"   -> "#D93025";
+        case "info"    -> "#1A73E8";
+        default        -> colorOrType; // allow "#RRGGBB"
+    };
+
+    Runnable task = () -> {
+        if (AdminPhoto == null || AdminPhoto.getScene() == null) {
+            Platform.runLater(() -> showPopup(message, colorOrType));
+            return;
+        }
+
+        Label text = new Label(message);
+        text.setTextFill(Color.WHITE);
+        text.setStyle("-fx-font-size: 13px; -fx-font-weight: 500;");
+
+        HBox toast = new HBox(text);
+        toast.setAlignment(Pos.CENTER);
+        toast.setPadding(new Insets(12,20,12,20));
+        toast.setBackground(new Background(new BackgroundFill(Color.web(hex), new CornerRadii(10), Insets.EMPTY)));
+        toast.setOpacity(0);
+
+        // Layout so we can measure width/height after shown
+        toast.applyCss(); toast.layout();
+
+        Popup popup = new Popup();
+        popup.setAutoFix(true);
+        popup.setAutoHide(false);
+        popup.setHideOnEscape(true);
+        popup.getContent().add(toast);
+
+        Node rootNode = AdminPhoto.getScene().getRoot();
+        Bounds b = rootNode.localToScreen(rootNode.getBoundsInLocal());
+        Window owner = AdminPhoto.getScene().getWindow();
+
+        // Show once (anywhere) to get real size
+        popup.show(owner, b.getMinX(), b.getMinY());
+        double w = toast.getWidth();
+        double h = toast.getHeight();
+
+        // Center inside the scene bounds
+        double x = b.getMinX() + (b.getWidth() - w) / 2.0;
+        double y = b.getMinY() + (b.getHeight() - h) / 2.0;
+        popup.setX(x);
+        popup.setY(y);
+
+        FadeTransition fi = new FadeTransition(Duration.millis(200), toast);
+        fi.setFromValue(0); fi.setToValue(1);
+
+        PauseTransition wait = new PauseTransition(Duration.seconds(2.2));
+
+        FadeTransition fo = new FadeTransition(Duration.millis(350), toast);
+        fo.setFromValue(1); fo.setToValue(0);
+        fo.setOnFinished(e -> popup.hide());
+
+        new SequentialTransition(fi, wait, fo).play();
+    };
+
+    if (Platform.isFxApplicationThread()) task.run();
+    else Platform.runLater(task);
+}
+
+    private void wireSwitch(ToggleButton tb) {
+        // The graphic structure we built above:
+        Pane sw = (Pane) tb.getGraphic();                  // .switch
+        Region track = (Region) sw.lookup(".track");
+        Region thumb = (Region) sw.lookup(".thumb");
+
+        // Constants must match CSS sizes
+        double trackW = 44, thumbW = 20, padding = 2;
+        double offX = padding;                              // 2
+        double onX  = trackW - thumbW - padding;           // 22
+
+        // Set initial position based on selected
+        thumb.setTranslateX(tb.isSelected() ? onX - offX : 0);
+
+        // Animate when toggled
+        tb.selectedProperty().addListener((obs, oldV, sel) -> {
+            double target = sel ? onX - offX : 0;          // we animate the delta from base layoutX=2
+            TranslateTransition t = new TranslateTransition(Duration.millis(130), thumb);
+            t.setToX(target);
+            t.play();
+        });
+    }
+
+    //password bycripts
+    private static boolean looksLikeBcrypt(String s) {
+        if (s == null) return false;
+        // $2a$ or $2b$ or $2y$ + 2 cost digits + $ + 53 chars = 60 total
+        return s.matches("^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
+    }
+
+    private boolean verifyCurrentPassword(String inputCurrent, String storedFromDB) {
+        if (storedFromDB == null || storedFromDB.isBlank()) return false;
+        if (looksLikeBcrypt(storedFromDB)) {
+            try {
+                return org.mindrot.jbcrypt.BCrypt.checkpw(inputCurrent, storedFromDB);
+            } catch (IllegalArgumentException badSalt) {
+                // In case something still weird with the hash
+                return false;
+            }
+        } else {
+            // Legacy plaintext password support (one-time migration)
+            return inputCurrent.equals(storedFromDB);
+        }
+    }
+
 
 }

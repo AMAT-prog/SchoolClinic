@@ -262,4 +262,20 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-radius: 8;
 }
 
+/* ============== Avatar Plate ============== */
+/* Use a StackPane with this class behind the ImageView (120x120 image) */
+.avatar-plate {
+    -fx-min-width: 140; -fx-min-height: 140;
+    -fx-max-width: 140; -fx-max-height: 140;
+    -fx-background-radius: 999;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 6, 6);
+    -fx-alignment: center;
+}
+.avatar-plate .image-view {
+    -fx-background-radius: 999;
+    -fx-border-color: black;
+    -fx-border-radius: 999;
+    -fx-padding: 0;
+}
 

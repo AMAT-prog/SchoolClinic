@@ -1,0 +1,43 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 6 Oct 2025, 23:11:13
+    Author     : Anna Margarette
+*/
+/* ==== Toggle Switch (Pane + Regions) ==== */
+.toggle-switch { -fx-background-color: transparent; -fx-padding: 0; }
+
+/* the graphic container */
+.toggle-switch .switch {
+    -fx-pref-width: 44;   /* track width */
+    -fx-pref-height: 25;  /* track height */
+}
+
+/* back pill (z-order first = behind) */
+.toggle-switch .switch .track {
+    -fx-background-color: #6B7280;   /* OFF gray */
+    -fx-background-radius: 999;
+    -fx-pref-width: 44;
+    -fx-pref-height: 25;
+    -fx-layout-x: 0;
+    -fx-layout-y: 0;
+}
+
+/* thumb (white circle) — starts at left inside 2px padding */
+.toggle-switch .switch .thumb {
+    -fx-background-color: white;
+    -fx-background-radius: 999;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 6, 0, 0, 2);
+    -fx-pref-width: 20;
+    -fx-pref-height: 20;
+    -fx-layout-x: 2;  /* left padding */
+    -fx-layout-y: 2;  /* top padding -> vertically centered */
+    /* DO NOT set -fx-translate-y here; we keep it 0 to stay inside the track */
+}
+
+/* ON state: blue track; we won't move the thumb here via CSS — we animate in code for smoothness */
+.toggle-switch:selected .switch .track {
+    -fx-background-color: #1A73E8;   /* Google blue */
+}
