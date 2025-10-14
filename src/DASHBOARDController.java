@@ -137,8 +137,6 @@ import org.mindrot.jbcrypt.BCrypt;
 
 
 
-
-
 /**
  * FXML Controller class
  *
@@ -177,7 +175,7 @@ public class DASHBOARDController implements Initializable {
     @FXML
     private TableView<Student> student_tv;
     @FXML
-    private TableColumn<Student, Integer> id_col;
+    private TableColumn<Student, String> id_col;
     @FXML
     private TableColumn<Student, String> lastName_col;
     @FXML
@@ -208,16 +206,10 @@ public class DASHBOARDController implements Initializable {
     private TextArea history_textArea;
     @FXML
     private TextField age_tf;
-    @FXML
-    private TextField gender_tf;
-    @FXML
-    private TextField birthday_tf;
+   
     @FXML
     private TextField birthplace_tf;
-    @FXML
-    private TextField course_tf;
-    @FXML
-    private TextField yearLevel_tf;
+    
     @FXML
     private TextField civilStatus_tf;
     @FXML
@@ -230,8 +222,7 @@ public class DASHBOARDController implements Initializable {
     private TextField contactNo_tf;
     @FXML
     private TextField email_tf;
-    @FXML
-    private TextField status_tf;
+    
     @FXML
     private TextField address_tf;
     @FXML
@@ -248,7 +239,7 @@ public class DASHBOARDController implements Initializable {
     private ToggleGroup sideNav;
     @FXML
     private ComboBox<String> yearLevel_cb;
-    private FilteredList<Student> filtered;
+    
     
     @FXML
     private Pane HistoryForm_pane;
@@ -453,7 +444,6 @@ private TextField student_tf;
     
 
     
-   
     @FXML
     private BorderPane rootBorder;
     @FXML
@@ -562,6 +552,21 @@ private TextField student_tf;
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @FXML
     private AnchorPane settings_pane;
+    
+    @FXML
+    private DatePicker birthday_dp;
+    @FXML
+    private ComboBox<String> course_cb;
+    @FXML
+    private ComboBox<String> gender_cb;
+    @FXML
+    private ComboBox<String> DETAILSyearLevel_cb;
+    @FXML
+    private ComboBox<String> DETAILSstatus_cb;
+    @FXML
+    private Button saveStudent_btn_id;
+    @FXML
+    private Button cancelStudent_btn_id;
 
     
     //for adding new consultation
@@ -575,9 +580,13 @@ private TextField student_tf;
         private StudentHistory draftHistoryForNewStudent = null;
     
     private final ObservableList<Student> students = FXCollections.observableArrayList();
-    // state for current view/edit
+    
+    private FilteredList<Student> filtered;
+    
+    // state for current view/edit (STUDENT RECORD)
     private Integer currentStudentId = null;
-    private byte[] pendingPhotoBytes = null; // set by upload; saved on Save
+    private String  pendingPhotoPath = null; //  store a path (varchar)
+
     
     private final StudentHistoryDAO historyDAO = new StudentHistoryDAO();
     
@@ -873,12 +882,13 @@ private TextField student_tf;
     
     // Add to chart
     barChart.getData().addAll(series1, series2); 
-    
+    ///////////////////////////////////////////////////////////////////////////////
      // hide the details pane initially
         if (viewStudent_pane != null) viewStudent_pane.setVisible(false);
 
      // table columns
-        id_col.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getId()).asObject());
+        // show school ID number in id_col (not student_id)
+        id_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getIdNumber()));
         lastName_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getLastName()));
         firstName_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getFirstName()));
         middleName_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getMiddleName()));
@@ -892,9 +902,9 @@ private TextField student_tf;
         setupActionColumn();
         loadStudents();
         
-                // 2.1 Year-level options 
+        // 2.1 Year-level options 
         yearLevel_cb.setItems(FXCollections.observableArrayList(
-                "All", "1st Year", "2nd Year", "3rd Year", "4th Year", "Irregular"
+            "All", "1st Year", "2nd Year", "3rd Year", "4th Year", "Irregular", "Inactive", "Graduated"
         ));
         yearLevel_cb.getSelectionModel().select("All");
 
@@ -924,9 +934,18 @@ private TextField student_tf;
         courseFilter.selectedToggleProperty().addListener((obs, o, n) -> refreshStudentPredicate());
         yearLevel_cb.valueProperty().addListener((obs, o, n) -> refreshStudentPredicate());
 
+        //2.6 Added for replaced textfields to combo box
+        // DETAILS combo options (edit pane)
+        course_cb.setItems(FXCollections.observableArrayList("BSIT", "BIT", "BSFAS"));
+        gender_cb.setItems(FXCollections.observableArrayList("Male", "Female", "Other"));
+        DETAILSyearLevel_cb.setItems(FXCollections.observableArrayList(
+            "1st Year","2nd Year","3rd Year","4th Year","Irregular"
+        ));
+        DETAILSstatus_cb.setItems(FXCollections.observableArrayList("active","inactive","graduated"));
+        
         // Run once initially
         refreshStudentPredicate();
-        
+        ///////////////////////////////////////////////////////////////////////////////////////////////
         //for adding a student
         addStudent_course_cb.getItems().setAll("BSIT", "BIT", "BSFAS");
         addStudent_year_cb.getItems().setAll("1st Year","2nd Year","3rd Year","4th Year","Irregular");
@@ -1670,30 +1689,41 @@ private TextField student_tf;
     ////////////////////////////////////////////////////////////////////////////STUDENT RECORD/DETAILS
     @FXML
     private void uploadPhoto_btn(ActionEvent event) {
-         FileChooser fc = new FileChooser();
+        FileChooser fc = new FileChooser();
         fc.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
+            new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
         File f = fc.showOpenDialog(viewStudent_pane.getScene().getWindow());
         if (f != null) {
             try {
-                pendingPhotoBytes = Files.readAllBytes(f.toPath());
-                showImage(pendingPhotoBytes);
+                // copy to app data folder (e.g., ./data/images/students/)
+                File dir = new File("data/images/students");
+                if (!dir.exists()) dir.mkdirs();
+                String safeName = System.currentTimeMillis() + "_" + f.getName();
+                File dest = new File(dir, safeName);
+                Files.copy(f.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                pendingPhotoPath = "data/images/students/" + safeName; // store relative path
+                showImage(pendingPhotoPath);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 alert(Alert.AlertType.ERROR, "Upload Photo", ex.getMessage());
             }
         }
     }
+
     
     @FXML
     private void editStudent_btn(ActionEvent event) {
         setEditable(true);
+        saveStudent_btn_id.setDisable(false);
+        cancelStudent_btn_id.setDisable(false);
     }
 
     @FXML
     private void saveStudent_btn(ActionEvent event) {
-         if (currentStudentId == null) return;
+        if (currentStudentId == null) return;
+
         String sql = """
             UPDATE students
             SET age = ?, gender = ?, birthday = ?, birthplace = ?, course = ?, year_level = ?,
@@ -1704,33 +1734,36 @@ private TextField student_tf;
         try (Connection c = MySQL.connect();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
-            // map fields (parse with care)
             setNullableInt(ps, 1, age_tf.getText());
-            ps.setString(2, emptyToNull(gender_tf.getText()));
-            setNullableDate(ps, 3, birthday_tf.getText());      // expects yyyy-MM-dd
+            ps.setString(2, emptyToNull((String) gender_cb.getValue()));
+            // DatePicker -> java.sql.Date
+            ps.setDate(3, birthday_dp.getValue() == null ? null : java.sql.Date.valueOf(birthday_dp.getValue()));
             ps.setString(4, emptyToNull(birthplace_tf.getText()));
-            ps.setString(5, emptyToNull(course_tf.getText()));
-            ps.setString(6, emptyToNull(yearLevel_tf.getText()));
+            ps.setString(5, emptyToNull((String) course_cb.getValue()));
+            ps.setString(6, emptyToNull((String) DETAILSyearLevel_cb.getValue()));
             ps.setString(7, emptyToNull(civilStatus_tf.getText()));
             ps.setString(8, emptyToNull(religion_tf.getText()));
             setNullableBigDecimal(ps, 9,  height_tf.getText());
             setNullableBigDecimal(ps, 10, weight_tf.getText());
             ps.setString(11, emptyToNull(contactNo_tf.getText()));
             ps.setString(12, emptyToNull(email_tf.getText()));
-            ps.setString(13, emptyToNull(status_tf.getText()));
+            ps.setString(13, emptyToNull((String) DETAILSstatus_cb.getValue())); // active/inactive/graduated
             ps.setString(14, emptyToNull(address_tf.getText()));
-            if (pendingPhotoBytes != null) {
-                ps.setBytes(15, pendingPhotoBytes);
+            // image path
+            if (pendingPhotoPath != null) {
+                ps.setString(15, pendingPhotoPath);
             } else {
-                ps.setNull(15, Types.BLOB);
+                ps.setNull(15, Types.VARCHAR);
             }
             ps.setInt(16, currentStudentId);
 
             ps.executeUpdate();
             alert(Alert.AlertType.INFORMATION, "Save", "Student updated.");
             setEditable(false);
-            // also refresh the row in the table (course/year/age/gender/contact might change)
-            loadStudents();
+            saveStudent_btn_id.setDisable(true);
+            cancelStudent_btn_id.setDisable(true);
+            loadStudents(); // refresh list
+
         } catch (Exception e) {
             e.printStackTrace();
             alert(Alert.AlertType.ERROR, "Save", e.getMessage());
@@ -1738,14 +1771,18 @@ private TextField student_tf;
         loadDashboardStats();
     }
 
+
     @FXML
     private void cancelStudent_btn(ActionEvent event) {
     viewStudent_pane.setVisible(false);
     StudentRecord_pane1.setVisible(false); // optional
     StudentRecord_pane.setVisible(true);
     StudentRecord_pane.toFront();
+    
         setEditable(false);
-        pendingPhotoBytes = null;
+        saveStudent_btn_id.setDisable(true);
+        cancelStudent_btn_id.setDisable(true);
+        pendingPhotoPath = null;
         currentStudentId = null;
         // hide details, show the list again
     
@@ -1755,81 +1792,97 @@ private TextField student_tf;
     private void backButton_STUDENTLIST(MouseEvent event) {
         StudentRecord_pane1.setVisible(false);
         StudentRecord_pane.setVisible(true);
+        
+        saveStudent_btn_id.setDisable(true);
+        cancelStudent_btn_id.setDisable(true);
     }
 
-    //FILTER STUDENT RECORDS
+    // FILTER STUDENT RECORDS
     private void refreshStudentPredicate() {
-    final String q = safeLower(filterField1.getText()); // search text
-    final Toggle selected = courseFilter.getSelectedToggle();
-    final String courseFilterVal = (selected == null || selected.getUserData() == null)
-            ? "ALL"
-            : selected.getUserData().toString();
+        final String q = safeLower(filterField1.getText());
+        final Toggle selected = courseFilter.getSelectedToggle();
+        final String courseFilterVal = (selected == null || selected.getUserData() == null)
+                ? "ALL" : selected.getUserData().toString();
 
-    final String yearSel = yearLevel_cb.getValue() == null ? "All" : yearLevel_cb.getValue();
+        final String yearSel = yearLevel_cb.getValue() == null ? "All" : yearLevel_cb.getValue();
 
-    filtered.setPredicate(s -> {
-        if (s == null) return false;
+        filtered.setPredicate(s -> {
+            if (s == null) return false;
 
-        // 3.1 Search filter (name or student_id)
-        if (!q.isEmpty()) {
-            String fullName = (nz(s.getLastName()) + " " + nz(s.getFirstName()) + " " + nz(s.getMiddleName())).toLowerCase();
-            String first = nz(s.getFirstName()).toLowerCase();
-            String last  = nz(s.getLastName()).toLowerCase();
-            String mid   = nz(s.getMiddleName()).toLowerCase();
-            String idStr = String.valueOf(s.getId()); // uses student_id from your model
-
-            boolean matches = fullName.contains(q) || first.contains(q) || last.contains(q) || mid.contains(q) || idStr.contains(q);
-            if (!matches) return false;
-        }
-
-        // 3.2 Course toggle filter
-        if (!"ALL".equalsIgnoreCase(courseFilterVal)) {
-            String course = nz(s.getCourse());
-            if (!course.equalsIgnoreCase(courseFilterVal)) return false;
-        }
-
-        // 3.3 Year level ComboBox filter
-        if (!"All".equalsIgnoreCase(yearSel)) {
-            String yl = nz(s.getYearLevel());
-            if (!yl.equalsIgnoreCase(yearSel)) return false;
-        }
-
-        return true;
-    });
-}
-
-        // ====== Load minimal rows for the table ======
-        private void loadStudents() {
-                students.clear();
-                String sql = """
-                    SELECT student_id, last_name, first_name, middle_name, course, year_level,
-                           gender, age, contact_number
-                    FROM students
-                    WHERE is_active IS NULL OR is_active = 1
-                    ORDER BY created_at DESC, last_name ASC
-                    """;
-                try (Connection c = MySQL.connect();
-                     PreparedStatement ps = c.prepareStatement(sql);
-                     ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        students.add(new Student(
-                            rs.getInt("student_id"),
-                            rs.getString("last_name"),
-                            rs.getString("first_name"),
-                            rs.getString("middle_name"),
-                            rs.getString("course"),
-                            rs.getString("year_level"),
-                            rs.getString("gender"),
-                            (Integer) rs.getObject("age"),
-                            rs.getString("contact_number")
-                        ));
-                    }
-//                    student_tv.setItems(students);    ---- already bind student_tv to sorted in initialize(...)
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    alert(Alert.AlertType.ERROR, "Load Students", e.getMessage());
-                }
+            // 1) Search
+            if (!q.isEmpty()) {
+                String fullName = (nz(s.getLastName()) + " " + nz(s.getFirstName()) + " " + nz(s.getMiddleName())).toLowerCase();
+                String idStr = nz(s.getIdNumber()); // search by school ID number too
+                if (!(fullName.contains(q) || idStr.toLowerCase().contains(q))) return false;
             }
+
+            // 2) Course toggle
+            if (!"ALL".equalsIgnoreCase(courseFilterVal)) {
+                if (!nz(s.getCourse()).equalsIgnoreCase(courseFilterVal)) return false;
+            }
+
+            // 3) Year-level / Inactive / Graduated filter
+            if (!"All".equalsIgnoreCase(yearSel)) {
+                if ("Graduated".equalsIgnoreCase(yearSel)) {
+                    if (!(s.getIsActive() == 2 || "graduated".equalsIgnoreCase(nz(s.getStatus())))) return false;
+                } else if ("Inactive".equalsIgnoreCase(yearSel)) {
+                    if (!(s.getIsActive() == 0 || "inactive".equalsIgnoreCase(nz(s.getStatus())))) return false;
+                } else {
+                    if (!nz(s.getYearLevel()).equalsIgnoreCase(yearSel)) return false;
+                    // exclude graduates from year lists
+                    if (s.getIsActive() == 2 || "graduated".equalsIgnoreCase(nz(s.getStatus()))) return false;
+                }
+            } else {
+                // “All” = show Active only by default
+                if (!(s.getIsActive() == 1 || "active".equalsIgnoreCase(nz(s.getStatus())))) return false;
+            }
+
+            return true;
+        });
+    }
+
+
+
+    // ====== Load minimal rows for the table (active + graduated visible, inactive filterable) ======
+    private void loadStudents() {
+        students.clear();
+
+        String sql = """
+            SELECT student_id, id_number, last_name, first_name, middle_name, course, year_level,
+                   gender, age, contact_number, status, is_active, image
+            FROM students
+            WHERE is_active IN (0,1,2)  -- load all states; filters will decide which to show
+            ORDER BY created_at DESC, last_name ASC
+            """;
+
+        try (Connection c = MySQL.connect();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                students.add(new Student(
+                    rs.getInt("student_id"),
+                    rs.getString("id_number"),
+                    rs.getString("last_name"),
+                    rs.getString("first_name"),
+                    rs.getString("middle_name"),
+                    rs.getString("course"),
+                    rs.getString("year_level"),
+                    rs.getString("gender"),
+                    (Integer) rs.getObject("age"),
+                    rs.getString("contact_number"),
+                    rs.getString("status"),
+                    rs.getInt("is_active"),
+                    rs.getString("image") // path
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            alert(Alert.AlertType.ERROR, "Load Students", e.getMessage());
+        }
+    }
+
+
         // ====== ⋮ column ======
         private void setupActionColumn() {
                 action_col.setCellFactory(col -> new TableCell<>() {
@@ -1856,9 +1909,15 @@ private TextField student_tf;
                     }
                 });
             }
-        // ====== View details (fills pane) ======
-        private void showStudent(int studentId) {
-        // join history (0..n). We'll aggregate into one text.
+
+    // ====== View details (fills pane) ======
+    private void showStudent(int studentId) {
+        course_cb.setDisable(true);
+        gender_cb.setDisable(true);
+        DETAILSyearLevel_cb.setDisable(true);
+        DETAILSstatus_cb.setDisable(true);
+        birthday_dp.setDisable(true);
+        
         String sqlStudent = "SELECT * FROM students WHERE student_id = ?";
         String sqlHistory = """
             SELECT past_illnesses, allergies, medications, immunizations, family_history, created_at
@@ -1866,44 +1925,51 @@ private TextField student_tf;
             WHERE student_id = ?
             ORDER BY created_at DESC
             """;
+
         try (Connection c = MySQL.connect()) {
-            // --- student main ---
+            // main
             try (PreparedStatement ps = c.prepareStatement(sqlStudent)) {
                 ps.setInt(1, studentId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) return;
 
                     currentStudentId = studentId;
-                    pendingPhotoBytes = null; // reset
+                    pendingPhotoPath = null;
 
-                    String last = nz(rs.getString("last_name"));
-                    String first = nz(rs.getString("first_name"));
-                    String mid = nz(rs.getString("middle_name"));
-                    String idNum = nz(rs.getString("id_number"));
+                    // header
+                    fullName_label.setText(nz(rs.getString("last_name")) + ", " +
+                                           nz(rs.getString("first_name")) +
+                                           (nz(rs.getString("middle_name")).isBlank() ? "" : " " + nz(rs.getString("middle_name"))));
+                    idNumber_label.setText(nz(rs.getString("id_number")));
 
-                    fullName_label.setText(last + ", " + first + (mid.isBlank() ? "" : " " + mid));
-                    idNumber_label.setText(idNum);
-
-                    setText(age_tf,       obj(rs.getObject("age")));
-                    setText(gender_tf,    nz(rs.getString("gender")));
-                    setText(birthday_tf,  obj(rs.getObject("birthday"))); // yyyy-MM-dd
-                    setText(birthplace_tf,nz(rs.getString("birthplace")));
-                    setText(course_tf,    nz(rs.getString("course")));
-                    setText(yearLevel_tf, nz(rs.getString("year_level")));
+                    // basic text fields
+                    setText(age_tf,        obj(rs.getObject("age")));
+                    setText(birthplace_tf, nz(rs.getString("birthplace")));
                     setText(civilStatus_tf,nz(rs.getString("civil_status")));
-                    setText(religion_tf,  nz(rs.getString("religion")));
-                    setText(height_tf,    obj(rs.getObject("height")));
-                    setText(weight_tf,    obj(rs.getObject("weight")));
-                    setText(contactNo_tf, nz(rs.getString("contact_number")));
-                    setText(email_tf,     nz(rs.getString("email")));
-                    setText(status_tf,    nz(rs.getString("status")));
-                    setText(address_tf,   nz(rs.getString("address")));
+                    setText(religion_tf,   nz(rs.getString("religion")));
+                    setText(height_tf,     obj(rs.getObject("height")));
+                    setText(weight_tf,     obj(rs.getObject("weight")));
+                    setText(contactNo_tf,  nz(rs.getString("contact_number")));
+                    setText(email_tf,      nz(rs.getString("email")));
+                    setText(address_tf,    nz(rs.getString("address")));
 
-                    byte[] img = rs.getBytes("image");
-                    showImage(img);
+                    // combos
+                    course_cb.getSelectionModel().select(nz(rs.getString("course")));
+                    gender_cb.getSelectionModel().select(nz(rs.getString("gender")));
+                    DETAILSyearLevel_cb.getSelectionModel().select(nz(rs.getString("year_level")));
+                    DETAILSstatus_cb.getSelectionModel().select(nz(rs.getString("status")));
+
+                    // date
+                    java.sql.Date bday = rs.getDate("birthday");
+                    birthday_dp.setValue(bday == null ? null : bday.toLocalDate());
+
+                    // image path
+                    String path = rs.getString("image");
+                    showImage(path); // change showImage to accept path
                 }
             }
-            // --- history (build pretty text) ---
+
+            // history (unchanged)
             StringBuilder sb = new StringBuilder();
             try (PreparedStatement ps = c.prepareStatement(sqlHistory)) {
                 ps.setInt(1, studentId);
@@ -1922,59 +1988,99 @@ private TextField student_tf;
             }
             history_textArea.setText(sb.toString());
 
-//            viewStudent_pane.setVisible(true);
-//            viewStudent_pane.toFront();
+            viewStudent_pane.setVisible(true);
+            StudentRecord_pane1.setVisible(true);
+            StudentRecord_pane1.toFront();
+            StudentRecord_pane.setVisible(false);
 
-             // show the details pane & bring its parent to front
-                viewStudent_pane.setVisible(true);
-                StudentRecord_pane1.setVisible(true);
-                StudentRecord_pane1.toFront();
-
-    // optionally hide the list pane so there’s no overlap
-    StudentRecord_pane.setVisible(false);
         } catch (Exception e) {
             e.printStackTrace();
             alert(Alert.AlertType.ERROR, "View Student", e.getMessage());
         }
     }
-        // ====== Delete (soft delete recommended) ======
-        private void deleteStudent(int id) {
-        Alert a = new Alert(Alert.AlertType.CONFIRMATION, "Delete this student?", ButtonType.OK, ButtonType.CANCEL);
-        a.setHeaderText(null);
-        a.showAndWait().ifPresent(b -> {
-            if (b == ButtonType.OK) {
-                String sql = "UPDATE students SET is_active = 0 WHERE student_id = ?";
-                try (Connection c = MySQL.connect();
-                     PreparedStatement ps = c.prepareStatement(sql)) {
-                    ps.setInt(1, id);
-                    ps.executeUpdate();
-                    students.removeIf(s -> s.getId() == id);
-                    if (currentStudentId != null && currentStudentId == id) viewStudent_pane.setVisible(false);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    alert(Alert.AlertType.ERROR, "Delete", e.getMessage());
-                }
+
+    // ====== Delete with dependency check ======
+    private void deleteStudent(int id) {
+        // count linked data
+        String q1 = "SELECT COUNT(*) FROM consultations WHERE student_id = ?";
+        String q2 = "SELECT COUNT(*) FROM visit_log     WHERE student_id = ?";
+
+        try (Connection c = MySQL.connect()) {
+            int consults = 0, visits = 0;
+            try (PreparedStatement ps = c.prepareStatement(q1)) {
+                ps.setInt(1, id);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) consults = rs.getInt(1); }
             }
-        });
+            try (PreparedStatement ps = c.prepareStatement(q2)) {
+                ps.setInt(1, id);
+                try (ResultSet rs = ps.executeQuery()) { if (rs.next()) visits = rs.getInt(1); }
+            }
+
+            if (consults > 0 || visits > 0) {
+                alert(Alert.AlertType.WARNING, "Cannot Delete",
+                    "This record has linked data:\n" +
+                    "- Consultations: " + consults + "\n" +
+                    "- Visit logs: " + visits + "\n\n" +
+                    "Tip: Set status to INACTIVE instead.");
+                return;
+            }
+
+            // Confirm permanent delete
+            Alert a = new Alert(Alert.AlertType.CONFIRMATION,
+                    "No linked data found. Permanently delete this student (and their histories)?",
+                    ButtonType.OK, ButtonType.CANCEL);
+            a.setHeaderText(null);
+            a.showAndWait().ifPresent(b -> {
+                if (b == ButtonType.OK) {
+                    // hard delete; student_history should be ON DELETE CASCADE
+                    String delHist = "DELETE FROM student_history WHERE student_id = ?";
+                    String delStud = "DELETE FROM students WHERE student_id = ?";
+                    try (PreparedStatement ps1 = c.prepareStatement(delHist);
+                         PreparedStatement ps2 = c.prepareStatement(delStud)) {
+                        c.setAutoCommit(false);
+                        ps1.setInt(1, id); ps1.executeUpdate();
+                        ps2.setInt(1, id); ps2.executeUpdate();
+                        c.commit();
+                        students.removeIf(s -> s.getId() == id);
+                        if (currentStudentId != null && currentStudentId == id) viewStudent_pane.setVisible(false);
+                        alert(Alert.AlertType.INFORMATION, "Deleted", "Student permanently deleted.");
+                    } catch (Exception ex) {
+                        try { c.rollback(); } catch (Exception ignore) {}
+                        ex.printStackTrace();
+                        alert(Alert.AlertType.ERROR, "Delete", ex.getMessage());
+                    } finally {
+                        try { c.setAutoCommit(true); } catch (Exception ignore) {}
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            alert(Alert.AlertType.ERROR, "Delete", e.getMessage());
+        }
         loadDashboardStats();
     }
-        // ====== helpers ======
-        private void setEditable(boolean b) {
+
+    // ====== helpers ======
+    private void setEditable(boolean b) {
+    // text fields that remain text
         age_tf.setEditable(b);
-        gender_tf.setEditable(b);
-        birthday_tf.setEditable(b);
         birthplace_tf.setEditable(b);
-        course_tf.setEditable(b);
-        yearLevel_tf.setEditable(b);
         civilStatus_tf.setEditable(b);
         religion_tf.setEditable(b);
         height_tf.setEditable(b);
         weight_tf.setEditable(b);
         contactNo_tf.setEditable(b);
         email_tf.setEditable(b);
-        status_tf.setEditable(b);
         address_tf.setEditable(b);
+
+        course_cb.setDisable(!b);
+        gender_cb.setDisable(!b);
+        DETAILSyearLevel_cb.setDisable(!b);
+        DETAILSstatus_cb.setDisable(!b);
+        birthday_dp.setDisable(!b);
     }
+
         
     @FXML
     private void SEARCHBAR_mouseclicked(MouseEvent event) {
@@ -2792,11 +2898,43 @@ private TextField student_tf;
     a.showAndWait();
 }
     private void setText(TextField tf, String value) { tf.setText(value == null ? "" : value); }
-    private void showImage(byte[] bytes) {
-        if (image_imageView == null) return;
-        if (bytes == null || bytes.length == 0) { image_imageView.setImage(null); return; }
-        image_imageView.setImage(new Image(new ByteArrayInputStream(bytes)));
+//    private void showImage(byte[] bytes) {
+//        if (image_imageView == null) return;
+//        if (bytes == null || bytes.length == 0) { image_imageView.setImage(null); return; }
+//        image_imageView.setImage(new Image(new ByteArrayInputStream(bytes)));
+//    }
+    // =====================================================
+    // SHOW IMAGE (supports file path or null placeholder)
+    // =====================================================
+    // Robust loader: tries absolute/relative disk paths, then packaged fallback.
+    // Place default-user.png under resources: /img/default-user.png
+    private void showImage(String imagePath) {
+        try {
+            // 1) Load from file path if provided
+            if (imagePath != null && !imagePath.isBlank()) {
+                File f = new File(imagePath);
+                if (f.exists()) {
+                    image_imageView.setImage(new Image(f.toURI().toString()));
+                    return;
+                }
+            }
+
+            // 2) Fallback to packaged resource (safe, no NPE)
+            URL url = getClass().getResource("/image/default-user.png");
+            if (url != null) {
+                image_imageView.setImage(new Image(url.toExternalForm()));
+            } else {
+                // 3) Last resort: clear image (prevents crash even if resource missing)
+                image_imageView.setImage(null);
+                System.err.println("[showImage] Fallback image not found: /img/default-user.png");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            image_imageView.setImage(null);
+        }
     }
+
+
     private void alert(Alert.AlertType t, String header, String content) {
         Alert a = new Alert(t);
         a.setHeaderText(header);
@@ -2853,6 +2991,27 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
     if (v == null) ps.setNull(idx, java.sql.Types.DECIMAL);
     else ps.setDouble(idx, v);
 }
+private void warnLong(String title, String header, String message) {
+    Alert alert = new Alert(Alert.AlertType.WARNING);
+    alert.setTitle(title);
+    alert.setHeaderText(header);
+
+    TextArea area = new TextArea(message);
+    area.setWrapText(true);
+    area.setEditable(false);
+    area.setPrefRowCount(10);
+    area.setPrefColumnCount(60);
+    area.setMaxWidth(Double.MAX_VALUE);
+    area.setMaxHeight(Double.MAX_VALUE);
+
+    alert.getDialogPane().setContent(area);
+    // ensure dialog sizes to content
+    alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+    alert.getDialogPane().setMinWidth(Region.USE_PREF_SIZE);
+
+    alert.showAndWait();
+}
+
 ////////////////////////////////////////////////////////////////////////////////MEDICAL CERTIFICATE
 
     // =================== LEFT PANE: SEARCH + RECORDS TABLE =====================
@@ -4270,9 +4429,6 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
         return confirm_pw.isVisible()? confirm_pw.getText() : confirm_pw_tf.getText();
     }
 
-
-
-
     @FXML
     private void onCancelPassword(ActionEvent event) {
         clearPasswordSide();
@@ -4280,8 +4436,7 @@ private static void setNullable(PreparedStatement ps, int idx, Double v) throws 
         togglePassword.setSelected(false);
     }
 
-
-    // ---- DAO helpers (implement with your DB class) ----
+    // ---- DAO helpers (implement with DB class) ---- 
     private boolean updateUserProfile(int id, String first, String last, String user, String photoPath) {
         String sql = "UPDATE users SET first_name=?, last_name=?, username=?, photo_path=? WHERE user_id=?";
         try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {

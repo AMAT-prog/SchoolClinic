@@ -29,7 +29,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 
 /* Neumorphic-ish cards */
 .card {
-    -fx-background-color: -card;
+    -fx-background-color: #FFFFFF;
     -fx-background-radius: 14;
     -fx-border-color: rgba(0,0,0,0.04);
     -fx-border-radius: 14;
