@@ -50,7 +50,7 @@
                         <Image url="@image/IMG_20240313_103647.png" />
                      </image>
                   </ImageView>
-                  <Pane fx:id="VisitLog_pane" layoutX="-3.0" layoutY="11.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
+                  <Pane fx:id="VisitLog_pane" layoutX="-3.0" layoutY="22.0" prefHeight="518.0" prefWidth="1057.0" visible="false">
                      <children>
                         <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -62,21 +62,21 @@
                               <Font name="System Bold" size="25.0" />
                            </font>
                         </Label>
-                        <TableView fx:id="visitLog_tv" layoutX="53.0" layoutY="109.0" prefHeight="341.0" prefWidth="761.0" stylesheets="@clinicDESIGN.css">
+                        <TableView fx:id="visitLog_tv" layoutX="53.0" layoutY="94.0" prefHeight="400.0" prefWidth="942.0" stylesheets="@clinicDESIGN.css">
                           <columns>
-                            <TableColumn fx:id="visitDate_col" prefWidth="124.66668701171875" text="Date" />
-                            <TableColumn fx:id="visitName_col" prefWidth="213.99990844726562" text="Name" />
-                              <TableColumn fx:id="visitReason_col" prefWidth="421.3333740234375" text="Reason for visits" />
+                            <TableColumn fx:id="visitDate_col" prefWidth="169.3333740234375" text="Date" />
+                            <TableColumn fx:id="visitName_col" prefWidth="325.5555725097656" text="Name" />
+                              <TableColumn fx:id="visitReason_col" prefWidth="448.4444580078125" text="Reason for visits" />
                           </columns>
                         </TableView>
-                        <Button layoutX="864.0" layoutY="212.0" mnemonicParsing="false" onAction="#VisitLog_AddNew" prefHeight="52.0" prefWidth="144.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Add New">
+                        <Button layoutX="890.0" layoutY="59.0" mnemonicParsing="false" onAction="#VisitLog_AddNew" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3;" text="Add New">
                            <font>
-                              <Font size="18.0" />
+                              <Font size="13.0" />
                            </font>
                         </Button>
-                        <Button layoutX="864.0" layoutY="279.0" mnemonicParsing="false" onAction="#VisitLog_Delete" prefHeight="52.0" prefWidth="144.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Delete">
+                        <Button layoutX="780.0" layoutY="59.0" mnemonicParsing="false" onAction="#VisitLog_Delete" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3;" text="Delete">
                            <font>
-                              <Font size="18.0" />
+                              <Font size="13.0" />
                            </font>
                         </Button>
                      </children>
@@ -427,11 +427,7 @@
                               <Insets bottom="5.0" left="10.0" top="5.0" />
                            </HBox.margin>
                         </ImageView>
-                        <TextField fx:id="filterField1" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="21.0" prefWidth="431.0" promptText="Search student name / ID" style="-fx-background-color: TRANSPARENT;">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </TextField>
+                        <TextField fx:id="filterField1" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="21.0" prefWidth="431.0" promptText="Search student name / ID" style="-fx-background-color: TRANSPARENT;" />
                      </children>
                   </HBox>
                   <ImageView fitHeight="35.0" fitWidth="40.0" layoutX="14.0" layoutY="14.0" onMouseClicked="#backButton" pickOnBounds="true" preserveRatio="true">
@@ -439,7 +435,7 @@
                         <Image url="@image/backBUTTON.png" />
                      </image>
                   </ImageView>
-                  <Button layoutX="954.0" layoutY="52.0" mnemonicParsing="false" onAction="#addNewStudent" prefHeight="29.0" prefWidth="69.0" text="Add New" />
+                  <Button layoutX="954.0" layoutY="52.0" mnemonicParsing="false" onAction="#addNewStudent" prefHeight="29.0" prefWidth="69.0" style="-fx-background-radius: 3;" text="Add New" />
                </children>
             </Pane>
             <Pane layoutX="211.0" layoutY="6.0" prefHeight="127.0" prefWidth="1038.0" styleClass="bg-head" stylesheets="@clinicDESIGN.css" AnchorPane.bottomAnchor="516.6666666666666" AnchorPane.leftAnchor="211.0">
@@ -468,7 +464,7 @@
                         <Insets top="45.0" />
                      </VBox.margin>
                      <children>
-                        <ImageView fx:id="AdminPhoto" fitHeight="56.0" fitWidth="65.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="AdminPhoto" fitHeight="56.0" fitWidth="65.0" pickOnBounds="true">
                            <image>
                               <Image url="@image/adminFINAL.png" />
                            </image>
@@ -607,7 +603,7 @@
                   </HBox>
                </children>
             </VBox>
-            <Pane fx:id="StudentRecord_pane1" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0">
+            <Pane fx:id="StudentRecord_pane1" layoutX="207.0" layoutY="145.0" prefHeight="507.0" prefWidth="1057.0" visible="false">
                <children>
                   <Label layoutX="56.0" layoutY="4.0" prefHeight="52.0" prefWidth="983.0" text="Student Details">
                      <font>
@@ -636,12 +632,15 @@
                               <Font size="14.0" />
                            </font>
                         </Label>
-                        <ImageView fx:id="image_imageView" fitHeight="71.0" fitWidth="73.0" layoutX="33.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="image_imageView" fitHeight="90.0" fitWidth="103.0" layoutX="22.0" layoutY="14.0" pickOnBounds="true">
                            <image>
                               <Image url="@image/photo.png" />
                            </image>
                         </ImageView>
-                        <Button layoutX="25.0" layoutY="93.0" mnemonicParsing="false" onAction="#uploadPhoto_btn" prefHeight="22.0" prefWidth="90.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="Upload Photo" />
+                        <Button layoutX="12.0" layoutY="111.0" mnemonicParsing="false" onAction="#uploadPhoto_btn" prefHeight="24.0" prefWidth="121.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="Upload">
+                           <font>
+                              <Font size="11.0" />
+                           </font></Button>
                         <TextArea fx:id="history_textArea" editable="false" layoutX="143.0" layoutY="102.0" prefHeight="256.0" prefWidth="358.0" />
                         <Label alignment="CENTER" layoutX="142.0" layoutY="77.0" prefHeight="26.0" prefWidth="361.0" text="Student History" wrapText="true">
                            <font>
@@ -658,7 +657,7 @@
                               </Label>
                               <HBox layoutX="1.0" layoutY="31.0" prefHeight="27.0" prefWidth="429.0">
                                  <children>
-                                    <Button mnemonicParsing="false" onAction="#editStudent_btn" prefHeight="23.0" prefWidth="52.0" style="-fx-background-color: white; -fx-border-color: green; -fx-border-radius: 5;" text="Edit" textFill="#015715">
+                                    <Button mnemonicParsing="false" onAction="#editStudent_btn" prefHeight="23.0" prefWidth="63.0" style="-fx-background-color: white; -fx-border-color: green; -fx-border-radius: 5;" text="Edit" textFill="#015715">
                                        <graphic>
                                           <ImageView fitHeight="13.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
@@ -670,7 +669,7 @@
                                           <Font size="10.0" />
                                        </font>
                                        <HBox.margin>
-                                          <Insets left="130.0" />
+                                          <Insets left="118.0" />
                                        </HBox.margin>
                                     </Button>
                                     <Button fx:id="saveStudent_btn_id" disable="true" mnemonicParsing="false" onAction="#saveStudent_btn" prefHeight="23.0" prefWidth="54.0" style="-fx-background-color: green; -fx-border-radius: 5;" text="Save" textFill="WHITE">
@@ -688,7 +687,7 @@
                                           <Insets left="5.0" />
                                        </HBox.margin>
                                     </Button>
-                                    <Button fx:id="cancelStudent_btn_id" disable="true" mnemonicParsing="false" onAction="#cancelStudent_btn" prefHeight="23.0" prefWidth="62.0" style="-fx-background-color: white; -fx-border-radius: 5;" text="Cancel" textFill="RED">
+                                    <Button fx:id="cancelStudent_btn_id" disable="true" mnemonicParsing="false" onAction="#cancelStudent_btn" prefHeight="23.0" prefWidth="63.0" style="-fx-background-color: white; -fx-border-radius: 5; -fx-border-color: red;" text="Cancel" textFill="RED">
                                        <graphic>
                                           <ImageView fitHeight="13.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
@@ -699,6 +698,9 @@
                                        <font>
                                           <Font size="10.0" />
                                        </font>
+                                       <HBox.margin>
+                                          <Insets left="5.0" />
+                                       </HBox.margin>
                                     </Button>
                                  </children>
                               </HBox>
@@ -711,7 +713,7 @@
                                 </columnConstraints>
                                 <rowConstraints>
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -720,11 +722,11 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Label prefHeight="17.0" prefWidth="45.0" text="Age:" />
+                                    <Label prefHeight="17.0" prefWidth="45.0" text="Age:" GridPane.rowIndex="1" />
                                     <Label prefHeight="17.0" prefWidth="45.0" text="Gender:" GridPane.columnIndex="2" />
-                                    <Label prefHeight="17.0" prefWidth="64.0" text="Birthday:" GridPane.rowIndex="1" />
-                                    <Label prefHeight="17.0" prefWidth="63.0" text="Birthplace:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                    <Label prefHeight="17.0" prefWidth="45.0" text="Course:" GridPane.rowIndex="2" />
+                                    <Label prefHeight="17.0" prefWidth="64.0" text="Birthday:" />
+                                    <Label prefHeight="17.0" prefWidth="63.0" text="Birthplace:" GridPane.rowIndex="2" />
+                                    <Label prefHeight="17.0" prefWidth="45.0" text="Course:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                     <Label prefHeight="17.0" prefWidth="45.0" text="Height:" GridPane.rowIndex="4" />
                                     <Label prefHeight="17.0" prefWidth="62.0" text="Religion:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                     <Label prefHeight="17.0" prefWidth="62.0" text="Civil Status:" GridPane.rowIndex="3" />
@@ -733,21 +735,20 @@
                                     <Label prefHeight="17.0" prefWidth="89.0" text="Email / FB:" GridPane.rowIndex="6" />
                                     <Label prefHeight="17.0" prefWidth="68.0" text="Contact No." GridPane.rowIndex="5" />
                                     <Label prefHeight="17.0" prefWidth="45.0" text="Weight:" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                                    <TextField fx:id="age_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" text="22" GridPane.columnIndex="1">
-                                       <GridPane.margin>
-                                          <Insets bottom="15.0" right="10.0" top="15.0" />
-                                       </GridPane.margin>
-                                    </TextField>
-                                    <DatePicker fx:id="birthday_dp" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <DatePicker fx:id="birthday_dp" GridPane.columnIndex="1">
                                        <GridPane.margin>
                                           <Insets right="10.0" />
                                        </GridPane.margin>
                                     </DatePicker>
-                                    <ComboBox fx:id="course_cb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <TextField fx:id="age_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" text="22" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets bottom="15.0" right="10.0" top="15.0" />
+                                       </GridPane.margin>
+                                    </TextField>
+                                    <TextField fx:id="birthplace_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="113.0" text="Alabat, Quezon" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                        <GridPane.margin>
                                           <Insets right="10.0" />
-                                       </GridPane.margin>
-                                    </ComboBox>
+                                       </GridPane.margin></TextField>
                                     <TextField fx:id="civilStatus_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" text="Single" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                        <GridPane.margin>
                                           <Insets right="10.0" />
@@ -772,7 +773,11 @@
                                        </GridPane.margin>
                                     </TextField>
                                     <ComboBox fx:id="gender_cb" prefWidth="150.0" GridPane.columnIndex="3" />
-                                    <TextField fx:id="birthplace_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="113.0" text="Alabat, Quezon" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                    <ComboBox fx:id="course_cb" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                       <GridPane.margin>
+                                          <Insets />
+                                       </GridPane.margin>
+                                    </ComboBox>
                                     <ComboBox fx:id="DETAILSyearLevel_cb" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                     <TextField fx:id="religion_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" text="Catholic" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                     <TextField fx:id="weight_tf" alignment="CENTER" editable="false" prefHeight="24.0" prefWidth="102.0" text="56 kg" GridPane.columnIndex="3" GridPane.rowIndex="4" />
@@ -784,6 +789,10 @@
                            </children>
                         </Pane>
                         <Button layoutX="296.0" layoutY="373.0" mnemonicParsing="false" onAction="#edit_HISTORY" prefHeight="25.0" prefWidth="56.0" text="EDIT" />
+                        <Button layoutX="13.0" layoutY="141.0" mnemonicParsing="false" onAction="#savePhoto_btn" prefHeight="24.0" prefWidth="121.0" style="-fx-background-radius: 3; -fx-background-color: #015715;" text="Save Photo" textFill="WHITE">
+                           <font>
+                              <Font size="11.0" />
+                           </font></Button>
                      </children>
                   </Pane>
                </children>
@@ -808,65 +817,38 @@
                         <TableColumn fx:id="consultationAction_col" prefWidth="96.0" text="Action" />
                     </columns>
                   </TableView>
-                  <Button layoutX="920.0" layoutY="52.0" mnemonicParsing="false" onAction="#AddNewConsultation" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="Add New">
+                  <Button layoutX="920.0" layoutY="52.0" mnemonicParsing="false" onAction="#AddNewConsultation" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3;" text="Add New">
                      <font>
                         <Font size="13.0" />
                      </font>
                   </Button>
-                  <Pane fx:id="AddEditConsultation_pane" layoutX="15.0" layoutY="13.0" prefHeight="470.0" prefWidth="1017.0" style="-fx-background-color: white;" visible="false">
+                  <Pane fx:id="AddEditConsultation_pane" layoutX="15.0" layoutY="3.0" prefHeight="488.0" prefWidth="1017.0" stylesheets="@clinic-theme.css" visible="false">
                      <children>
-                        <Label layoutX="661.0" layoutY="23.0" prefHeight="41.0" prefWidth="74.0" text="Date:">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </Label>
-                        <ComboBox fx:id="consultationName_cb" editable="true" layoutX="157.0" layoutY="19.0" prefHeight="49.0" prefWidth="319.0" promptText="Select or search student..." styleClass="combo-boxNAME" stylesheets="@clinicDESIGN.css" />
-                        <GridPane layoutX="101.0" layoutY="78.0" prefHeight="279.0" prefWidth="834.0">
+                        <GridPane layoutX="101.0" layoutY="59.0" prefHeight="365.0" prefWidth="834.0">
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="369.333251953125" minWidth="10.0" prefWidth="140.66665649414062" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="694.6666768391927" minWidth="10.0" prefWidth="694.6666768391927" />
                           </columnConstraints>
                           <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="54.888916015625" minHeight="10.0" prefHeight="10.4444580078125" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="115.0" minHeight="10.0" prefHeight="115.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="21.77777099609375" minHeight="0.0" percentHeight="8.0" prefHeight="0.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" percentHeight="8.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Reason for visit:">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Blood Pressure:" GridPane.rowIndex="1">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Temperature:" GridPane.rowIndex="4">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Diagnosis:" GridPane.rowIndex="5">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Treatment given:" GridPane.rowIndex="6">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Referral:" GridPane.rowIndex="7">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Reason for visit:" />
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Blood Pressure:" GridPane.rowIndex="1" />
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Temperature:" GridPane.rowIndex="4" />
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Diagnosis:" GridPane.rowIndex="5" />
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Treatment given:" GridPane.rowIndex="6" />
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Referral:" GridPane.rowIndex="10" />
                               <TextField fx:id="consultationReason_tf" prefHeight="0.0" prefWidth="695.0" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" />
                               <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                  <children>
@@ -931,9 +913,6 @@
                                        </HBox.margin>
                                     </Circle>
                                     <Label prefHeight="38.0" prefWidth="63.0" text="C">
-                                       <font>
-                                          <Font size="17.0" />
-                                       </font>
                                        <HBox.margin>
                                           <Insets top="8.0" />
                                        </HBox.margin>
@@ -941,51 +920,109 @@
                                  </children>
                               </HBox>
                               <TextField fx:id="consultationDiagnosis_tf" prefHeight="13.0" prefWidth="695.0" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Pulse Rate:" GridPane.rowIndex="2">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
-                              <Label prefHeight="111.0" prefWidth="296.0" text="Respiratory Rate:" GridPane.rowIndex="3">
-                                 <font>
-                                    <Font size="17.0" />
-                                 </font>
-                              </Label>
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Pulse Rate:" GridPane.rowIndex="2" />
+                              <Label prefHeight="111.0" prefWidth="296.0" text="Respiratory Rate:" GridPane.rowIndex="3" />
                               <TextField fx:id="consultationTreatment_tf" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                              <TextField fx:id="consultationReferral_tf" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <TextField fx:id="consultationReferral_tf" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                              <Label alignment="TOP_LEFT" prefHeight="104.0" prefWidth="140.0" text="Medicine Dispensed:" GridPane.rowIndex="8" />
+                              <TableView fx:id="rxTable" prefHeight="180.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                                <columns>
+                                  <TableColumn fx:id="rxColMed" prefWidth="315.1111145019531" text="Medicine" />
+                                  <TableColumn fx:id="rxColQty" prefWidth="108.22222900390625" text="Quantity" />
+                                    <TableColumn fx:id="rxColUnit" prefWidth="139.3333740234375" text="Unit" />
+                                    <TableColumn fx:id="rxColAction" prefWidth="132.66668701171875" text="Action" />
+                                </columns>
+                              </TableView>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                                 <children>
+                                    <Button fx:id="rxAdd_btn" mnemonicParsing="false" onAction="#onRxAdd" text="+ Add Medicine" />
+                                    <Button fx:id="rxClear_btn" mnemonicParsing="false" onAction="#onRxClear" text="Clear All" />
+                                    <Label fx:id="rxHint_lbl" text="Tip: quantities will be deducted from Inventory on Save." textFill="#666666">
+                                       <HBox.margin>
+                                          <Insets />
+                                       </HBox.margin>
+                                       <font>
+                                          <Font name="System Italic" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
                            </children>
                         </GridPane>
-                        <Label layoutX="99.0" layoutY="23.0" prefHeight="41.0" prefWidth="84.0" text="Name:">
+                        <Button fx:id="saveBtn" layoutX="831.0" layoutY="437.0" mnemonicParsing="false" onAction="#saveConsultation_btn" prefHeight="27.0" prefWidth="109.0" text="SAVE">
                            <font>
-                              <Font size="18.0" />
+                              <Font name="System Bold" size="13.0" />
                            </font>
-                        </Label>
-                        <TextField fx:id="consultationDate_tf" layoutX="710.0" layoutY="21.0" onMouseClicked="#consultationDate_auto" prefHeight="38.0" prefWidth="227.0" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css">
-                           <font>
-                              <Font name="System Bold" size="12.0" />
-                           </font>
-                        </TextField>
-                        <Button fx:id="saveBtn" layoutX="831.0" layoutY="391.0" mnemonicParsing="false" onAction="#saveConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="SAVE">
-                           <font>
-                              <Font name="System Bold" size="17.0" />
-                           </font>
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-primary" />
+                           </styleClass>
                         </Button>
-                        <Button fx:id="cancelBtn" layoutX="717.0" layoutY="392.0" mnemonicParsing="false" onAction="#cancelConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="CANCEL">
+                        <Button fx:id="cancelBtn" layoutX="717.0" layoutY="438.0" mnemonicParsing="false" onAction="#cancelConsultation_btn" prefHeight="27.0" prefWidth="109.0" text="CANCEL">
                            <font>
-                              <Font name="System Bold" size="17.0" />
+                              <Font name="System Bold" size="13.0" />
                            </font>
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-neutral" />
+                           </styleClass>
                         </Button>
-                        <Button fx:id="editBtn" layoutX="603.0" layoutY="393.0" mnemonicParsing="false" onAction="#editConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="EDIT" textFill="#058826">
+                        <Button fx:id="editBtn" layoutX="603.0" layoutY="439.0" mnemonicParsing="false" onAction="#editConsultation_btn" prefHeight="27.0" prefWidth="109.0" text="EDIT" textFill="#058826">
                            <font>
-                              <Font name="System Bold" size="17.0" />
+                              <Font name="System Bold" size="13.0" />
                            </font>
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-success" />
+                           </styleClass>
                         </Button>
-                        <Button fx:id="deleteBtn" layoutX="489.0" layoutY="393.0" mnemonicParsing="false" onAction="#deleteConsultation_btn" prefHeight="27.0" prefWidth="109.0" style="-fx-background-radius: 3; -fx-background-color: #f2f2f2;" text="DELETE" textFill="#cc2020">
+                        <Button fx:id="deleteBtn" layoutX="489.0" layoutY="439.0" mnemonicParsing="false" onAction="#deleteConsultation_btn" prefHeight="27.0" prefWidth="109.0" text="DELETE" textFill="#cc2020">
                            <font>
-                              <Font name="System Bold" size="17.0" />
+                              <Font name="System Bold" size="13.0" />
                            </font>
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-danger" />
+                           </styleClass>
                         </Button>
+                        <GridPane layoutX="97.0" layoutY="26.0" prefHeight="25.0" prefWidth="837.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="141.22216796875" minWidth="10.0" prefWidth="141.22216796875" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="312.6666259765625" minWidth="10.0" prefWidth="311.77783203125" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.88893636067712" minWidth="10.0" prefWidth="143.55550130208337" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="211.5555419921875" minWidth="10.0" prefWidth="47.77773030598951" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="231.1112060546875" minWidth="10.0" prefWidth="170.66668701171875" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Name:" />
+                              <TextField fx:id="consultationName_tf" editable="false" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1">
+                                 <font>
+                                    <Font name="System Bold" size="15.0" />
+                                 </font>
+                              </TextField>
+                              <Hyperlink fx:id="pickStudent_hl" onAction="#searchStudent_hyperlink" prefHeight="12.0" prefWidth="81.0" text="Select Student" underline="true" GridPane.columnIndex="2">
+                                 <font>
+                                    <Font name="System Italic" size="11.0" />
+                                 </font>
+                                 <GridPane.margin>
+                                    <Insets top="7.0" />
+                                 </GridPane.margin>
+                              </Hyperlink>
+                              <Label prefHeight="26.0" prefWidth="185.0" text="Date:" GridPane.columnIndex="3" />
+                              <TextField fx:id="consultationDate_tf" styleClass="textfieldConsultation" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="4">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font></TextField>
+                           </children>
+                        </GridPane>
                      </children>
+                     <styleClass>
+                        <String fx:value="gc" />
+                        <String fx:value="gc-surface" />
+                     </styleClass>
                   </Pane>
                </children>
             </Pane>
@@ -1146,7 +1183,7 @@
                   </Label>
                   <HBox layoutX="860.0" layoutY="63.0" prefHeight="26.0" prefWidth="137.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#AddNewStock" prefHeight="26.0" prefWidth="136.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Add New Stock" />
+                        <Button mnemonicParsing="false" onAction="#AddNewStock" prefHeight="26.0" prefWidth="136.0" style="-fx-background-radius: 3;" text="Add New Stock" />
                      </children>
                   </HBox>
                   <HBox fx:id="filterField_hbox" alignment="CENTER_LEFT" layoutX="55.0" layoutY="66.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="695.0" styleClass="search-container1" stylesheets="@clinicDESIGN.css">
@@ -1178,7 +1215,7 @@
                         <TableColumn fx:id="inventoryAction_col" prefWidth="62.6666259765625" text="Action" />
                     </columns>
                   </TableView>
-                  <Pane fx:id="AddEdit_InventoryPane" layoutX="54.0" layoutY="55.0" prefHeight="427.0" prefWidth="944.0" style="-fx-background-color: WHITE;" visible="false">
+                  <Pane fx:id="AddEdit_InventoryPane" layoutX="54.0" layoutY="55.0" prefHeight="427.0" prefWidth="944.0" stylesheets="@clinic-theme.css" visible="false">
                      <children>
                         <GridPane layoutX="76.0" layoutY="72.0" prefHeight="219.0" prefWidth="781.0">
                           <columnConstraints>
@@ -1240,23 +1277,35 @@
                               <TextField fx:id="inventoryUnit_tf" prefHeight="51.0" prefWidth="249.0" styleClass="textfield" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
-                        <Button layoutX="756.0" layoutY="342.0" mnemonicParsing="false" onAction="#InventorySave" prefHeight="41.0" prefWidth="98.0" text="Save" />
-                        <Button layoutX="645.0" layoutY="342.0" mnemonicParsing="false" onAction="#inventoryCancel" prefHeight="41.0" prefWidth="98.0" text="Cancel" />
+                        <Button layoutX="756.0" layoutY="342.0" mnemonicParsing="false" onAction="#InventorySave" prefHeight="41.0" prefWidth="98.0" text="Save">
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-primary" />
+                           </styleClass></Button>
+                        <Button layoutX="645.0" layoutY="342.0" mnemonicParsing="false" onAction="#inventoryCancel" prefHeight="41.0" prefWidth="98.0" text="Cancel">
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-neutral" />
+                           </styleClass></Button>
                         <Label alignment="CENTER" layoutX="417.0" layoutY="37.0" prefHeight="17.0" prefWidth="121.0" text="Inventory Form">
                            <font>
                               <Font name="System Bold" size="16.0" />
                            </font>
                         </Label>
                      </children>
+                     <styleClass>
+                        <String fx:value="gc" />
+                        <String fx:value="gc-surface" />
+                     </styleClass>
                   </Pane>
                </children>
             </Pane>
-            <Pane fx:id="VisitLog_addpane" layoutX="412.0" layoutY="195.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="318.0" prefWidth="519.0" style="-fx-background-color: white;" visible="false">
+            <Pane fx:id="VisitLog_addpane" layoutX="412.0" layoutY="195.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="318.0" prefWidth="563.0" stylesheets="@clinic-theme.css" visible="false">
                <children>
-                  <GridPane layoutX="31.0" layoutY="40.0" prefHeight="200.0" prefWidth="443.0">
+                  <GridPane layoutX="31.0" layoutY="40.0" prefHeight="200.0" prefWidth="505.0">
                     <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="211.3333740234375" minWidth="10.0" prefWidth="91.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="352.0" minWidth="10.0" prefWidth="352.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="211.3333740234375" minWidth="10.0" prefWidth="79.66664632161456" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="425.33335367838544" minWidth="10.0" prefWidth="425.33335367838544" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -1266,17 +1315,17 @@
                      <children>
                         <Label alignment="CENTER" prefHeight="76.0" prefWidth="224.0" text="Date:">
                            <font>
-                              <Font size="17.0" />
+                              <Font size="15.0" />
                            </font>
                         </Label>
                         <Label alignment="CENTER" prefHeight="76.0" prefWidth="224.0" text="Name:" GridPane.rowIndex="1">
                            <font>
-                              <Font size="17.0" />
+                              <Font size="15.0" />
                            </font>
                         </Label>
                         <Label alignment="CENTER" prefHeight="76.0" prefWidth="224.0" text="Reasons:" GridPane.rowIndex="2">
                            <font>
-                              <Font size="17.0" />
+                              <Font size="15.0" />
                            </font>
                         </Label>
                         <TextField fx:id="visitDate_tf" prefHeight="52.0" prefWidth="316.0" styleClass="textfieldVisitLog" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1">
@@ -1284,25 +1333,53 @@
                               <Insets bottom="20.0" />
                            </GridPane.margin>
                         </TextField>
-                        <ComboBox fx:id="visitName_cb" prefHeight="48.0" prefWidth="360.0" styleClass="combo-boxNAME" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <TextField fx:id="visitReason_tf" prefHeight="52.0" prefWidth="316.0" styleClass="textfieldVisitLog" stylesheets="@clinicDESIGN.css" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <GridPane.margin>
                               <Insets bottom="20.0" />
                            </GridPane.margin>
                         </TextField>
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <children>
+                              <TextField fx:id="visitName_tf" editable="false" prefHeight="50.0" prefWidth="339.0" styleClass="textfieldVisitLog" stylesheets="@clinicDESIGN.css" />
+                              <Hyperlink fx:id="visitLog_searchStudent_hl" onAction="#visitLog_searchStudent_hl" text="Search Student" underline="true">
+                                 <font>
+                                    <Font name="System Italic" size="12.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets top="25.0" />
+                                 </HBox.margin>
+                              </Hyperlink>
+                           </children>
+                        </HBox>
                      </children>
                   </GridPane>
-                  <Button layoutX="155.0" layoutY="249.0" mnemonicParsing="false" onAction="#addVL_cancel" prefHeight="37.0" prefWidth="108.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Cancel">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Button>
-                  <Button layoutX="269.0" layoutY="248.0" mnemonicParsing="false" onAction="#addVL_add" prefHeight="37.0" prefWidth="108.0" style="-fx-background-color: #f2f2f2; -fx-background-radius: 3;" text="Add">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Button>
+                  <HBox alignment="CENTER" layoutX="40.0" layoutY="239.0" prefHeight="37.0" prefWidth="497.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#addVL_cancel" prefHeight="37.0" prefWidth="108.0" text="Cancel">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-neutral" />
+                           </styleClass>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#addVL_add" prefHeight="37.0" prefWidth="108.0" text="Add">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <styleClass>
+                              <String fx:value="gc-btn" />
+                              <String fx:value="gc-primary" />
+                           </styleClass>
+                        </Button>
+                     </children>
+                  </HBox>
                </children>
+               <styleClass>
+                  <String fx:value="gc" />
+                  <String fx:value="gc-surface" />
+               </styleClass>
             </Pane>
             <Pane fx:id="Notification_pane" layoutX="418.0" layoutY="233.0" prefHeight="270.0" prefWidth="492.0" style="-fx-background-color: white;" styleClass="bg-head" stylesheets="@clinicDESIGN.css" visible="false">
                <children>
@@ -1464,7 +1541,7 @@
                               <Button mnemonicParsing="false" onAction="#addStudent_addHistory" prefHeight="25.0" prefWidth="95.0" text="Add History" GridPane.columnIndex="3" GridPane.rowIndex="8" />
                            </children>
                         </GridPane>
-                        <ImageView fx:id="addStudent_imageview" fitHeight="73.0" fitWidth="91.0" layoutX="844.0" layoutY="44.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="addStudent_imageview" fitHeight="73.0" fitWidth="91.0" layoutX="834.0" layoutY="44.0" pickOnBounds="true">
                            <image>
                               <Image url="@image/addStudent.png" />
                            </image>
@@ -1585,7 +1662,7 @@
                               <TextField fx:id="temp_tf" promptText="e.g. 37" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                               <TextField fx:id="pulse_tf" promptText="e.g. 85" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                               <TextField fx:id="resp_tf" promptText="e.g. 18" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                              <Label fx:id="student_lbl" prefHeight="23.0" prefWidth="185.0" text="Please pick a student..." GridPane.columnIndex="1">
+                              <Label fx:id="student_lbl" prefHeight="23.0" prefWidth="151.0" text="Please pick a student..." GridPane.columnIndex="1">
                                  <padding>
                                     <Insets left="3.0" />
                                  </padding>
@@ -1598,9 +1675,9 @@
                                     <Insets left="280.0" />
                                  </GridPane.margin>
                               </Hyperlink>
-                              <Label fx:id="studentID_lbl" prefHeight="27.0" prefWidth="89.0" GridPane.columnIndex="1">
+                              <Label fx:id="studentID_lbl" prefHeight="27.0" prefWidth="113.0" GridPane.columnIndex="1">
                                  <GridPane.margin>
-                                    <Insets left="190.0" />
+                                    <Insets left="165.0" />
                                  </GridPane.margin>
                               </Label>
                               <Label fx:id="vitalsSource_lbl" prefHeight="27.0" prefWidth="407.0" style="-fx-text-fill: gray; -fx-font-size: 11;" GridPane.columnIndex="1" GridPane.rowIndex="9">
@@ -1890,7 +1967,7 @@
                                     </HBox>
                                     <StackPane minWidth="21.0" prefHeight="140.0" prefWidth="21.0" styleClass="avatar-plate">
                                        <children>
-                                          <ImageView fx:id="AdminPhoto_edit" fitHeight="120.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true" styleClass="avatar-plate" />
+                                          <ImageView fx:id="AdminPhoto_edit" fitHeight="120.0" fitWidth="120.0" pickOnBounds="true" styleClass="avatar-plate" />
                                        </children>
                                        <VBox.margin>
                                           <Insets left="140.0" />

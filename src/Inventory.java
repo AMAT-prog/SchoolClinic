@@ -9,6 +9,7 @@
  */
 import java.time.LocalDate;
 import javafx.beans.property.*;
+import javafx.beans.property.*;
 
 public class Inventory {
     private final IntegerProperty itemId = new SimpleIntegerProperty();
@@ -18,6 +19,9 @@ public class Inventory {
     private final StringProperty unit = new SimpleStringProperty();
     private final ObjectProperty<LocalDate> expiryDate = new SimpleObjectProperty<>();
     private final StringProperty status = new SimpleStringProperty();
+    private final IntegerProperty totalUsed    = new SimpleIntegerProperty();
+    private final IntegerProperty balanceStock = new SimpleIntegerProperty();
+
 
     public Inventory(int itemId, String itemName, String type, int quantity,
                      String unit, LocalDate expiryDate, String status) {
@@ -28,8 +32,20 @@ public class Inventory {
         setUnit(unit);
         setExpiryDate(expiryDate);
         setStatus(status);
+        // defaults if not supplied
+        setTotalUsed(0);
+        setBalanceStock(quantity);
     }
-
+    
+    
+    // Optional convenience constructor for “picker rows”
+    public Inventory(int itemId, String itemName, String unit, int balanceStock) {
+        setItemId(itemId);
+        setItemName(itemName);
+        setUnit(unit);
+        setBalanceStock(balanceStock);
+    }
+   
     // getters (JavaFX-style) + properties
     public int getItemId() { return itemId.get(); }
     public void setItemId(int v) { itemId.set(v); }
@@ -58,5 +74,23 @@ public class Inventory {
     public String getStatus() { return status.get(); }
     public void setStatus(String v) { status.set(v); }
     public StringProperty statusProperty() { return status; }
+    
+     // additional getters + properties (for adding consultation)
+    public int getTotalUsed() { return totalUsed.get(); }
+    public void setTotalUsed(int v) { totalUsed.set(v); }
+    public IntegerProperty totalUsedProperty() { return totalUsed; }
+
+    public int getBalanceStock() { return balanceStock.get(); }
+    public void setBalanceStock(int v) { balanceStock.set(v); }
+    public IntegerProperty balanceStockProperty() { return balanceStock; }
+
+    // Optional: nice toString for picker lists
+    @Override public String toString() {
+        String name = getItemName() == null ? "" : getItemName();
+        String u    = getUnit() == null ? "" : getUnit();
+        return name + (u.isEmpty() ? "" : " (" + u + ")");
+    }
+    
+    
 }
 

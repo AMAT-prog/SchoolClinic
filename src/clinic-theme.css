@@ -1,0 +1,159 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 18 Oct 2025, 16:29:51
+    Author     : Anna Margarette
+*/
+/* ---------- Color lookups (easy to tweak in one place) CONSULTATION PANE/EDITING PANE ---------- */
+.gc {
+  -color-surface:    #f6f8fc;     /* sheet background (very light)   */
+  -color-elevated:   #ffffff;     /* button & card base               */
+  -color-border:     #e6e9ef;
+  -color-text:       #1f2937;
+
+  -color-primary:    #1a73e8;     /* Save (Google blue)               */
+  -color-success:    #1e8e3e;     /* Edit (Google green)              */
+  -color-danger:     #d93025;     /* Delete (Google red)              */
+  -color-neutral:    #5f6368;     /* Cancel text                      */
+}
+
+/* ---------- Pane / Card (apply to AddEditConsultation_pane) ---------- */
+.gc-card {
+  -fx-background-color:
+      linear-gradient(to bottom, rgba(255,255,255,0.86), rgba(255,255,255,0.98)),
+      -color-elevated;
+  -fx-background-radius: 18;
+  -fx-padding: 22;
+  -fx-border-color: rgba(255,255,255,0.9), -color-border;
+  -fx-border-insets: 1 1 1 1, 0 0 0 0;
+  -fx-border-radius: 18, 18;
+
+  /* soft, material-like shadow */
+  -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.18), 24, 0.24, 0, 8);
+}
+
+/* Optional page background (parent container) */
+.gc-surface {
+  -fx-background-color: -color-surface;
+  -fx-effect: dropshadow(gaussian, rgba(16,24,40,0.20), 28, 0.30, 0, 10);
+  
+  -fx-background-radius: 18;
+  -fx-padding: 22;
+  -fx-border-color: rgba(255,255,255,0.9), -color-border;
+  -fx-border-insets: 1 1 1 1, 0 0 0 0;
+  -fx-border-radius: 18, 18;
+
+}
+
+/* ---------- Base Button ---------- */
+.gc-btn {
+  -fx-background-color: -color-elevated;
+  -fx-background-radius: 999;
+  -fx-padding: 5 11 5 11;
+  -fx-font-weight: 700;
+  -fx-text-fill: -color-text;
+  -fx-cursor: hand;
+  -fx-effect: dropshadow(gaussian, rgba(17,24,39,0.15), 12, 0.25, 0, 3);
+  -fx-border-color: transparent;
+  -fx-border-radius: 999;
+  -fx-background-insets: 0, 1;
+}
+
+.gc-btn:hover {
+  -fx-effect: dropshadow(gaussian, rgba(17,24,39,0.18), 16, 0.30, 0, 4);
+}
+
+.gc-btn:pressed {
+  -fx-effect: innershadow(gaussian, rgba(17,24,39,0.18), 10, 0.30, 0, 2);
+}
+
+.gc-btn:disabled {
+  -fx-opacity: 0.55;
+  -fx-effect: none;
+}
+
+/* Save */
+/* ---------- Variants (filled) ---------- */
+.gc-primary {
+  -fx-background-color:
+      linear-gradient(to bottom, derive(-color-primary, 10%), -color-primary);
+  -fx-text-fill: white;
+}
+.gc-primary:hover {
+  -fx-background-color:
+      linear-gradient(to bottom, derive(-color-primary, 18%), derive(-color-primary, 6%));
+}
+.gc-primary:pressed {
+  -fx-background-color:
+      linear-gradient(to bottom, -color-primary, derive(-color-primary, -8%));
+}
+
+/* Edit */
+.gc-success {
+  -fx-background-color:
+      linear-gradient(to bottom, derive(-color-success, 10%), -color-success);
+  -fx-text-fill: white;
+}
+.gc-success:hover {
+  -fx-background-color:
+      linear-gradient(to bottom, derive(-color-success, 18%), derive(-color-success, 6%));
+}
+.gc-success:pressed {
+  -fx-background-color:
+      linear-gradient(to bottom, -color-success, derive(-color-success, -8%));
+}
+
+/* Delete */
+.gc-danger {
+  -fx-background-color:
+      linear-gradient(to bottom, derive(-color-danger, 6%), -color-danger);
+  -fx-text-fill: white;
+}
+.gc-danger:hover {
+  -fx-background-color:
+      linear-gradient(to bottom, derive(-color-danger, 14%), derive(-color-danger, 2%));
+}
+.gc-danger:pressed {
+  -fx-background-color:
+      linear-gradient(to bottom, -color-danger, derive(-color-danger, -8%));
+}
+
+/* Cancel */
+/* ---------- Neutral (outlined/soft) ---------- */
+.gc-neutral {
+  -fx-background-color: linear-gradient(to bottom, #ffffff, #f7f8fb);
+  -fx-text-fill: -color-neutral;
+  -fx-border-color: rgba(95,99,104,0.25);
+  -fx-border-width: 1;
+}
+.gc-neutral:hover {
+  -fx-background-color: linear-gradient(to bottom, #ffffff, #eef1f7);
+}
+.gc-neutral:pressed {
+  -fx-background-color: linear-gradient(to bottom, #f0f2f7, #e7ebf3);
+}
+
+
+/* Make table + inputs sit nicely on the card */
+.gc-card .text-field,
+.gc-card .text-area,
+.gc-card .combo-box,
+.gc-card .date-picker,
+.gc-card .spinner {
+  -fx-background-radius: 10;
+  -fx-background-color: #ffffff;
+  -fx-border-color: #e7e9ee;
+  -fx-border-radius: 10;
+}
+
+.gc-card .table-view {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 6;
+  -fx-border-color: #edf0f5;
+  -fx-border-radius: 12;
+  -fx-background-radius: 12;
+}
+

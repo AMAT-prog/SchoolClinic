@@ -37,7 +37,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-text-inner-color:black;
     -fx-border-color:black;
     -fx-border-width: 0px 0px .4px 0px;
-    -fx-font-size: 17px;
+    -fx-font-size: 12px;
  }
  
  .textfieldVisitLog{
@@ -45,7 +45,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-text-inner-color:black;
     -fx-border-color:black;
     -fx-border-width: 0px 0px .4px 0px;
-    -fx-font-size: 17px;
+    -fx-font-size: 15px;
  }
  
  .SIDE_nav{

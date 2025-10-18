@@ -105,7 +105,51 @@ public class StudentDAO {
         }
     }
 
+    ///// on adding consultation
+    public static String findIdNumberByStudentId(int studentId){
+        try (Connection con = MySQL.connect();
+             PreparedStatement ps = con.prepareStatement(
+                    "SELECT id_number FROM students WHERE student_id=?")) {
+            ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString(1) : null;
+            }
+        } catch (SQLException e){ return null; }
+    }
 
+
+    //for visit log (searching student in popup by their id number or name) used by med cert and consultation also
+    public static List<StudentPick> searchPicksByNameOrIdNumber(String query) {
+        String q = (query == null) ? "" : query.trim();
+        String sql = """
+            SELECT student_id, id_number,
+                   CONCAT(last_name, ', ', first_name, ' ', COALESCE(middle_name,'')) AS full_name
+            FROM students
+            WHERE (? = '' )
+               OR (id_number LIKE CONCAT('%', ?, '%')
+                   OR CONCAT(first_name, ' ', last_name) LIKE CONCAT('%', ?, '%')
+                   OR CONCAT(last_name, ', ', first_name) LIKE CONCAT('%', ?, '%'))
+            ORDER BY last_name, first_name
+        """;
+        List<StudentPick> out = new java.util.ArrayList<>();
+        try (var con = MySQL.connect();
+             var ps  = con.prepareStatement(sql)) {
+            ps.setString(1, q);
+            ps.setString(2, q);
+            ps.setString(3, q);
+            ps.setString(4, q);
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new StudentPick(
+                        rs.getInt("student_id"),
+                        rs.getString("id_number"),
+                        rs.getString("full_name")
+                    ));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return out;
+    }
 
     
     

@@ -107,10 +107,12 @@ import javafx.animation.SequentialTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.css.PseudoClass;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -345,8 +347,6 @@ public class DASHBOARDController implements Initializable {
     private Button editBtn;
     @FXML
     private Button deleteBtn;
-    @FXML
-    private ComboBox<StudentOption> consultationName_cb;
     
     @FXML
     private TableView<Inventory> inventory_tv;
@@ -393,8 +393,6 @@ public class DASHBOARDController implements Initializable {
 //    private TextField visitName_tf;
     @FXML
     private TextField visitReason_tf;
-    @FXML
-    private ComboBox<StudentOption> visitName_cb;
     
     @FXML
     private Label TotalStudents_label;
@@ -548,8 +546,6 @@ private TextField student_tf;
     private ToggleButton togglePassword;
     @FXML
     private TextField ADMINcontactNumber_tf;
-    
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @FXML
     private AnchorPane settings_pane;
     
@@ -568,7 +564,41 @@ private TextField student_tf;
     @FXML
     private Button cancelStudent_btn_id;
 
+    @FXML
+    private TextField consultationName_tf;
+    @FXML
+    private Hyperlink pickStudent_hl;
+
+// --- Add Student (photo staging) ---
+private String pendingStudentPhotoPath = null;   // absolute path of chosen file (not yet copied)
+private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
+        + File.separator + "AppData" + File.separator + "Roaming"
+        + File.separator + "SchoolClinic" + File.separator + "students";
+    @FXML
+    private TableView<RxRow> rxTable;
+    @FXML
+    private TableColumn<RxRow, String> rxColMed;
+    @FXML
+    private TableColumn<RxRow, Integer> rxColQty;
+    @FXML
+    private TableColumn<RxRow, String> rxColUnit;
+    @FXML
+    private TableColumn<RxRow, Void> rxColAction;
+    @FXML
+    private Button rxAdd_btn;
+    @FXML
+    private Button rxClear_btn;
+    @FXML
+    private Label rxHint_lbl;
     
+    @FXML
+    private TextField visitName_tf;
+    @FXML
+    private Hyperlink visitLog_searchStudent_hl;
+
+
+
+
     //for adding new consultation
     //for adding history during adding a new student
     //1. currentStudentId - already in controller
@@ -592,17 +622,35 @@ private TextField student_tf;
     
     int addStudent_sideNav = 0;
     
-    // ===== Controller state ===== FOR CONSULTATION
+    // ============================== CONSULTATION: Controller State ==============================
+    // Table backing list
     private final ObservableList<Consultation> consultations = FXCollections.observableArrayList();
-    private Integer currentConsultationId = null;   // null = adding; non-null = editing existing
-    private Consultation currentSelected = null;    // convenience
-        
-    // ==== fields in controller ====
-    private final ObservableList<StudentOption> studentOptionsMaster = FXCollections.observableArrayList();
-    private final FilteredList<StudentOption> studentOptionsFiltered =
-    new FilteredList<>(studentOptionsMaster, p -> true); // start: show all
-   
-    //inventory
+
+    // If null → adding, otherwise editing an existing consultation
+    private Integer currentConsultationId = null;
+
+    // Convenience: the currently selected Consultation in the table (when viewing/editing)
+    private Consultation currentSelected = null;
+
+    // The student chosen via the picker for the consultation form.
+    // We keep both id and display name so the TextField is read-only but we still have the id.
+    private Integer currentConsultationStudentId = null;
+    private String  currentConsultationStudentName = null;
+
+    // Date format used by the date TextField
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        //private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    
+    // ======================= MEDICINES DISPENSED (Consultation form) =======================
+    // Backing list for the Rx table
+    private final ObservableList<RxRow> rxItems = FXCollections.observableArrayList();
+    // Read-only student identity for the current form (set by StudentPicker dialog)
+//    private Integer currentConsultationStudentId = null;
+//    private String  currentConsultationStudentName = null;
+    private String  currentConsultationStudentIdNumber = null; // NEW: school-issued id_number
+
+    
+    ////////////////////////////////////////////////////////////////////////////inventory
     private ObservableList<Inventory> data; 
         // internal state
     private boolean isEditMode = false;
@@ -614,12 +662,19 @@ private TextField student_tf;
     private FilteredList<Inventory> inventoryFiltered;
     private SortedList<Inventory> inventorySorted;
     
-    //visit log
+
+//    //visit log
+//    private javafx.collections.ObservableList<StudentOption> studentOptions;
+//    private FilteredList<StudentOption> studentFiltered;
+//    private boolean suppressEditorEvents = false;
+    // ====================== VISIT LOG: controller state ======================
     private ObservableList<VisitLogRow> rows;
-   
-    private javafx.collections.ObservableList<StudentOption> studentOptions;
-    private FilteredList<StudentOption> studentFiltered;
-    private boolean suppressEditorEvents = false;
+
+    // The picked student for the “Add Visit” form (TextField + hyperlink)
+    private Integer visitAdd_studentId = null;     // students.student_id (DB key)
+    private String  visitAdd_fullName  = null;     // for table display
+    private String  visitAdd_idNumber  = null;     // students.id_number (school-issued)
+
     
     // ============================ STATE / PREVIEW (MED CERT) ==============================
     private int currentStudentIdMEDCERT = -1;    // currently selected student
@@ -686,6 +741,10 @@ private TextField student_tf;
             + "SchoolClinic" + File.separator + "profiles";
 
     private final UserDAO userDao = new UserDAO();
+    
+    // keep the currentUserId, orig* vars, etc.
+    private String adminImagePath = null;   // holds the current admin photo path from DB
+
 
   
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -900,6 +959,7 @@ private TextField student_tf;
         contact_col.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getContactNumber()));
 
         setupActionColumn();
+        refreshAgesOnStartup();
         loadStudents();
         
         // 2.1 Year-level options 
@@ -951,78 +1011,110 @@ private TextField student_tf;
         addStudent_year_cb.getItems().setAll("1st Year","2nd Year","3rd Year","4th Year","Irregular");
         addStudent_gender_cb.getItems().setAll("Male","Female","Other");
 
+    // ============================== CONSULTATION: initialize() setup ==============================
+    // Bind columns to Consultation model
+    consultationName_col.setCellValueFactory(cd ->
+            new SimpleStringProperty(cd.getValue().getStudentName()));
 
-       // Bind columns to Consultation model
-    consultationName_col.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getStudentName()));
-    consultationDate_col.setCellValueFactory(cd -> new SimpleStringProperty(
-            cd.getValue().getConsultationDate() != null ? cd.getValue().getConsultationDate().toString() : ""
-    ));
-    consultationReason_col.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getReasonForVisit()));
+    consultationDate_col.setCellValueFactory(cd ->
+            new SimpleStringProperty(
+                    cd.getValue().getConsultationDate() != null
+                       ? cd.getValue().getConsultationDate().format(DATE_FMT)
+                       : ""
+            ));
 
-    // Action column (button)
+    consultationReason_col.setCellValueFactory(cd ->
+            new SimpleStringProperty(cd.getValue().getReasonForVisit()));
+
+    // Action column with a "View" button
     consultationAction_col.setCellFactory(col -> new TableCell<>() {
         private final Button viewBtn = new Button("View");
         {
-            viewBtn.getStyleClass().add("table-action-view"); // optional CSS
+            viewBtn.getStyleClass().add("table-action-view");
             viewBtn.setOnAction(e -> {
-                Consultation rowItem = getTableView().getItems().get(getIndex());
-                onViewRow(rowItem);
+                Consultation row = getTableView().getItems().get(getIndex());
+                onViewRow(row);
             });
         }
         @Override
-        protected void updateItem(Void item, boolean empty) {   // <-- correct override signature
+        protected void updateItem(Void item, boolean empty) {
             super.updateItem(item, empty);
             setGraphic(empty ? null : viewBtn);
             setText(null);
         }
     });
-
-    // Load data
+    
+    // Initial load of the table
     refreshTable();
 
-    // Real-time status logic for vitals
+    // Vitals listeners (instant feedback)
     attachVitalsStatusListeners();
-        
-        //for BP
-        consultationBP_tf.focusedProperty().addListener((obs, oldVal, newVal) -> {
-    if (!newVal) { // lost focus
-        String bp = consultationBP_tf.getText();
-        if (bp.contains("/")) {
-            try {
-                int sys = Integer.parseInt(bp.split("/")[0]);
-                int dia = Integer.parseInt(bp.split("/")[1]);
-                if (sys >= 130 || dia >= 90) BPstatus_label.setText("Hypertension");
-                else if (sys <= 90 || dia <= 60) BPstatus_label.setText("Hypotension");
-                else BPstatus_label.setText("Normal");
-            } catch (Exception ignored) {}
+
+    // Default date auto-fill when the pane is first shown
+    consultationDate_tf.setText(LocalDate.now().format(DATE_FMT));
+  
+    // ======================= Rx table: columns & behavior =======================
+    rxTable.setItems(rxItems);
+
+    // Medicine name column (read-only text)
+    rxColMed.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getItemName()));
+    rxColMed.setPrefWidth(260);
+
+    // Unit column (read-only)
+    rxColUnit.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getUnit()));
+    rxColUnit.setPrefWidth(90);
+
+    // Qty column with Spinner (1..999), red cell if exceeds stock
+    rxColQty.setCellValueFactory(cd -> new ReadOnlyObjectWrapper<>(cd.getValue().getQty()));
+    rxColQty.setCellFactory(col -> new TableCell<>() {
+        private final Spinner<Integer> spinner = new Spinner<>(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
+        {
+            spinner.setEditable(true);
+            spinner.valueProperty().addListener((obs,o,n)-> {
+                RxRow row = getTableView().getItems().get(getIndex());
+                if (row != null) {
+                    row.setQty(n);
+                    validateQtyAgainstStock(row, this);
+                }
+            });
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setAlignment(Pos.CENTER);
+            setPadding(new Insets(2,4,2,4));
         }
+        @Override protected void updateItem(Integer qty, boolean empty) {
+            super.updateItem(qty, empty);
+            if (empty) { setGraphic(null); return; }
+            spinner.getValueFactory().setValue(qty==null?1:qty);
+            setGraphic(spinner);
+
+            RxRow row = getTableView().getItems().get(getIndex());
+            validateQtyAgainstStock(row, this);
+        }
+    });
+
+    // Action column: Remove button
+    rxColAction.setCellFactory(col -> new TableCell<>() {
+        final Button btn = new Button("Remove");
+        {
+            btn.getStyleClass().add("danger-small");
+            btn.setOnAction(e -> {
+                RxRow row = getTableView().getItems().get(getIndex());
+                rxItems.remove(row);
+            });
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
+        @Override protected void updateItem(Void v, boolean empty) {
+            super.updateItem(v, empty);
+            setGraphic(empty ? null : btn);
+        }
+    });
+
+    if (rxHint_lbl != null) {
+        rxHint_lbl.setText("Tip: quantities will be deducted from Inventory on Save.");
     }
-});
-            //FOR PULSE RATE
-        consultationPR_tf.focusedProperty().addListener((obs, oldVal, newVal) -> {
-    if (!newVal) {
-        try {
-            int pr = Integer.parseInt(consultationPR_tf.getText());
-            PRstatus_label.setText((pr >= 80 && pr <= 100) ? "Normal" : "Abnormal");
-        } catch (Exception ignored) {}
-    }
-});
-        //FOR RESPIRATORY RATE
-        consultationRR_tf.focusedProperty().addListener((obs, oldVal, newVal) -> {
-    if (!newVal) {
-        try {
-            int rr = Integer.parseInt(consultationRR_tf.getText());
-            RRstatus_label.setText((rr >= 16 && rr <= 20) ? "Normal" : "Abnormal");
-        } catch (Exception ignored) {}
-    }
-});
-        
-        consultationName_cb.setEditable(true);
-        consultationName_cb.setItems(FXCollections.observableArrayList(StudentDAO.findAllStudentOptions()));
-        enableComboBoxSearch(consultationName_cb); // attach a simple search filter (function below)
-        
-         setupStudentNameCombo();
-         
+
+    //=======================================================================================================
         // INVENTORY
         setupColumns();
         loadData();
@@ -1030,45 +1122,16 @@ private TextField student_tf;
         setupActionColumnINVENTORY();   // the "⋮" per row
         setupInventorySearchFilter();
         
-        //VISIT LOGS
+        // ====================== VISIT LOG: initialize ======================
         setupColumnsVISITLOG();
         loadVisitLogs();
+
         VisitLog_addpane.setVisible(false);
         visitLog_tv.setPlaceholder(new Label("No visit logs"));
-        
-        // load ComboBox options
-//        studentOptions = StudentDAO.getStudentOptions();
-//        visitName_cb.setItems(studentOptions);
-        
-        //searchable in combo box (visit log)
-        studentOptions  = StudentDAO.getStudentOptions();
-        studentFiltered = new FilteredList<>(studentOptions, s -> true);
 
-        setupStudentCombo();
-        
-
-        visitName_cb.setEditable(true); // if want type-to-filter inside the ComboBox
-        visitName_cb.setConverter(new javafx.util.StringConverter<StudentOption>() {
-            @Override
-            public String toString(StudentOption so) {
-                return (so == null) ? "" : so.getDisplay();
-            }
-            @Override
-            public StudentOption fromString(String s) {
-                // IMPORTANT: never return null here — it clears the selection.
-                if (s == null) return visitName_cb.getValue();
-                String typed = s.trim();
-                if (typed.isEmpty()) return visitName_cb.getValue();
-                // Try exact match; if not found, keep current selection
-                for (StudentOption o : visitName_cb.getItems()) {
-                    if (o.getDisplay().equalsIgnoreCase(typed)) return o;
-                }
-                return visitName_cb.getValue();
-            }
-        });
-        
         loadDashboardStats();  // call once on load (and after any CRUD for live)
-
+        //====================================================================
+        
         // defaults (MED CERTIFICATE)
         date_dp.setValue(LocalDate.now());
         status_cb.setItems(FXCollections.observableArrayList("Fit","Not Fit"));
@@ -1211,26 +1274,26 @@ private TextField student_tf;
         
         buildLegend(); //for color/legend
         
-        //SETTINGS
-//        Circle clip = new Circle(60, 60, 60); // centerX, centerY, radius
-//        AdminPhoto_edit.setClip(clip);
-//
-//        Circle clip2 = new Circle(30, 30, 30);
-//        AdminPhoto.setClip(clip2);
-        
+        //SETTINGS in initialize
         // 1) wire eyes (show/hide password)
         wireEye(currentPass_show, current_pw, current_pw_tf);
         wireEye(newPass_show, new_pw, new_pw_tf);
         wireEye(confirmPass_show, confirm_pw, confirm_pw_tf);
 
         // 2) circular photos
-        AdminPhoto.setFitWidth(70); AdminPhoto.setFitHeight(70);
+//        AdminPhoto.setFitWidth(70); AdminPhoto.setFitHeight(70);
+//        AdminPhoto_edit.setFitWidth(120); AdminPhoto_edit.setFitHeight(120);
+//        makeCircular(AdminPhoto);
+//        makeCircular(AdminPhoto_edit);
+
+        // 2) define avatar sizes; set once (crop+clip will be called in loadUserFromDB)
+        AdminPhoto.setFitWidth(70);    AdminPhoto.setFitHeight(70);
         AdminPhoto_edit.setFitWidth(120); AdminPhoto_edit.setFitHeight(120);
-        makeCircular(AdminPhoto);
-        makeCircular(AdminPhoto_edit);
-        loadUserFromDB();   // fills images & labels
 
-
+        
+        image_imageView.setFitWidth(STUDENT_AVATAR_SIZE);
+        image_imageView.setFitHeight(STUDENT_AVATAR_SIZE);
+        
         // 3) load user (name + photo + fields)
         loadUserFromDB();
 
@@ -1251,439 +1314,373 @@ private TextField student_tf;
     }  
     ////////////////////////////////////////////////////////////////////////////end initialization
     
-    ////////////////////////////////////////////////////////////////////////////CONSULTATION
+    // ============================================================================================
+    // ============================== CONSULTATION: Event Handlers & Helpers ======================
+    // ============================================================================================
+
+    // --- Open the student picker popup and store selection (Consultation) ---
     @FXML
-    private void AddNewConsultation(ActionEvent event) {
-        studentOptionsMaster.setAll(StudentDAO.findAllStudentOptions());
+    private void searchStudent_hyperlink(ActionEvent e) {
+        StudentPickerDialog dlg = new StudentPickerDialog();
 
-        AddEditConsultation_pane.setVisible(true);
-        clearFields();
-        
-        // Prepare name picker
-        consultationName_cb.setItems(FXCollections.observableArrayList(StudentDAO.findAllStudentOptions()));
-        consultationName_cb.getSelectionModel().clearSelection();
-        consultationName_cb.getEditor().clear();
+        // center on this pane's window if available.
+        if (AddEditConsultation_pane != null &&
+            AddEditConsultation_pane.getScene() != null) {
+            dlg.initOwner(AddEditConsultation_pane.getScene().getWindow());
+        }
 
-        // today’s date auto-fill
-        consultationDate_tf.setText(LocalDate.now().format(DATE_FMT));
-        setModeAdd();
+        java.util.Optional<StudentPick> res = dlg.showAndWait();
+        res.ifPresent(pick -> {
+            // Keep both DB key and human ID number
+            currentConsultationStudentId        = pick.getStudentId();
+            currentConsultationStudentIdNumber  = pick.getIdNumber();
+            currentConsultationStudentName      = pick.getFullName();
+
+            // Show "IDNumber – Name" in the (read-only) field
+            consultationName_tf.setText(pick.getIdNumber() + " – " + pick.getFullName());
+
+            // separate label for the school ID number:
+//            if (studentIdNo_lbl != null) studentIdNo_lbl.setText(pick.getIdNumber());
+        });
     }
 
+
+    // --- Add new consultation ---
+    @FXML
+    private void AddNewConsultation(ActionEvent e) {
+        AddEditConsultation_pane.setVisible(true);
+        clearFields();
+        rxItems.clear();               // <— reset meds table
+        setModeAdd();
+        consultationDate_tf.setText(LocalDate.now().format(DATE_FMT));
+    }
+
+
+    // --- Cancel form ---
     @FXML
     private void cancelConsultation_btn(ActionEvent event) {
         AddEditConsultation_pane.setVisible(false);
         clearFields();
-        
     }
-    
+
+    // --- Save (insert or update) ---
     @FXML
     private void saveConsultation_btn(ActionEvent event) {
-        
-        
-    // 1) Commit editor text -> value (StudentOption)
-    String typed = consultationName_cb.getEditor().getText();
-    StudentOption value = consultationName_cb.getValue(); // may be null
-    if (value == null && typed != null) {
-        // try converter first
-        if (consultationName_cb.getConverter() != null) {
-            value = consultationName_cb.getConverter().fromString(typed.trim());
+
+        // 1) Resolve student id for this form
+        Integer studentId = (currentConsultationId == null)
+                ? currentConsultationStudentId                     // ADD
+                : (currentSelected != null ? currentSelected.getStudentId() : null); // EDIT keeps original
+
+        if (studentId == null) {
+            showWarn("Please pick a student.");
+            return;
         }
-        // as a fallback, search master list (case-insensitive)
-        if (value == null) {
-            value = studentOptionsMaster.stream()
-                    .filter(o -> o.toString().equalsIgnoreCase(typed.trim()))
-                    .findFirst()
-                    .orElse(null);
+
+        // 2) Date
+        String dateStr = consultationDate_tf.getText();
+        LocalDate cdate = (dateStr == null || dateStr.isBlank())
+                ? LocalDate.now()
+                : LocalDate.parse(dateStr, DATE_FMT);
+
+        // 3) Gather values from fields
+        String reason    = consultationReason_tf.getText();
+        String bp        = consultationBP_tf.getText();
+        String tempStr   = consultationTemperature_tf.getText();
+        String diagnosis = consultationDiagnosis_tf.getText();
+        String treatment = consultationTreatment_tf.getText();
+        String referral  = consultationReferral_tf.getText();
+        String prStr     = consultationPR_tf.getText();
+        String rrStr     = consultationRR_tf.getText();
+
+        Double  temp = (tempStr == null || tempStr.isBlank()) ? null : Double.valueOf(tempStr);
+        Integer pr   = (prStr   == null || prStr.isBlank())   ? null : Integer.valueOf(prStr);
+        Integer rr   = (rrStr   == null || rrStr.isBlank())   ? null : Integer.valueOf(rrStr);
+
+        // 4) Persist using DAO (which already handles consultation_meds + inventory in one transaction)
+        try {
+            if (currentConsultationId == null) {
+                int newId = ConsultationDAO.insertWithMeds(
+                    studentId, cdate, reason, bp, temp, diagnosis, treatment, referral, pr, rr,
+                    new ArrayList<>(rxItems)
+                );
+                if (newId <= 0) { 
+                    alertError("Save failed. Please try again.");
+                    return;
+                }
+                currentConsultationId = newId;
+            } else {
+                ConsultationDAO.updateWithMeds(
+                    currentConsultationId, studentId, cdate, reason, bp, temp, diagnosis, treatment, referral, pr, rr,
+                    new ArrayList<>(rxItems)
+                );
+            }
+        } catch (StockException se) {
+            // Friendly, specific reason for failure (no stack trace)
+            showWarn(se.getMessage());
+            return;
+        } catch (Exception ex) {
+            // Unexpected problem
+            // ex.printStackTrace(); // optionally remove to keep console clean
+            alertError("Unexpected error while saving. Please contact the administrator.");
+            return;
         }
-        consultationName_cb.setValue(value); // keep ComboBox consistent
-    }
-    // 2) Resolve studentId safely
-    Integer studentId = (currentConsultationId == null)
-            ? (value != null ? value.getId() : null)
-            : (currentSelected != null ? currentSelected.getStudentId() : null);
 
-    if (studentId == null) {
-        showWarn("Please select a valid student from the list.");
-        return;
-    }
-    
-    // Date
-    String dateStr = consultationDate_tf.getText();
-    LocalDate cdate = (dateStr == null || dateStr.isBlank()) ? LocalDate.now() : LocalDate.parse(dateStr, DATE_FMT);
+        // 5) Refresh table + close pane
+        refreshTable();
+        AddEditConsultation_pane.setVisible(false);
 
-    // Gather other values
-    String reason = consultationReason_tf.getText();
-    String bp = consultationBP_tf.getText();
-    String tempStr = consultationTemperature_tf.getText();
-//    Double temp = parseDoubleOrNull(consultationTemperature_tf.getText());
-    String diagnosis = consultationDiagnosis_tf.getText();
-    String treatment = consultationTreatment_tf.getText();
-    String referral = consultationReferral_tf.getText();
-    String prStr = consultationPR_tf.getText();
-    String rrStr = consultationRR_tf.getText();
-//    Integer pr = parseIntOrNull(consultationPR_tf.getText());
-//    Integer rr = parseIntOrNull(consultationRR_tf.getText());
-    
-    // Convert
-    Double temp = (tempStr == null || tempStr.isBlank()) ? null : Double.valueOf(tempStr);
-    Integer pr = (prStr == null || prStr.isBlank()) ? null : Integer.valueOf(prStr);
-    Integer rr = (rrStr == null || rrStr.isBlank()) ? null : Integer.valueOf(rrStr);
-
-   
-    if (currentConsultationId == null) {
-        // INSERT
-        ConsultationDAO.insert(studentId, cdate, reason, bp, temp, diagnosis, treatment, referral, pr, rr);
-    } else {
-        // UPDATE
-        ConsultationDAO.update(currentConsultationId, studentId, cdate, reason, bp, temp, diagnosis, treatment, referral, pr, rr);
+        // (optional) clear form state for the next Add
+        clearFields();
+        rxItems.clear();
     }
 
-    refreshTable();
-    AddEditConsultation_pane.setVisible(false);
-    }
-
+    // --- Edit button: allow fields to be edited (student change is not allowed here) ---
     @FXML
     private void editConsultation_btn(ActionEvent event) {
-        if (currentConsultationId == null) return; // safety
-        setModeEdit(); // fields editable; name combo remains disabled because not adding
-
+        if (currentConsultationId == null) return;
+        setModeEdit();
     }
 
+    // --- Delete current consultation ---
     @FXML
     private void deleteConsultation_btn(ActionEvent event) {
         if (currentConsultationId != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirm Delete");
-            alert.setHeaderText("Are you sure you want to delete this consultation?");
+            alert.setHeaderText("Delete this consultation?");
             alert.setContentText("This action cannot be undone.");
-
             ButtonType yesBtn = new ButtonType("Yes", ButtonBar.ButtonData.OK_DONE);
-            ButtonType noBtn = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+            ButtonType noBtn  = new ButtonType("No",  ButtonBar.ButtonData.CANCEL_CLOSE);
             alert.getButtonTypes().setAll(yesBtn, noBtn);
 
-            alert.showAndWait().ifPresent(response -> {
-                if (response == yesBtn) {
-                    ConsultationDAO.delete(currentConsultationId);
+            alert.showAndWait().ifPresent(resp -> {
+                if (resp == yesBtn) {
+                    ConsultationDAO.deleteWithMeds(currentConsultationId);
                     refreshTable();
                     AddEditConsultation_pane.setVisible(false);
+                    clearFields();
+                    rxItems.clear();
                 }
             });
         }
     }
 
-    @FXML
+
+    // --- If date is empty, auto-fill with today on click ---
     private void consultationDate_auto(MouseEvent event) {
-         if (consultationDate_tf.getText() == null || consultationDate_tf.getText().isBlank()) {
-        consultationDate_tf.setText(LocalDate.now().format(DATE_FMT));
+        if (consultationDate_tf.getText() == null || consultationDate_tf.getText().isBlank()) {
+            consultationDate_tf.setText(LocalDate.now().format(DATE_FMT));
+        }
     }
-    }
-    
-    // ===== Methods & Helpers =====
-        private void onViewRow(Consultation c) {
+
+    // ============================== Table row → form (View) =====================================
+    private void onViewRow(Consultation c) {
         currentConsultationId = c.getConsultationId();
-    currentSelected = c;
-    AddEditConsultation_pane.setVisible(true);
+        currentSelected = c;
 
-    // Name combo shows the selected student
-    var options = FXCollections.observableArrayList(StudentDAO.findAllStudentOptions());
-    consultationName_cb.setItems(options);
-    // find matching option by id
-    options.stream().filter(o -> o.getId() == c.getStudentId()).findFirst()
-           .ifPresent(opt -> consultationName_cb.getSelectionModel().select(opt));
+        AddEditConsultation_pane.setVisible(true);
 
-    consultationDate_tf.setText(c.getConsultationDate() == null ? "" : c.getConsultationDate().format(DATE_FMT));
-    // ... set other fields ...
-    consultationReason_tf.setText(c.getReasonForVisit());
-    consultationBP_tf.setText(c.getBloodPressure());
-    consultationTemperature_tf.setText(c.getTemperature() != null ? c.getTemperature().toString() : "");
-    consultationDiagnosis_tf.setText(c.getDiagnosis());
-    consultationTreatment_tf.setText(c.getTreatment());
-    consultationReferral_tf.setText(c.getReferral());
-    consultationPR_tf.setText(c.getPulseRate() != null ? c.getPulseRate().toString() : "");
-    consultationRR_tf.setText(c.getRespiratoryRate() != null ? c.getRespiratoryRate().toString() : "");
+        // Student (read-only field)
+        currentConsultationStudentId   = c.getStudentId();
+        currentConsultationStudentName = c.getStudentName(); // ensure model supplies it
+        consultationName_tf.setText(currentConsultationStudentName);
 
-    BPstatus_label.setText(nullToEmpty(c.getBpStatus()));
-    PRstatus_label.setText(nullToEmpty(c.getPulseStatus()));
-    RRstatus_label.setText(nullToEmpty(c.getRespiratoryStatus()));
-    
-    // buttons: when viewing, only Edit/Delete/Cancel enabled; Save disabled
-    saveBtn.setDisable(true);
-    editBtn.setDisable(false);
-    deleteBtn.setDisable(false);
-    cancelBtn.setDisable(false);
+        // Fill fields
+        consultationDate_tf.setText(c.getConsultationDate() == null ? "" : c.getConsultationDate().format(DATE_FMT));
+        consultationReason_tf.setText(c.getReasonForVisit());
+        consultationBP_tf.setText(c.getBloodPressure());
+        consultationTemperature_tf.setText(c.getTemperature() != null ? c.getTemperature().toString() : "");
+        consultationDiagnosis_tf.setText(c.getDiagnosis());
+        consultationTreatment_tf.setText(c.getTreatment());
+        consultationReferral_tf.setText(c.getReferral());
+        consultationPR_tf.setText(c.getPulseRate() != null ? c.getPulseRate().toString() : "");
+        consultationRR_tf.setText(c.getRespiratoryRate() != null ? c.getRespiratoryRate().toString() : "");
 
-    setFieldsEditable(false); // locks name combo for existing records
-//    consultationDate_tf.setEditable(false);
-}
-
-        private void loadConsultationDetails(Consultation c) {
-    AddEditConsultation_pane.setVisible(true);
-    currentConsultationId = c.getConsultationId();
-    currentSelected = c;
-    // --- Student ComboBox ---
-    // Reload all student options (so combo is filled)
-    ObservableList<StudentOption> options = FXCollections.observableArrayList(StudentDAO.findAllStudentOptions());
-    consultationName_cb.setItems(options);
-
-    // Find and select the matching student
-    options.stream()
-           .filter(opt -> opt.getId() == c.getStudentId())
-           .findFirst()
-           .ifPresent(opt -> consultationName_cb.getSelectionModel().select(opt));
-
-    // fill fields
-    consultationDate_tf.setText(
-        (c.getConsultationDate() != null) ? c.getConsultationDate().toString() : ""
-    );
-//    consultationDate_tf.setText(c.getConsultationDate().toString());
-    consultationReason_tf.setText(c.getReasonForVisit());
-    consultationBP_tf.setText(c.getBloodPressure());
-    consultationTemperature_tf.setText(
-        (c.getTemperature() != null) ? String.valueOf(c.getTemperature()) : ""
-    );
-//    consultationTemperature_tf.setText(String.valueOf(c.getTemperature()));
-    consultationDiagnosis_tf.setText(c.getDiagnosis());
-    consultationTreatment_tf.setText(c.getTreatment());
-    consultationReferral_tf.setText(c.getReferral());
-//    consultationPR_tf.setText(String.valueOf(c.getPulseRate()));
-    consultationPR_tf.setText(
-        (c.getPulseRate() != null) ? String.valueOf(c.getPulseRate()) : ""
-    );
-    consultationRR_tf.setText(
-        (c.getRespiratoryRate() != null) ? String.valueOf(c.getRespiratoryRate()) : ""
-    );
-//    consultationRR_tf.setText(String.valueOf(c.getRespiratoryRate()));
-
-    // status labels
-    BPstatus_label.setText(c.getBpStatus());
-    PRstatus_label.setText(c.getPulseStatus());
-    RRstatus_label.setText(c.getRespiratoryStatus());
-    
-
-    // enable/disable buttons
-    saveBtn.setDisable(true);
-    editBtn.setDisable(false);
-    deleteBtn.setDisable(false);
-    cancelBtn.setDisable(false);
-
-    // lock fields
-//    setFieldsEditable(false); //already defined in setModeView();
-    setModeView();
-}
-
-        private void attachVitalsStatusListeners() {
-    // BP: expects "SYS/DIA"
-    consultationBP_tf.focusedProperty().addListener((obs, was, isNow) -> {
-        if (!isNow) updateBpStatusLabel();
-    });
-    consultationBP_tf.setOnKeyReleased(e -> updateBpStatusLabel()); // instant feedback while typing
-
-    // Pulse
-    consultationPR_tf.focusedProperty().addListener((obs, was, isNow) -> {
-        if (!isNow) updatePulseStatusLabel();
-    });
-    consultationPR_tf.setOnKeyReleased(e -> updatePulseStatusLabel());
-
-    // Respiratory
-    consultationRR_tf.focusedProperty().addListener((obs, was, isNow) -> {
-        if (!isNow) updateRespStatusLabel();
-    });
-    consultationRR_tf.setOnKeyReleased(e -> updateRespStatusLabel());
-}
+        // Status labels
+        BPstatus_label.setText(nullToEmpty(c.getBpStatus()));
+        PRstatus_label.setText(nullToEmpty(c.getPulseStatus()));
+        RRstatus_label.setText(nullToEmpty(c.getRespiratoryStatus()));
         
-        private void updateBpStatusLabel() {
-    String bp = consultationBP_tf.getText();
-    if (bp != null && bp.contains("/")) {
-        try {
-            String[] parts = bp.split("/");
-            int sys = Integer.parseInt(parts[0].trim());
-            int dia = Integer.parseInt(parts[1].trim());
-            String status = (sys >= 130 || dia >= 90) ? "Hypertension"
-                           : (sys <= 90 || dia <= 60) ? "Hypotension"
-                           : "Normal";
-            BPstatus_label.setText(status);
-        } catch (Exception ex) {
+        // ======== NEW: load medicines dispensed for this consultation =========
+        rxItems.setAll(ConsultationDAO.findMedsByConsultationId(currentConsultationId));
+        rxTable.refresh();
+        // =====================================================================
+
+        // View mode
+        setModeView();
+    }
+
+    // ============================== Vitals listeners & calculators ===============================
+    private void attachVitalsStatusListeners() {
+        // BP expects "SYS/DIA"
+        consultationBP_tf.focusedProperty().addListener((obs, was, isNow) -> { if (!isNow) updateBpStatusLabel(); });
+        consultationBP_tf.setOnKeyReleased(e -> updateBpStatusLabel());
+
+        consultationPR_tf.focusedProperty().addListener((obs, was, isNow) -> { if (!isNow) updatePulseStatusLabel(); });
+        consultationPR_tf.setOnKeyReleased(e -> updatePulseStatusLabel());
+
+        consultationRR_tf.focusedProperty().addListener((obs, was, isNow) -> { if (!isNow) updateRespStatusLabel(); });
+        consultationRR_tf.setOnKeyReleased(e -> updateRespStatusLabel());
+    }
+
+    private void updateBpStatusLabel() {
+        String bp = consultationBP_tf.getText();
+        if (bp != null && bp.contains("/")) {
+            try {
+                String[] p = bp.split("/");
+                int sys = Integer.parseInt(p[0].trim());
+                int dia = Integer.parseInt(p[1].trim());
+                String status = (sys >= 130 || dia >= 90) ? "Hypertension"
+                             : (sys <= 90  || dia <= 60)  ? "Hypotension"
+                             : "Normal";
+                BPstatus_label.setText(status);
+            } catch (Exception ex) {
+                BPstatus_label.setText("");
+            }
+        } else {
             BPstatus_label.setText("");
         }
-    } else {
+    }
+
+    private void updatePulseStatusLabel() {
+        try {
+            int pr = Integer.parseInt(consultationPR_tf.getText().trim());
+            PRstatus_label.setText((pr >= 80 && pr <= 100) ? "Normal" : "Abnormal");
+        } catch (Exception ex) {
+            PRstatus_label.setText("");
+        }
+    }
+
+    private void updateRespStatusLabel() {
+        try {
+            int rr = Integer.parseInt(consultationRR_tf.getText().trim());
+            RRstatus_label.setText((rr >= 16 && rr <= 20) ? "Normal" : "Abnormal");
+        } catch (Exception ex) {
+            RRstatus_label.setText("");
+        }
+    }
+
+    // ============================== Modes & field locking =======================================
+    private void setFieldsEditable(boolean editable) {
+        // Student name stays read-only; student can only be picked in ADD mode via hyperlink.
+        pickStudent_hl.setDisable(currentConsultationId != null); // disabled when editing existing
+        consultationName_tf.setEditable(false);
+
+        consultationDate_tf.setEditable(true);
+        consultationReason_tf.setEditable(editable);
+        consultationBP_tf.setEditable(editable);
+        consultationTemperature_tf.setEditable(editable);
+        consultationDiagnosis_tf.setEditable(editable);
+        consultationTreatment_tf.setEditable(editable);
+        consultationReferral_tf.setEditable(editable);
+        consultationPR_tf.setEditable(editable);
+        consultationRR_tf.setEditable(editable);
+    }
+
+    private void clearFields() {
+        currentConsultationId = null;
+        currentSelected = null;
+        currentConsultationStudentId = null;
+        currentConsultationStudentName = null;
+
+        consultationName_tf.clear();
+        consultationDate_tf.clear();
+        consultationReason_tf.clear();
+        consultationBP_tf.clear();
+        consultationTemperature_tf.clear();
+        consultationDiagnosis_tf.clear();
+        consultationTreatment_tf.clear();
+        consultationReferral_tf.clear();
+        consultationPR_tf.clear();
+        consultationRR_tf.clear();
+
         BPstatus_label.setText("");
-    }
-}
-
-        private void updatePulseStatusLabel() {
-    try {
-        int pr = Integer.parseInt(consultationPR_tf.getText().trim());
-        PRstatus_label.setText((pr >= 80 && pr <= 100) ? "Normal" : "Abnormal");
-    } catch (Exception ex) {
         PRstatus_label.setText("");
-    }
-}
-
-        private void updateRespStatusLabel() {
-    try {
-        int rr = Integer.parseInt(consultationRR_tf.getText().trim());
-        RRstatus_label.setText((rr >= 16 && rr <= 20) ? "Normal" : "Abnormal");
-    } catch (Exception ex) {
         RRstatus_label.setText("");
     }
-    
-    setupStudentNameCombo(); //for adding new consultation (student name)
-}
 
-        private void setupStudentNameCombo() {
-    // Load once (or reload when open the Add pane if prefer)
-    studentOptionsMaster.setAll(StudentDAO.findAllStudentOptions());
-
-    consultationName_cb.setEditable(true);
-    consultationName_cb.setItems(studentOptionsFiltered);
-
-     // StringConverter to map between StudentOption <-> String
-    consultationName_cb.setConverter(new StringConverter<StudentOption>() {
-        @Override
-        public String toString(StudentOption opt) {
-            return (opt == null) ? "" : opt.toString();
-        }
-        @Override
-        public StudentOption fromString(String text) {
-            if (text == null || text.isBlank()) return null;
-            String t = text.trim().toLowerCase();
-            return studentOptionsMaster.stream()
-                    .filter(o -> o.toString().toLowerCase().equals(t))
-                    .findFirst()
-                    .orElse(null);
-        }
-    });
-    
-    // Filter as the user types
-    consultationName_cb.getEditor().textProperty().addListener((obs, oldText, newText) -> {
-        final String typed = (newText == null) ? "" : newText.toLowerCase();
-
-        // Don't filter when the change came from selecting an item
-        // If user picks from dropdown, editor text becomes item's toString(); keep it visible:
-        studentOptionsFiltered.setPredicate(opt -> {
-            if (typed.isBlank()) return true; // show all if nothing typed
-            return opt != null && opt.toString().toLowerCase().contains(typed);
-        });
-
-        // Re-open popup so results update immediately
-        if (!consultationName_cb.isShowing()) {
-            consultationName_cb.show();
-        }
-    });
-
-    // When an item is selected from the list, keep editor text in sync
-    consultationName_cb.valueProperty().addListener((obs, oldVal, newVal) -> {
-        if (newVal != null) {
-            consultationName_cb.getEditor().setText(newVal.toString());
-            // After a selection, reset filter so entire list is available for next search
-            studentOptionsFiltered.setPredicate(p -> true);
-        }
-    });
-
-    // On focus lost, reset filter (do NOT replace items or reload DAO)
-    consultationName_cb.focusedProperty().addListener((obs, was, isNow) -> {
-        if (!isNow) studentOptionsFiltered.setPredicate(p -> true);
-    });
-}
-
-        private <T> void enableComboBoxSearch(ComboBox<T> combo) {
-    combo.setOnKeyReleased(e -> {
-        if (!combo.isEditable()) return;
-        String typed = combo.getEditor().getText();
-        if (typed == null) typed = "";
-        final String lower = typed.toLowerCase();
-
-        // assuming original items are in a master list
-        ObservableList<T> all = combo.getItems();
-        FilteredList<T> filtered = new FilteredList<>(all, item ->
-            item != null && item.toString().toLowerCase().contains(lower)
-        );
-        combo.hide();
-        combo.setItems(filtered);
-        combo.getEditor().setText(typed);
-        combo.show();
-
-        // Move caret to end
-        combo.getEditor().positionCaret(typed.length());
-    });
-
-    // When focus lost, restore full list
-    combo.focusedProperty().addListener((obs, was, isNow) -> {
-        if (!isNow) {
-            // Reload full list from DAO or cache:
-            combo.setItems((ObservableList<T>) FXCollections.observableArrayList(StudentDAO.findAllStudentOptions()));
-        }
-    });
-}
+    private void setModeAdd() {
+        currentConsultationId = null;
+        saveBtn.setDisable(false);
+        editBtn.setDisable(true);
+        deleteBtn.setDisable(true);
+        cancelBtn.setDisable(false);
+        setFieldsEditable(true);   // name is still via hyperlink; textfield remains read-only
         
-        private void setFieldsEditable(boolean editable) {
-            // Name (ComboBox): only enabled when ADDING a new consultation.
-            boolean adding = (currentConsultationId == null);
-            consultationName_cb.setDisable(!adding);       // disable in view/edit
-            consultationName_cb.setEditable(adding);       // allow typing/search only in add mode
-            
-            consultationDate_tf.setEditable(true);
-            consultationReason_tf.setEditable(editable);
-            consultationBP_tf.setEditable(editable);
-            consultationTemperature_tf.setEditable(editable);
-            consultationDiagnosis_tf.setEditable(editable);
-            consultationTreatment_tf.setEditable(editable);
-            consultationReferral_tf.setEditable(editable);
-            consultationPR_tf.setEditable(editable);
-            consultationRR_tf.setEditable(editable);
-           
-        }
+        rxClear_btn.setDisable(false);
+        rxAdd_btn.setDisable(false);
+        rxTable.setDisable(false);
+    }
 
-        private void clearFields() {
-            consultationName_cb.getSelectionModel().clearSelection();  // clear selected student
-            consultationName_cb.getEditor().clear();                   // also clear typed text if editable
-            consultationDate_tf.clear();
-            consultationReason_tf.clear();
-            consultationBP_tf.clear();
-            consultationTemperature_tf.clear();
-            consultationDiagnosis_tf.clear();
-            consultationTreatment_tf.clear();
-            consultationReferral_tf.clear();
-            consultationPR_tf.clear();
-            consultationRR_tf.clear();
-            BPstatus_label.setText("");
-            PRstatus_label.setText("");
-            RRstatus_label.setText("");
-            currentConsultationId = null;
-            currentSelected = null;
-        }
+    private void setModeView() {
+        saveBtn.setDisable(true);
+        editBtn.setDisable(false);
+        deleteBtn.setDisable(false);
+        cancelBtn.setDisable(false);
+        setFieldsEditable(false);
         
-        private void setModeAdd() {
-            currentConsultationId = null;
-            saveBtn.setDisable(false);
-            editBtn.setDisable(true);
-            deleteBtn.setDisable(true);
-            cancelBtn.setDisable(false);
-            setFieldsEditable(true);  // enables all inputs except those you keep locked by design
-        }
+        rxClear_btn.setDisable(true);
+        rxAdd_btn.setDisable(true);
+        rxTable.setDisable(true);
+    }
 
-        private void setModeView() {
-            saveBtn.setDisable(true);
-            editBtn.setDisable(false);
-            deleteBtn.setDisable(false);
-            cancelBtn.setDisable(false);
-            setFieldsEditable(false); // lock fields; name combo disabled (not adding)
-        }
+    private void setModeEdit() {
+        saveBtn.setDisable(false);
+        editBtn.setDisable(true);
+        deleteBtn.setDisable(false);
+        cancelBtn.setDisable(false);
+        setFieldsEditable(true);   // hyperlink disabled because currentConsultationId != null
+        
+        rxClear_btn.setDisable(false);
+        rxAdd_btn.setDisable(false);
+        rxTable.setDisable(false);
+    }
 
-        private void setModeEdit() {
-            // Editing an existing record: fields editable, but name combo stays disabled
-            saveBtn.setDisable(false);
-            editBtn.setDisable(true);
-            deleteBtn.setDisable(false);
-            cancelBtn.setDisable(false);
-            setFieldsEditable(true);  // because currentConsultationId != null, name combo remains disabled
-        }
-
-        private void refreshTable() {
-        consultations.setAll(ConsultationDAO.findAllWithStudentName()); // implement DAO method
+    // Reload table
+    private void refreshTable() {
+        consultations.setAll(ConsultationDAO.findAllWithStudentName());
         consultation_tv.setItems(consultations);
     }
+
+    //helper
+    // Mark qty cell red if exceeding current balance (queries live balance)
+    private void validateQtyAgainstStock(RxRow row, TableCell<?,?> cell) {
+        if (row == null) return;
+        Integer bal = InventoryDAO.findBalance(row.getItemId());
+        boolean over = (bal != null) && (row.getQty() > bal);
+        cell.setStyle(over ? "-fx-background-color: rgba(255,0,0,0.12);" : "");
+        cell.setTooltip(over ? new Tooltip("Insufficient stock. Available: " + bal) : null);
+    }
+
     
+    @FXML
+    private void onRxAdd(ActionEvent e) {
+        InventoryPickerDialog dlg = new InventoryPickerDialog();
+        dlg.showAndWait().ifPresent(inv -> {
+            // use RxRow model
+            RxRow existing = rxItems.stream()
+                    .filter(r -> r.getItemId() == inv.getItemId())
+                    .findFirst().orElse(null);
+            if (existing != null) {
+                existing.setQty(existing.getQty() + 1);
+                rxTable.refresh();
+            } else {
+                rxItems.add(new RxRow(
+                    inv.getItemId(),
+                    inv.getItemName(),
+                    inv.getUnit(),
+                    1
+                ));
+            }
+        });
+    }
+
+
+    @FXML
+    private void onRxClear(ActionEvent e){ rxItems.clear(); }
+
+
     ////////////////////////////////////////////////////////////////////////////end consultation
        
     ////////////////////////////////////////////////////////////////////////////STUDENT RECORD/DETAILS
@@ -1712,6 +1709,53 @@ private TextField student_tf;
         }
     }
 
+    @FXML
+    private void savePhoto_btn(ActionEvent event) {
+        if (currentStudentId == null) {
+            alert(Alert.AlertType.WARNING, "No Student Selected", "Please select a student first.");
+            return;
+        }
+
+        if (pendingPhotoPath == null || pendingPhotoPath.isBlank()) {
+            alert(Alert.AlertType.WARNING, "No Photo Selected", "Please upload a photo before saving.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Save this new photo for the student?",
+                ButtonType.OK, ButtonType.CANCEL);
+        confirm.setHeaderText(null);
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == ButtonType.OK) {
+                // then execute SQL update block
+                    String sql = "UPDATE students SET image = ? WHERE student_id = ?";
+                    try (Connection c = MySQL.connect();
+                         PreparedStatement ps = c.prepareStatement(sql)) {
+
+                        ps.setString(1, pendingPhotoPath);   // store the image path
+                        ps.setInt(2, currentStudentId);
+                        ps.executeUpdate();
+
+                        alert(Alert.AlertType.INFORMATION, "Photo Saved", "Student photo has been updated successfully.");
+
+                        // update image preview immediately
+                        showImage(pendingPhotoPath);
+
+                        // clear pending selection
+                        pendingPhotoPath = null;
+
+                        // optional: reload data in the table if image paths are visible
+                        loadStudents();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        alert(Alert.AlertType.ERROR, "Save Photo Error", e.getMessage());
+                    }
+            }
+        });
+    }
+
+
     
     @FXML
     private void editStudent_btn(ActionEvent event) {
@@ -1728,48 +1772,68 @@ private TextField student_tf;
             UPDATE students
             SET age = ?, gender = ?, birthday = ?, birthplace = ?, course = ?, year_level = ?,
                 civil_status = ?, religion = ?, height = ?, weight = ?, contact_number = ?,
-                email = ?, status = ?, address = ?, image = COALESCE(?, image)
+                email = ?, status = ?, address = ?
             WHERE student_id = ?
             """;
+
+
         try (Connection c = MySQL.connect();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
+            // --- 1) Map all fields ---
             setNullableInt(ps, 1, age_tf.getText());
             ps.setString(2, emptyToNull((String) gender_cb.getValue()));
-            // DatePicker -> java.sql.Date
             ps.setDate(3, birthday_dp.getValue() == null ? null : java.sql.Date.valueOf(birthday_dp.getValue()));
             ps.setString(4, emptyToNull(birthplace_tf.getText()));
             ps.setString(5, emptyToNull((String) course_cb.getValue()));
             ps.setString(6, emptyToNull((String) DETAILSyearLevel_cb.getValue()));
             ps.setString(7, emptyToNull(civilStatus_tf.getText()));
             ps.setString(8, emptyToNull(religion_tf.getText()));
-            setNullableBigDecimal(ps, 9,  height_tf.getText());
+            setNullableBigDecimal(ps, 9, height_tf.getText());
             setNullableBigDecimal(ps, 10, weight_tf.getText());
             ps.setString(11, emptyToNull(contactNo_tf.getText()));
             ps.setString(12, emptyToNull(email_tf.getText()));
             ps.setString(13, emptyToNull((String) DETAILSstatus_cb.getValue())); // active/inactive/graduated
             ps.setString(14, emptyToNull(address_tf.getText()));
-            // image path
-            if (pendingPhotoPath != null) {
-                ps.setString(15, pendingPhotoPath);
-            } else {
-                ps.setNull(15, Types.VARCHAR);
-            }
+
+//            // --- 2) Image path ---
+//            if (pendingPhotoPath != null)
+//                ps.setString(15, pendingPhotoPath);
+//            else
+//                ps.setNull(15, Types.VARCHAR);
+
             ps.setInt(16, currentStudentId);
 
+            // --- 3) Execute update ---
             ps.executeUpdate();
+
+            // --- 4) Auto-update the age column in DB ---
+            refreshAgesOnStartup();
+
+            // --- 5) Update the age text field immediately on UI ---
+            if (birthday_dp.getValue() != null) {
+                int computedAge = java.time.Period.between(birthday_dp.getValue(), java.time.LocalDate.now()).getYears();
+                age_tf.setText(String.valueOf(computedAge));
+            } else {
+                age_tf.clear();
+            }
+
+            // --- 6) Final UI cleanup ---
             alert(Alert.AlertType.INFORMATION, "Save", "Student updated.");
             setEditable(false);
             saveStudent_btn_id.setDisable(true);
             cancelStudent_btn_id.setDisable(true);
-            loadStudents(); // refresh list
+
+            // refresh table and dashboard
+            loadStudents();
+            loadDashboardStats();
 
         } catch (Exception e) {
             e.printStackTrace();
             alert(Alert.AlertType.ERROR, "Save", e.getMessage());
         }
-        loadDashboardStats();
     }
+
 
 
     @FXML
@@ -1785,7 +1849,6 @@ private TextField student_tf;
         pendingPhotoPath = null;
         currentStudentId = null;
         // hide details, show the list again
-    
     }
 
     @FXML
@@ -1799,6 +1862,14 @@ private TextField student_tf;
 
     // FILTER STUDENT RECORDS
     private void refreshStudentPredicate() {
+        
+    // *ComboBox Selection*           *Shown Students*
+    //All                       -   Only Active students
+    //Inactive                  -   Only Inactive students
+    //Graduated                 -   Only Graduated students
+    //1st–4th Year / Irregular  -   Only Active students of that year level
+
+    
         final String q = safeLower(filterField1.getText());
         final Toggle selected = courseFilter.getSelectedToggle();
         final String courseFilterVal = (selected == null || selected.getUserData() == null)
@@ -1809,10 +1880,10 @@ private TextField student_tf;
         filtered.setPredicate(s -> {
             if (s == null) return false;
 
-            // 1) Search
+            // 1) Search (by name or ID number)
             if (!q.isEmpty()) {
                 String fullName = (nz(s.getLastName()) + " " + nz(s.getFirstName()) + " " + nz(s.getMiddleName())).toLowerCase();
-                String idStr = nz(s.getIdNumber()); // search by school ID number too
+                String idStr = nz(s.getIdNumber());
                 if (!(fullName.contains(q) || idStr.toLowerCase().contains(q))) return false;
             }
 
@@ -1821,24 +1892,39 @@ private TextField student_tf;
                 if (!nz(s.getCourse()).equalsIgnoreCase(courseFilterVal)) return false;
             }
 
-            // 3) Year-level / Inactive / Graduated filter
+            // 3) Year-level / Status filters
             if (!"All".equalsIgnoreCase(yearSel)) {
+
                 if ("Graduated".equalsIgnoreCase(yearSel)) {
+                    // show only graduated
                     if (!(s.getIsActive() == 2 || "graduated".equalsIgnoreCase(nz(s.getStatus())))) return false;
+
                 } else if ("Inactive".equalsIgnoreCase(yearSel)) {
+                    // show only inactive
                     if (!(s.getIsActive() == 0 || "inactive".equalsIgnoreCase(nz(s.getStatus())))) return false;
+
                 } else {
+                    // show specific year level → only active students
                     if (!nz(s.getYearLevel()).equalsIgnoreCase(yearSel)) return false;
-                    // exclude graduates from year lists
-                    if (s.getIsActive() == 2 || "graduated".equalsIgnoreCase(nz(s.getStatus()))) return false;
+                    if (!(s.getIsActive() == 1 || "active".equalsIgnoreCase(nz(s.getStatus())))) return false;
                 }
+
             } else {
-                // “All” = show Active only by default
+                // “All” = show only active
                 if (!(s.getIsActive() == 1 || "active".equalsIgnoreCase(nz(s.getStatus())))) return false;
             }
 
             return true;
         });
+    }
+    
+    private void refreshAgesOnStartup() {
+        String sql = "UPDATE students SET age = TIMESTAMPDIFF(YEAR, birthday, CURDATE()) WHERE birthday IS NOT NULL";
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -2064,7 +2150,7 @@ private TextField student_tf;
     // ====== helpers ======
     private void setEditable(boolean b) {
     // text fields that remain text
-        age_tf.setEditable(b);
+//        age_tf.setEditable(b);
         birthplace_tf.setEditable(b);
         civilStatus_tf.setEditable(b);
         religion_tf.setEditable(b);
@@ -2120,24 +2206,30 @@ private TextField student_tf;
     
     @FXML
     private void addStudent_upload(ActionEvent event) {
-            FileChooser fc = new FileChooser();
-       fc.setTitle("Select Student Photo");
-       fc.getExtensionFilters().addAll(
-           new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
-       );
-       File file = fc.showOpenDialog(addStudent_imageview.getScene().getWindow());
-       if (file != null) {
-           try {
-               // preview
-               addStudent_imageview.setImage(new Image(file.toURI().toString()));
-               // store as bytes for DB (LONGBLOB)
-               pendingPhotoBytes = java.nio.file.Files.readAllBytes(file.toPath());
-           } catch (Exception ex) {
-               ex.printStackTrace();
-               showError("Failed to load image: " + ex.getMessage());
-           }
-       }
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Select Student Photo");
+        fc.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+        );
+        File file = fc.showOpenDialog(addStudent_imageview.getScene().getWindow());
+        if (file == null) return;
+
+        try {
+            // stage the selected absolute path (copy will happen on SAVE)
+            pendingStudentPhotoPath = file.getAbsolutePath();
+
+            // circular preview (120 is a good size for add form)
+            Image preview = new Image(file.toURI().toString(), false);
+            setCircularImage(addStudent_imageview, preview, 80);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Failed to load image: " + ex.getMessage());
+            pendingStudentPhotoPath = null;
+            addStudent_imageview.setImage(null);
+        }
     }
+
 
     @FXML
     private void addStudent_cancel(ActionEvent event) {
@@ -2146,19 +2238,20 @@ private TextField student_tf;
         AddStudent_pane.setVisible(false);
         StudentRecord_pane.setVisible(true);
     }
+    
 
     @FXML
     private void addStudent_save(ActionEvent event) {
-        // 1) Basic required fields
+        // 1) Required fields
         String idNumber   = trimOrNull(addStudent_idNum_tf.getText());
         String lastName   = trimOrNull(addStudent_lastName_tf.getText());
         String firstName  = trimOrNull(addStudent_firstName_tf.getText());
         String course     = addStudent_course_cb.getValue();
         String yearLevel  = addStudent_year_cb.getValue();
-        String gender     = addStudent_gender_cb.getValue(); // must be 'Male','Female','Other' (per schema)
-
+        String gender     = addStudent_gender_cb.getValue();
         if (idNumber == null || lastName == null || firstName == null ||
-            course == null || yearLevel == null || gender == null || addStudent_birthday_dp.getValue() == null) {
+            course == null || yearLevel == null || gender == null ||
+            addStudent_birthday_dp.getValue() == null) {
             showError("Please fill in all required fields (ID No., Name, Course, Year, Gender, Birthday).");
             return;
         }
@@ -2172,108 +2265,121 @@ private TextField student_tf;
         String birthplace = trimOrNull(addStudent_birthplace_tf.getText());
         String religion   = trimOrNull(addStudent_religion_tf.getText());
 
-        Integer age       = parseIntOrNull(addStudent_age_tf.getText());
-        java.sql.Date birthday = java.sql.Date.valueOf(addStudent_birthday_dp.getValue());
-        Double height     = parseDoubleOrNull(addStudent_height_tf.getText());
-        Double weight     = parseDoubleOrNull(addStudent_weight_tf.getText());
+        Integer age             = parseIntOrNull(addStudent_age_tf.getText());  // will be refreshed anyway
+        java.sql.Date birthday  = java.sql.Date.valueOf(addStudent_birthday_dp.getValue());
+        Double height           = parseDoubleOrNull(addStudent_height_tf.getText());
+        Double weight           = parseDoubleOrNull(addStudent_weight_tf.getText());
 
-        // 3) Insert into DB
+        // 3) Decide final image path (copy staged file into app folder if any)
+        String finalImagePath = null;
+        try {
+            if (pendingStudentPhotoPath != null) {
+                File dir = new File(STUDENT_IMG_DIR);
+                if (!dir.exists()) dir.mkdirs();
+
+                // unique & readable file name
+                String ext = pendingStudentPhotoPath.toLowerCase().endsWith(".png") ? ".png" : ".jpg";
+                String safeId = idNumber.replaceAll("[^A-Za-z0-9_-]", "_");
+                File dest = new File(dir, "student_" + safeId + "_" + System.currentTimeMillis() + ext);
+
+                Files.copy(new File(pendingStudentPhotoPath).toPath(), dest.toPath(),
+                           java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                finalImagePath = dest.getAbsolutePath();
+            }
+        } catch (IOException io) {
+            io.printStackTrace();
+            showError("Unable to save photo file.\n" + io.getMessage());
+            return;
+        }
+
+        // 4) Insert into DB
         try {
             int newId = insertStudent(
                 idNumber, lastName, firstName, middleName,
                 course, yearLevel, gender, age, contact,
                 address, birthday, birthplace, civil, religion,
                 height, weight, email,
-                /* status */ "active",
-                /* image */ pendingPhotoBytes,
-                /* is_active */ true
+                /* status    */ "active",
+                /* imagePath */ finalImagePath,
+                /* isActive  */ 1   // 1=active; your trigger keeps this in sync with status too
             );
-       //////////ADDED FOR HISTORY//////////////////////////////
-            // If user added history during the Add flow, persist it now
-        if (draftHistoryForNewStudent != null) {
-            draftHistoryForNewStudent.setStudentId(newId);
-            historyDAO.upsert(draftHistoryForNewStudent);
-            // clear the draft once persisted
-            draftHistoryForNewStudent = null;
-        }
-        //////////////////////////////////////////////////////////
+
+            // Persist drafted history (if any)
+            if (draftHistoryForNewStudent != null) {
+                draftHistoryForNewStudent.setStudentId(newId);
+                historyDAO.upsert(draftHistoryForNewStudent);
+                draftHistoryForNewStudent = null;
+            }
+
             showInfo("Student added (ID: " + newId + ").");
             clearAddStudentForm();
             AddStudent_pane.setVisible(false);
-            //refresh table
-            setupActionColumn();
-            loadStudents(); 
-            
-        StudentRecord_pane.setVisible(true);
-     
+
+            refreshAgesOnStartup();  // recompute ages (Option B you chose)
+            loadStudents();          // refresh table
+            StudentRecord_pane.setVisible(true);
+
         } catch (java.sql.SQLIntegrityConstraintViolationException dupe) {
             showError("ID Number already exists. Please use a unique ID.");
         } catch (Exception ex) {
             ex.printStackTrace();
             showError("Failed to save student.\n" + ex.getMessage());
         }
-        
         loadDashboardStats();
-}
+    }
+
     
     private int insertStudent(
-    String idNumber, String lastName, String firstName, String middleName,
-    String course, String yearLevel, String gender, Integer age, String contact,
-    String address, java.sql.Date birthday, String birthplace, String civil, String religion,
-    Double height, Double weight, String email,
-    String status, byte[] image, boolean isActive
+        String idNumber, String lastName, String firstName, String middleName,
+        String course, String yearLevel, String gender, Integer age, String contact,
+        String address, java.sql.Date birthday, String birthplace, String civil, String religion,
+        Double height, Double weight, String email,
+        String status, String imagePath, int isActive
     ) throws Exception {
 
-    // 20 columns -> 20 placeholders
-    String sql = """
-        INSERT INTO students
-        (id_number, last_name, first_name, middle_name,
-         course, year_level, gender, age, contact_number, address,
-         birthday, birthplace, civil_status, religion,
-         height, weight, email, status, image, is_active)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    """;
+        String sql = """
+            INSERT INTO students
+            (id_number, last_name, first_name, middle_name,
+             course, year_level, gender, age, contact_number, address,
+             birthday, birthplace, civil_status, religion,
+             height, weight, email, status, image, is_active)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """;
 
-    try (Connection con = MySQL.connect();
-         PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = MySQL.connect();
+             PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
 
-        int i = 1;
-        ps.setString(i++, idNumber);           // 1
-        ps.setString(i++, lastName);           // 2
-        ps.setString(i++, firstName);          // 3
-        setNullable(ps, i++, middleName);      // 4
-        ps.setString(i++, course);             // 5
-        ps.setString(i++, yearLevel);          // 6
-        ps.setString(i++, gender);             // 7  (must match ENUM in DB)
-        setNullable(ps, i++, age);             // 8
-        setNullable(ps, i++, contact);         // 9
-        setNullable(ps, i++, address);         // 10
-        ps.setDate(i++, birthday);             // 11 (validated non-null)
-        setNullable(ps, i++, birthplace);      // 12
-        setNullable(ps, i++, civil);           // 13
-        setNullable(ps, i++, religion);        // 14
-        setNullable(ps, i++, height);          // 15
-        setNullable(ps, i++, weight);          // 16
-        setNullable(ps, i++, email);           // 17
-        ps.setString(i++, status);             // 18
-        if (image != null && image.length > 0) {
-            ps.setBytes(i++, image);           // 19
-        } else {
-            ps.setNull(i++, java.sql.Types.BLOB);
+            int i = 1;
+            ps.setString(i++, idNumber);                  // 1
+            ps.setString(i++, lastName);                  // 2
+            ps.setString(i++, firstName);                 // 3
+            setNullable(ps, i++, middleName);             // 4
+            ps.setString(i++, course);                    // 5
+            ps.setString(i++, yearLevel);                 // 6
+            ps.setString(i++, gender);                    // 7
+            setNullable(ps, i++, age);                    // 8
+            setNullable(ps, i++, contact);                // 9
+            setNullable(ps, i++, address);                // 10
+            ps.setDate(i++, birthday);                    // 11
+            setNullable(ps, i++, birthplace);             // 12
+            setNullable(ps, i++, civil);                  // 13
+            setNullable(ps, i++, religion);               // 14
+            setNullable(ps, i++, height);                 // 15
+            setNullable(ps, i++, weight);                 // 16
+            setNullable(ps, i++, email);                  // 17
+            ps.setString(i++, status);                    // 18
+            setNullable(ps, i++, imagePath);              // 19  (VARCHAR path)
+            ps.setInt(i++, isActive);                     // 20  (0/1/2)
+
+            ps.executeUpdate();
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) return keys.getInt(1);
+            }
         }
-        ps.setBoolean(i++, isActive);          // 20
-
-        // Safety check (remove in production)
-        // System.out.println("Last parameter index set: " + (i - 1)); // should print 20
-
-        ps.executeUpdate();
-
-        try (ResultSet keys = ps.getGeneratedKeys()) {
-            if (keys.next()) return keys.getInt(1);
-        }
+        return -1;
     }
-    return -1;
-}
+
 
     private void clearAddStudentForm() {
         addStudent_idNum_tf.clear();
@@ -2293,9 +2399,12 @@ private TextField student_tf;
         addStudent_height_tf.clear();
         addStudent_weight_tf.clear();
         addStudent_religion_tf.clear();
-        addStudent_imageview.setImage(null);
-        pendingPhotoBytes = null;
+
+        // preview reset (optional: show default avatar circular)
+        pendingStudentPhotoPath = null;
+        addStudent_imageview.setImage(null); // or: setCircularImage(addStudent_imageview, defaultAvatar(), 120);
     }
+
     
     ////////////////////////////////////////////////////////////////////////////end add new student
     
@@ -2435,136 +2544,13 @@ private TextField student_tf;
 
     
     ////////////////////////////////////////////////////////////////////////////VISIT LOG
-    private void setupStudentCombo() {
-        studentOptions  = StudentDAO.getStudentOptions();
-        studentFiltered = new FilteredList<>(studentOptions, x -> true);
-        visitName_cb.setItems(studentFiltered);
-
-        TextField editor = visitName_cb.getEditor();
-
-        // Filter on typing — only change the predicate
-        editor.textProperty().addListener((obs, old, txt) -> {
-            if (suppressEditorEvents) return;
-            String q = (txt == null) ? "" : txt.trim().toLowerCase();
-            studentFiltered.setPredicate(o -> q.isEmpty() || o.getDisplay().toLowerCase().contains(q));
-        });
-
-        // Keep editor text in sync when a value is chosen
-        visitName_cb.valueProperty().addListener((obs, old, val) -> {
-            suppressEditorEvents = true;
-            editor.setText(val == null ? "" : val.getDisplay());
-            editor.positionCaret(editor.getText().length());
-            suppressEditorEvents = false;
-        });
-
-        // When popup closes, reset filter AFTER selection has been committed
-        visitName_cb.setOnHidden(e ->
-            javafx.application.Platform.runLater(() -> studentFiltered.setPredicate(s -> true))
-        );
-    }
-    
-    @FXML
-    private void VisitLog_AddNew(ActionEvent event) {
-        VisitLog_pane.setDisable(true);
-        VisitLog_addpane.setVisible(true);
-        
-        // default date = today
-        visitDate_tf.setText(LocalDate.now().toString()); // yyyy-MM-dd
-        suppressEditorEvents = true;
-        visitName_cb.getSelectionModel().clearSelection();
-        visitName_cb.getEditor().clear();
-        studentFiltered.setPredicate(s -> true);
-        suppressEditorEvents = false;
-        visitReason_tf.clear();
-        visitName_cb.requestFocus();
-    }
-    
-    @FXML
-    private void VisitLog_Delete(ActionEvent event) {
-        VisitLogRow sel = visitLog_tv.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            warn("Please select a visit log to delete.");
-            return;
-        }
-        Alert a = new Alert(Alert.AlertType.CONFIRMATION,
-                "Delete visit log dated " + sel.getVisitDate() + " for " + sel.getStudentName() + "?",
-                ButtonType.OK, ButtonType.CANCEL);
-        a.setHeaderText(null);
-        a.showAndWait().ifPresent(bt -> {
-            if (bt == ButtonType.OK) {
-                boolean ok = VisitLogDAO.deleteById(sel.getVisitId());
-                if (ok) rows.remove(sel);
-                else error("Delete failed.");
-            }
-        });
-        loadDashboardStats();
-    }
-    
-    @FXML
-    private void addVL_cancel(ActionEvent event) {
-        VisitLog_pane.setDisable(false);
-        VisitLog_addpane.setVisible(false);
-        
-        
-        suppressEditorEvents = true;
-        clearAddForm();
-        studentFiltered.setPredicate(s -> true);
-        suppressEditorEvents = false;
-
-        visitName_cb.hide(); // close popup window if it’s open
-        // Platform.runLater(visitName_cb::hide); // optional
-  
-    }
-
-    @FXML
-    private void addVL_add(ActionEvent event) {
-        // validate date
-    java.time.LocalDate date;
-    try {
-        date = java.time.LocalDate.parse(visitDate_tf.getText().trim(),
-                java.time.format.DateTimeFormatter.ISO_LOCAL_DATE);
-    } catch (java.time.format.DateTimeParseException e) {
-        warn("Date must be in yyyy-MM-dd format.");
-        return;
-    }
-
-    StudentOption sel = visitName_cb.getValue(); // may be null
-    Integer studentId = (sel != null) ? sel.getId() : null;
-
-    String reason = (visitReason_tf.getText() == null) ? null : visitReason_tf.getText().trim();
-
-    int newId = VisitLogDAO.insert(date, studentId, reason);
-    if (newId <= 0) { error("Insert failed."); return; }
-
-    // for the table: use selected label (if any) or lookup
-    String studentName = (sel != null) ? sel.getDisplay() : StudentDAO.getDisplayName(null);
-    VisitLogRow row = new VisitLogRow(newId, date, studentId, studentName, reason);
-    rows.add(0, row);
-
-    visitName_cb.hide();
-    clearAddForm();
-    VisitLog_pane.setDisable(false);
-    VisitLog_addpane.setVisible(false);
-    
-    // (Optional extra safety if seen stubborn popups)
-    // Platform.runLater(visitName_cb::hide);
-
-    loadDashboardStats();
-    }
-
-    private void clearAddForm() {
-        visitDate_tf.clear();
-        visitName_cb.getSelectionModel().clearSelection();
-        visitName_cb.getEditor().clear();
-        visitReason_tf.clear();
-    }
-    
-     private void setupColumnsVISITLOG() {
+    // ====================== VISIT LOG: columns ======================
+    private void setupColumnsVISITLOG() {
         visitDate_col.setCellValueFactory(new PropertyValueFactory<>("visitDate"));
         visitName_col.setCellValueFactory(new PropertyValueFactory<>("studentName"));
         visitReason_col.setCellValueFactory(new PropertyValueFactory<>("reason"));
 
-        // nicer date text (optional)
+        // optional: nicer date text
         visitDate_col.setCellFactory(col -> new TableCell<>() {
             @Override protected void updateItem(LocalDate d, boolean empty) {
                 super.updateItem(d, empty);
@@ -2573,15 +2559,134 @@ private TextField student_tf;
         });
     }
 
+    // ====================== VISIT LOG: data ======================
     private void loadVisitLogs() {
         rows = VisitLogDAO.findAll();
         visitLog_tv.setItems(rows);
     }
-    
-    // dialogs
-    private void warn(String msg) { new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK).showAndWait(); }
-    private void error(String msg) { new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait(); }
-    
+
+    // ====================== VISIT LOG: open add form ======================
+    @FXML
+    private void VisitLog_AddNew(ActionEvent event) {
+        VisitLog_pane.setDisable(true);
+        VisitLog_addpane.setVisible(true);
+
+        // default date = today
+        visitDate_tf.setText(LocalDate.now().toString()); // yyyy-MM-dd
+
+        // clear current selection
+        visitAdd_studentId = null;
+        visitAdd_fullName  = null;
+        visitAdd_idNumber  = null;
+        visitName_tf.clear();
+        visitReason_tf.clear();
+        visitLog_searchStudent_hl.requestFocus();
+    }
+
+    // ====================== VISIT LOG: student picker hyperlink ======================
+    /** Opens the same StudentPicker dialog use in Consultation/Med Certificate.
+     *  The dialog should allow searching by name OR id_number.
+     *  It must return student_id, id_number, and display name.
+     */
+    // (Visit Log / Consultation / Med Cert):
+    @FXML
+    private void visitLog_searchStudent_hl(ActionEvent e) {
+        StudentPickerDialog dlg = new StudentPickerDialog();
+
+        // Optional: set owner (so it centers on window)
+        dlg.initOwner(VisitLog_addpane.getScene().getWindow());
+
+        java.util.Optional<StudentPick> res = dlg.showAndWait(); // <-- no arguments
+
+        res.ifPresent(pick -> {
+            // keep what you need
+            visitAdd_studentId = pick.getStudentId();
+            visitAdd_fullName  = pick.getFullName();
+            visitAdd_idNumber  = pick.getIdNumber();
+
+            // show “ID – Name” in the read-only field
+            visitName_tf.setText(pick.getIdNumber() + " – " + pick.getFullName());
+        });
+    }
+
+
+    // ====================== VISIT LOG: save new row ======================
+    @FXML
+    private void addVL_add(ActionEvent event) {
+        // validate date
+        final LocalDate date;
+        try {
+            date = LocalDate.parse(
+                    visitDate_tf.getText().trim(),
+                    java.time.format.DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (Exception e) {
+            warn("Date must be in yyyy-MM-dd format.");
+            return;
+        }
+
+        if (visitAdd_studentId == null) {
+            warn("Please select a student.");
+            return;
+        }
+
+        final String reason = (visitReason_tf.getText() == null)
+                ? null : visitReason_tf.getText().trim();
+
+        int newId = VisitLogDAO.insert(date, visitAdd_studentId, reason);
+        if (newId <= 0) { error("Insert failed."); return; }
+
+        // Add to table (show full name; if you need id_number in table, add a column)
+        rows.add(0, new VisitLogRow(newId, date, visitAdd_studentId, visitAdd_fullName, reason));
+
+        // close form
+        clearAddForm();
+        VisitLog_pane.setDisable(false);
+        VisitLog_addpane.setVisible(false);
+
+        loadDashboardStats(); // if you show live stats on the dashboard
+    }
+
+    // ====================== VISIT LOG: cancel ======================
+    @FXML
+    private void addVL_cancel(ActionEvent event) {
+        clearAddForm();
+        VisitLog_pane.setDisable(false);
+        VisitLog_addpane.setVisible(false);
+    }
+
+    // ====================== VISIT LOG: delete ======================
+    @FXML
+    private void VisitLog_Delete(ActionEvent event) {
+        VisitLogRow sel = visitLog_tv.getSelectionModel().getSelectedItem();
+        if (sel == null) { warn("Please select a visit log to delete."); return; }
+
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION,
+            "Delete visit log dated " + sel.getVisitDate() + " for " + sel.getStudentName() + "?",
+            ButtonType.OK, ButtonType.CANCEL);
+        a.setHeaderText(null);
+        a.showAndWait().ifPresent(bt -> {
+            if (bt == ButtonType.OK) {
+                boolean ok = VisitLogDAO.deleteById(sel.getVisitId());
+                if (ok) rows.remove(sel); else error("Delete failed.");
+            }
+        });
+        loadDashboardStats();
+    }
+
+    // ====================== VISIT LOG: helpers ======================
+    private void clearAddForm() {
+        visitDate_tf.clear();
+        visitReason_tf.clear();
+        visitName_tf.clear();
+        visitAdd_studentId = null;
+        visitAdd_fullName  = null;
+        visitAdd_idNumber  = null;
+    }
+
+    // simple alerts you already had
+    private void warn(String msg){ new Alert(Alert.AlertType.WARNING,msg,ButtonType.OK).showAndWait(); }
+    private void error(String msg){ new Alert(Alert.AlertType.ERROR,msg,ButtonType.OK).showAndWait(); }
+
     ////////////////////////////////////////////////////////////////////////////end visit log
     
     ////////////////////////////////////////////////////////////////////////////INVENTORY
@@ -2898,39 +3003,44 @@ private TextField student_tf;
     a.showAndWait();
 }
     private void setText(TextField tf, String value) { tf.setText(value == null ? "" : value); }
-//    private void showImage(byte[] bytes) {
-//        if (image_imageView == null) return;
-//        if (bytes == null || bytes.length == 0) { image_imageView.setImage(null); return; }
-//        image_imageView.setImage(new Image(new ByteArrayInputStream(bytes)));
-//    }
+
     // =====================================================
     // SHOW IMAGE (supports file path or null placeholder)
     // =====================================================
     // Robust loader: tries absolute/relative disk paths, then packaged fallback.
     // Place default-user.png under resources: /img/default-user.png
+
+    private static final double STUDENT_AVATAR_SIZE = 90.0;
+
     private void showImage(String imagePath) {
         try {
-            // 1) Load from file path if provided
+            Image imgToShow = null;
+
+            // 1) load from file path if present
             if (imagePath != null && !imagePath.isBlank()) {
                 File f = new File(imagePath);
                 if (f.exists()) {
-                    image_imageView.setImage(new Image(f.toURI().toString()));
-                    return;
+                    imgToShow = new Image(f.toURI().toString(), false);
                 }
             }
 
-            // 2) Fallback to packaged resource (safe, no NPE)
-            URL url = getClass().getResource("/image/default-user.png");
-            if (url != null) {
-                image_imageView.setImage(new Image(url.toExternalForm()));
-            } else {
-                // 3) Last resort: clear image (prevents crash even if resource missing)
-                image_imageView.setImage(null);
-                System.err.println("[showImage] Fallback image not found: /img/default-user.png");
+            // 2) fallback resource
+            if (imgToShow == null) {
+                URL url = getClass().getResource("/image/default-user.png"); // <-- match folder
+                if (url != null) {
+                    imgToShow = new Image(url.toExternalForm(), false);
+                }
+            }
+
+            // 3) apply center-crop + circle (handles null safely)
+            setCircularImage(image_imageView, imgToShow, STUDENT_AVATAR_SIZE);
+
+            if (imgToShow == null) {
+                System.err.println("[showImage] Fallback image not found: /image/default-user.png");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            image_imageView.setImage(null);
+            setCircularImage(image_imageView, null, STUDENT_AVATAR_SIZE);
         }
     }
 
@@ -3471,29 +3581,31 @@ private void warnLong(String title, String header, String message) {
         return new File(dir, code + ".pdf");
     }
     
+    // --- Open the student picker popup and store selection (Med Certificate) ---
     @FXML
     private void onPickStudent() {
         StudentPickerDialog dlg = new StudentPickerDialog();
-        // If this line NPEs, it means the label is not in a showing scene yet;
-        // you can omit initOwner() safely.
         if (student_lbl != null && student_lbl.getScene() != null) {
             dlg.initOwner(student_lbl.getScene().getWindow());
         }
-        dlg.showAndWait().ifPresent(s -> {
-            currentStudentIdMEDCERT = s.studentId;
-            student_lbl.setText(s.fullName());
-            studentID_lbl.setText("   •   ID: " + s.studentId);
-            date_dp.setValue(LocalDate.now());
-            
+
+        java.util.Optional<StudentPick> res = dlg.showAndWait();
+        res.ifPresent(p -> {
+            currentStudentIdMEDCERT = p.getStudentId();           // FK for saves
+            student_lbl.setText(p.getFullName());                 // visible name
+            studentID_lbl.setText("   •   ID: " + p.getIdNumber()); // show school ID#
+            date_dp.setValue(java.time.LocalDate.now());
+
             // If switching to a different student, clear previous vitals
-            if (lastVitalsStudentId == null || !lastVitalsStudentId.equals(s.studentId)) {
+            if (lastVitalsStudentId == null || !lastVitalsStudentId.equals(p.getStudentId())) {
                 clearVitalsFields();
-                vitalsUserEdited = false; // new student — reset edit flag
+                vitalsUserEdited = false;
             }
-            // Force overwrite when changing student (so new vitals always appear)
-            applyLatestVitals(s.studentId, /*forceOverwrite=*/ true);
+            // Always refresh vitals for the chosen student
+            applyLatestVitals(p.getStudentId(), /*forceOverwrite=*/ true);
         });
     }
+
     /////////////////deleting
     private void deleteCertToRecycle(int certId){
         Alert confirm = new Alert(Alert.AlertType.WARNING,
@@ -4199,25 +4311,25 @@ private void warnLong(String title, String header, String message) {
 
     ////////////////////////////////////////////////////////////////////////////SETTINGS
     // Call after you load the user from DB
-    private void loadUserToUI(User u) {
-        currentUserId = u.getUserId();
-        origFirst = u.getFirstName();  origLast = u.getLastName();
-        origUser  = u.getUsername();   origPhotoPath = u.getPhotoPath();
-
-        ADMINfirstName_tf.setText(origFirst);
-        ADMINlastName_tf.setText(origLast);
-        ADMINusername_tf.setText(origUser);
-
-        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
-                ? new Image(new File(origPhotoPath).toURI().toString(), true)
-                : new Image(getClass().getResource("/img/avatar-default.png").toExternalForm());
-        AdminPhoto.setImage(img);
-        AdminPhoto_edit.setImage(img);
-
-        Profile_gridpane.setDisable(true);
-        Password_gridpane.setDisable(true);
-        clearPasswordSide();
-    }
+//    private void loadUserToUI(User u) {
+//        currentUserId = u.getUserId();
+//        origFirst = u.getFirstName();  origLast = u.getLastName();
+//        origUser  = u.getUsername();   origPhotoPath = u.getPhotoPath();
+//
+//        ADMINfirstName_tf.setText(origFirst);
+//        ADMINlastName_tf.setText(origLast);
+//        ADMINusername_tf.setText(origUser);
+//
+//        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
+//                ? new Image(new File(origPhotoPath).toURI().toString(), true)
+//                : new Image(getClass().getResource("/img/avatar-default.png").toExternalForm());
+//        AdminPhoto.setImage(img);
+//        AdminPhoto_edit.setImage(img);
+//
+//        Profile_gridpane.setDisable(true);
+//        Password_gridpane.setDisable(true);
+//        clearPasswordSide();
+//    }
 
     private void clearPasswordSide() {
         current_pw.clear(); new_pw.clear(); confirm_pw.clear();
@@ -4247,16 +4359,21 @@ private void warnLong(String title, String header, String message) {
         File f = fc.showOpenDialog(ADMINusername_tf.getScene().getWindow());
         if (f != null) {
             stagedPhoto = f;
-            AdminPhoto_edit.setImage(new Image(f.toURI().toString(), true)); // preview only
+//            AdminPhoto_edit.setImage(new Image(f.toURI().toString(), true)); // preview only
+        Image preview = new Image(f.toURI().toString(), false);
+        setCircularImage(AdminPhoto_edit, preview, 120);
+        setCircularImage(AdminPhoto,      preview, 70);
+
         }
     }
 
     private boolean stagedRemove = false;
     @FXML private void onRemovePhoto(ActionEvent e) {
         stagedPhoto = null;
-        stagedRemove = true;                // <--  want it removed
-        AdminPhoto_edit.setImage(defaultAvatar());  // preview only
+        stagedRemove = true;
+        refreshAdminPhotos(null);    // show default avatar (circular) in both views
     }
+
 
 
     @FXML
@@ -4307,13 +4424,20 @@ private void warnLong(String title, String header, String message) {
         origFirst = f; origLast = l; origContact = c.isBlank()? null : c; origPhotoPath = newPath;
         stagedPhoto = null; stagedRemove = false;
 
-        // UI refresh
+        // ---- REFRESH UI ----
         campusNurse_fullName.setText(f + " " + l);
+
+        // Load updated image and apply circular crop
         Image img = (newPath != null && new File(newPath).exists())
                 ? new Image(new File(newPath).toURI().toString(), true)
                 : defaultAvatar();
-        AdminPhoto.setImage(img);
-        AdminPhoto_edit.setImage(img);
+
+        // NEW: use circular image helper
+        adminImagePath = newPath; // update current path reference
+//        setCircularImage(AdminPhoto, img, 70);       // sidebar photo
+//        setCircularImage(AdminPhoto_edit, img, 120); // settings photo
+        refreshAdminPhotos(adminImagePath);
+
 
         showPopup("Profile updated.", "success");
         Profile_gridpane.setDisable(true);
@@ -4326,15 +4450,35 @@ private void warnLong(String title, String header, String message) {
         ADMINlastName_tf.setText(origLast);
         ADMINcontactNumber_tf.setText(origContact == null ? "" : origContact);
 
-        stagedPhoto = null; stagedRemove = false;
-        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
-                ? new Image(new File(origPhotoPath).toURI().toString(), true)
-                : defaultAvatar();
-        AdminPhoto_edit.setImage(img);
+        // now:
+        stagedPhoto = null;
+        stagedRemove = false;
+        refreshAdminPhotos(origPhotoPath);   // restores both AdminPhoto & AdminPhoto_edit
 
         Profile_gridpane.setDisable(true);
         toggleProfile.setSelected(false);
     }
+    
+    /** Draw admin photos (sidebar=70, settings=120) from a file path or fallback. */
+    private void refreshAdminPhotos(String pathOrNull) {
+        Image img = null;
+
+        if (pathOrNull != null && !pathOrNull.isBlank()) {
+            File f = new File(pathOrNull);
+            if (f.exists()) {
+                img = new Image(f.toURI().toString(), false);
+            }
+        }
+        if (img == null) {
+            // fallback resource you already use
+            Image def = defaultAvatar();
+            img = def;
+        }
+
+        setCircularImage(AdminPhoto,      img, 70);
+        setCircularImage(AdminPhoto_edit, img, 120);
+    }
+
 
     // ---- PASSWORD SIDE ----
     // Eye icon wiring (call once in initialize)
@@ -4467,6 +4611,34 @@ private void warnLong(String title, String header, String message) {
         // replace with notifier/snackbar implementation
         System.out.println(text);
     }
+
+    // call this whenever you set/change the student photo
+    private void setCircularImage(ImageView iv, Image img, double size) {
+        if (img == null || img.getWidth() <= 0 || img.getHeight() <= 0) {
+            iv.setImage(img);
+            iv.setViewport(null);
+            iv.setFitWidth(size);
+            iv.setFitHeight(size);
+            iv.setPreserveRatio(false);
+            makeCircular(iv);
+            return;
+        }
+
+        double iw = img.getWidth();
+        double ih = img.getHeight();
+        double side = Math.min(iw, ih);
+        double x = (iw - side) / 2.0;
+        double y = (ih - side) / 2.0;
+
+        iv.setImage(img);
+        iv.setViewport(new Rectangle2D(x, y, side, side)); // center-crop to square
+        iv.setFitWidth(size);
+        iv.setFitHeight(size);
+        iv.setPreserveRatio(false); // square viewport already, so fill
+        iv.setSmooth(true);
+        makeCircular(iv);
+    }
+
     
     //to load profile, admin photo, and full name when user opens the system
     private void makeCircular(ImageView iv) {
@@ -4498,28 +4670,23 @@ private void warnLong(String title, String header, String message) {
         if (u == null) return;
 
         // originals
-        origFirst = u.getFirstName();
-        origLast  = u.getLastName();
-        origUser  = u.getUsername();
+        origFirst     = u.getFirstName();
+        origLast      = u.getLastName();
+        origUser      = u.getUsername();
         origPhotoPath = u.getPhotoPath();
-        origContact = u.getContactNumber();
+        origContact   = u.getContactNumber();
 
-        // fill profile fields
+        // expose current admin image path for reuse
+        adminImagePath = origPhotoPath;
+
+        // paint BOTH admin photos (sidebar=70, settings=120) with crop+circle
+        refreshAdminPhotos(adminImagePath);
+
+        // fill fields / labels
         ADMINfirstName_tf.setText(origFirst);
         ADMINlastName_tf.setText(origLast);
         ADMINcontactNumber_tf.setText(origContact == null ? "" : origContact);
-
-        // username now belongs to the Password card (still show current value there)
         ADMINusername_tf.setText(origUser);
-
-        // photos (settings + sidebar)
-        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
-                ? new Image(new File(origPhotoPath).toURI().toString(), true)
-                : defaultAvatar();
-        AdminPhoto_edit.setImage(img);
-        AdminPhoto.setImage(img);
-
-        // sidebar label shows First Last
         campusNurse_fullName.setText(origFirst + " " + origLast);
 
         // start disabled

@@ -126,6 +126,52 @@ public class InventoryDAO {
         }
 }
 
+    ////// on adding consultation (medicine dispensed)
+    
+    // Balance lookup (overload with external Connection thus can use it inside a transaction)
+    public static Integer findBalance(int itemId) {
+        try (Connection con = MySQL.connect()) {
+            return findBalance(itemId, con);
+        } catch (SQLException e) { return null; }
+    }
+    public static Integer findBalance(int itemId, Connection con) {
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT balance_stock FROM inventory WHERE item_id=?")) {
+            ps.setInt(1, itemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? (Integer) rs.getObject(1) : null;
+            }
+        } catch (SQLException e) { return null; }
+    }
+    
+    // List items for the picker with live balances
+    public static ObservableList<Inventory> listForPicker(String search) {
+        ObservableList<Inventory> list = FXCollections.observableArrayList();
+        String sql =
+            "SELECT item_id, item_name, unit, " +
+            "       /* if you used a generated column: */ balance_stock " +
+            "  FROM inventory " +
+            " WHERE (? IS NULL OR item_name LIKE CONCAT('%',?,'%')) " +
+            " ORDER BY item_name";
+        try (Connection con = MySQL.connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            String k = (search == null || search.isBlank()) ? null : search.trim();
+            ps.setString(1, k); ps.setString(2, k);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Inventory inv = new Inventory(
+                        rs.getInt("item_id"),
+                        rs.getString("item_name"),
+                        rs.getString("unit"),
+                        rs.getInt("balance_stock")
+                    );
+                    list.add(inv);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
 
 }
 
