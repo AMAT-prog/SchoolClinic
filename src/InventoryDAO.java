@@ -19,31 +19,40 @@ public class InventoryDAO {
     public static ObservableList<Inventory> findAll() {
         ObservableList<Inventory> list = FXCollections.observableArrayList();
         String sql = """
-            SELECT item_id, item_name, type, quantity, unit, expiry_date, status
+            SELECT item_id, item_name, type, quantity, total_used, balance_stock, unit, expiry_date, status
             FROM inventory
             ORDER BY item_name ASC
         """;
-        try (Connection con = MySQL.connect();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                int id = rs.getInt("item_id");
-                String name = rs.getString("item_name");
-                String type = rs.getString("type");
-                int qty = rs.getInt("quantity");
-                String unit = rs.getString("unit");
-                Date d = rs.getDate("expiry_date");
-                LocalDate expiry = (d != null) ? d.toLocalDate() : null;
-                String status = rs.getString("status");
+        try (Connection con = MySQL.connect()) {
 
-                list.add(new Inventory(id, name, type, qty, unit, expiry, status));
+            // <<< new LINE
+            markExpiredNow(con);
+
+            try (PreparedStatement ps = con.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    int id       = rs.getInt("item_id");
+                    String name  = rs.getString("item_name");
+                    String type  = rs.getString("type");
+                    int qty      = rs.getInt("quantity");
+                    int used     = rs.getInt("total_used");
+                    int balance  = rs.getInt("balance_stock");
+                    String unit  = rs.getString("unit");
+                    Date d       = rs.getDate("expiry_date");
+                    LocalDate expiry = (d != null) ? d.toLocalDate() : null;
+                    String status = rs.getString("status");
+
+                    list.add(new Inventory(id, name, type, qty, used, balance, unit, expiry, status));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
     }
+
 
     public static boolean deleteById(int itemId) {
         String sql = "DELETE FROM inventory WHERE item_id = ?";
@@ -170,6 +179,19 @@ public class InventoryDAO {
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
+    }
+
+    //for status column in inventory (for expired medicines)
+    private static void markExpiredNow(Connection con) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement(
+            "UPDATE inventory " +
+            "   SET status='expired' " +
+            " WHERE expiry_date IS NOT NULL " +
+            "   AND expiry_date < CURDATE() " +
+            "   AND status <> 'expired'"
+        )) {
+            ps.executeUpdate();
+        }
     }
 
 

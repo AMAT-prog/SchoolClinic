@@ -16,6 +16,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
@@ -1181,41 +1183,117 @@
                         <Font name="System Bold" size="25.0" />
                      </font>
                   </Label>
-                  <HBox layoutX="860.0" layoutY="63.0" prefHeight="26.0" prefWidth="137.0">
-                     <children>
-                        <Button mnemonicParsing="false" onAction="#AddNewStock" prefHeight="26.0" prefWidth="136.0" style="-fx-background-radius: 3;" text="Add New Stock" />
-                     </children>
-                  </HBox>
-                  <HBox fx:id="filterField_hbox" alignment="CENTER_LEFT" layoutX="55.0" layoutY="66.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="695.0" styleClass="search-container1" stylesheets="@clinicDESIGN.css">
-                     <children>
-                        <ImageView fitHeight="19.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@image/search.png" />
-                           </image>
-                           <HBox.margin>
-                              <Insets bottom="5.0" left="10.0" top="5.0" />
-                           </HBox.margin>
-                        </ImageView>
-                        <TextField fx:id="filterField_inventory" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="27.0" prefWidth="653.0" promptText="Search item /code /type /status" style="-fx-background-color: TRANSPARENT;">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </TextField>
-                     </children>
-                  </HBox>
-                  <TableView fx:id="inventory_tv" layoutX="57.0" layoutY="100.0" prefHeight="382.0" prefWidth="939.0" stylesheets="@clinicDESIGN.css">
-                    <columns>
-                        <TableColumn fx:id="inventoryCode_col" prefWidth="75.0" text="Code" />
-                      <TableColumn fx:id="inventoryName_col" prefWidth="155.33331298828125" text="Item Name" />
-                      <TableColumn fx:id="inventoryType_col" prefWidth="115.33334350585938" text="Type" />
-                        <TableColumn fx:id="inventoryQuantity_col" prefWidth="179.3333740234375" text="Quantity" />
-                        <TableColumn fx:id="inventoryUnit_col" prefWidth="124.666748046875" text="Unit" />
-                        <TableColumn fx:id="inventoryExpiry_col" prefWidth="112.00018310546875" text="Expiry Date" />
-                        <TableColumn fx:id="inventoryStatus_col" prefWidth="110.666748046875" text="Status" />
-                        <TableColumn fx:id="inventoryAction_col" prefWidth="62.6666259765625" text="Action" />
-                    </columns>
-                  </TableView>
-                  <Pane fx:id="AddEdit_InventoryPane" layoutX="54.0" layoutY="55.0" prefHeight="427.0" prefWidth="944.0" stylesheets="@clinic-theme.css">
+                  <TabPane fx:id="invTabPane" layoutX="57.0" layoutY="45.0" prefHeight="441.0" prefWidth="939.0" stylesheets="@clinicDESIGN.css">
+                     <tabs>
+                        <Tab closable="false" text="Medicines">
+                           <content>
+                              <VBox prefHeight="427.0" prefWidth="939.0" spacing="8.0">
+                                 <children>
+                                    <HBox prefHeight="27.0" prefWidth="137.0" spacing="8.0">
+                                       <children>
+                                          <HBox fx:id="filterField_hbox" alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="695.0" styleClass="search-container1" stylesheets="@clinicDESIGN.css">
+                                             <children>
+                                                <ImageView fitHeight="19.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@image/search.png" />
+                                                   </image>
+                                                   <HBox.margin>
+                                                      <Insets bottom="5.0" left="10.0" top="5.0" />
+                                                   </HBox.margin>
+                                                </ImageView>
+                                                <TextField fx:id="filterField_inventory" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="27.0" prefWidth="653.0" promptText="Search item /code /type /status" style="-fx-background-color: TRANSPARENT;">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </TextField>
+                                             </children>
+                                             <HBox.margin>
+                                                <Insets left="5.0" />
+                                             </HBox.margin>
+                                          </HBox>
+                                          <Button mnemonicParsing="false" onAction="#AddNewStock" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3;" text="Add New">
+                                             <HBox.margin>
+                                                <Insets left="135.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <TableView fx:id="inventory_tv" prefHeight="369.0" prefWidth="939.0" stylesheets="@clinicDESIGN.css">
+                                      <columns>
+                                          <TableColumn fx:id="inventoryCode_col" prefWidth="75.0" text="Code" />
+                                        <TableColumn fx:id="inventoryName_col" prefWidth="155.33331298828125" text="Item Name" />
+                                        <TableColumn fx:id="inventoryType_col" prefWidth="106.4444580078125" text="Type" />
+                                          <TableColumn fx:id="inventoryQuantity_col" prefWidth="82.88885498046875" text="Quantity" />
+                                          <TableColumn fx:id="inventoryUsed_col" prefWidth="86.88885498046875" text="Total Used" />
+                                          <TableColumn fx:id="inventoryBalance_col" prefWidth="71.111083984375" text="Balance" />
+                                          <TableColumn fx:id="inventoryUnit_col" prefWidth="87.33331298828125" text="Unit" />
+                                          <TableColumn fx:id="inventoryExpiry_col" prefWidth="104.888916015625" text="Expiry Date" />
+                                          <TableColumn fx:id="inventoryStatus_col" prefWidth="113.77783203125" text="Status" />
+                                          <TableColumn fx:id="inventoryAction_col" prefWidth="52.4444580078125" text="Action" />
+                                      </columns>
+                                    </TableView>
+                                 </children>
+                              </VBox>
+                           </content>
+                        </Tab>
+                        <Tab closable="false" text="Tools">
+                           <content>
+                              <VBox prefHeight="200.0" prefWidth="100.0" spacing="8.0">
+                                 <children>
+                                    <HBox prefHeight="27.0" prefWidth="137.0" spacing="8.0">
+                                       <children>
+                                          <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" prefWidth="695.0" styleClass="search-container1" stylesheets="@clinicDESIGN.css">
+                                             <children>
+                                                <ImageView fitHeight="19.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@image/search.png" />
+                                                   </image>
+                                                   <HBox.margin>
+                                                      <Insets bottom="5.0" left="10.0" top="5.0" />
+                                                   </HBox.margin>
+                                                </ImageView>
+                                                <TextField fx:id="toolSearch_tf" maxHeight="-Infinity" minHeight="-Infinity" onMouseClicked="#SEARCHBAR_mouseclicked" prefHeight="27.0" prefWidth="653.0" promptText="Search tool / code / condition" style="-fx-background-color: TRANSPARENT;">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </TextField>
+                                             </children>
+                                             <HBox.margin>
+                                                <Insets left="5.0" />
+                                             </HBox.margin>
+                                          </HBox>
+                                          <Button fx:id="addTool_btn" mnemonicParsing="false" onAction="#onAddTool" prefHeight="27.0" prefWidth="103.0" style="-fx-background-radius: 3;" text="Add New">
+                                             <HBox.margin>
+                                                <Insets left="135.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <TableView fx:id="tools_tv" prefHeight="399.0" prefWidth="939.0" stylesheets="@clinicDESIGN.css">
+                                      <columns>
+                                        <TableColumn fx:id="inventoryTools_code" prefWidth="65.55551147460938" text="Code" />
+                                        <TableColumn fx:id="inventoryTools_name" prefWidth="233.11111450195312" text="Item Name" />
+                                          <TableColumn fx:id="inventoryTools_category" prefWidth="122.22222900390625" text="Category" />
+                                          <TableColumn fx:id="inventoryTools_quantity" prefWidth="65.7777099609375" text="Quantity" />
+                                          <TableColumn fx:id="inventoryTools_unit" prefWidth="46.44451904296875" text="Unit" />
+                                          <TableColumn fx:id="inventoryTools_location" prefWidth="124.88885498046875" text="Location" />
+                                          <TableColumn fx:id="inventoryTools_status" prefWidth="119.33331298828125" text="Status/Condition" />
+                                          <TableColumn fx:id="inventoryTools_remarks" prefWidth="106.44439697265625" text="Remarks" />
+                                          <TableColumn fx:id="inventoryTools_action" prefWidth="58.0" text="Action" />
+                                      </columns>
+                                    </TableView>
+                                 </children></VBox>
+                           </content>
+                        </Tab>
+                     </tabs>
+                  </TabPane>
+                  <Pane fx:id="AddEdit_InventoryPane" layoutX="54.0" layoutY="55.0" prefHeight="427.0" prefWidth="944.0" stylesheets="@clinic-theme.css" visible="false">
                      <children>
                         <GridPane layoutX="76.0" layoutY="72.0" prefHeight="219.0" prefWidth="781.0">
                           <columnConstraints>
@@ -1939,6 +2017,80 @@
                   </BorderPane>
                </children>
             </AnchorPane>
+            <StackPane fx:id="AddEdit_ToolPane" layoutX="226.0" layoutY="150.0" prefHeight="483.0" prefWidth="1009.0" styleClass="sheet" stylesheets="@clinicDESIGN.css">
+               <children>
+                  <VBox maxWidth="980.0" prefHeight="200.0" prefWidth="100.0" spacing="16.0" stylesheets="@clinic-theme.css">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="932.0" spacing="12.0">
+                           <children>
+                              <Label fx:id="toolFormTitle_lbl" styleClass="panel-title" text="Add Tool" />
+                              <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                              <Button mnemonicParsing="false" onAction="#onCancelTool" styleClass="ghost-icon" text="✕" />
+                           </children>
+                        </HBox>
+                        <Separator prefWidth="200.0" />
+                        <GridPane hgap="18.0" prefHeight="300.0" prefWidth="840.0" vgap="12.0">
+                          <columnConstraints>
+                            <ColumnConstraints minWidth="10.0" prefWidth="170.0" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                              <ColumnConstraints minWidth="10.0" prefWidth="170.0" />
+                              <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Code" />
+                              <TextField fx:id="toolCode_tf" promptText="TL-001" GridPane.columnIndex="1" />
+                              <Label text="Item Name" GridPane.columnIndex="2" />
+                              <Label text="Category" GridPane.rowIndex="1" />
+                              <Label text="Location" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Label text="Quantity" GridPane.rowIndex="2" />
+                              <Label text="Unit" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <TextField fx:id="toolName_tf" promptText="Nebulizer Machine" GridPane.columnIndex="3" />
+                              <ComboBox fx:id="toolCategory_cb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ComboBox fx:id="toolLocation_cb" prefWidth="150.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                              <TextField fx:id="toolQty_tf" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <TextField fx:id="toolUnit_tf" promptText="pcs / sets / units" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                              <Label text="Condition / Status" GridPane.rowIndex="3" />
+                              <ComboBox fx:id="toolStatus_cb" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label text="Acquired On" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <DatePicker fx:id="toolAcquired_dp" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                              <Label text="Purchase Cost" GridPane.rowIndex="4" />
+                              <Label text="Remarks" GridPane.rowIndex="5" />
+                              <TextField fx:id="toolCost_tf" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <TextArea fx:id="toolRemarks_ta" prefHeight="200.0" prefRowCount="3" prefWidth="200.0" promptText="Notes, maintenance info…" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="5" />
+                           </children>
+                        </GridPane>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="65.0" prefWidth="840.0" spacing="12.0">
+                           <children>
+                              <Label fx:id="toolFormHint_lbl" prefHeight="17.0" prefWidth="649.0" styleClass="hint" />
+                              <Button mnemonicParsing="false" onAction="#onCancelTool" text="Cancel">
+                                 <styleClass>
+                                    <String fx:value="gc-btn" />
+                                    <String fx:value="gc-neutral" />
+                                 </styleClass></Button>
+                              <Button fx:id="toolSave_btn" mnemonicParsing="false" onAction="#onSaveTool" text="Save">
+                                 <styleClass>
+                                    <String fx:value="gc-btn" />
+                                    <String fx:value="gc-primary" />
+                                 </styleClass>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                     <styleClass>
+                        <String fx:value="gc" />
+                        <String fx:value="gc-surface" />
+                     </styleClass>
+                  </VBox>
+               </children>
+            </StackPane>
             <AnchorPane fx:id="settings_pane" layoutX="210.0" layoutY="135.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="523.0" prefWidth="1039.0" styleClass="calendar_pane" stylesheets="@calendar.css" visible="false">
                <children>
                   <VBox layoutX="1.0" layoutY="-1.0" prefHeight="517.0" prefWidth="1050.0" spacing="16.0" styleClass="pane-bg" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-12.0" AnchorPane.topAnchor="-1.0">

@@ -23,7 +23,7 @@ public class Inventory {
     private final IntegerProperty balanceStock = new SimpleIntegerProperty();
 
 
-    public Inventory(int itemId, String itemName, String type, int quantity,
+    public Inventory(int itemId, String itemName, String type, int quantity,int used, int balance,
                      String unit, LocalDate expiryDate, String status) {
         setItemId(itemId);
         setItemName(itemName);
@@ -33,8 +33,8 @@ public class Inventory {
         setExpiryDate(expiryDate);
         setStatus(status);
         // defaults if not supplied
-        setTotalUsed(0);
-        setBalanceStock(quantity);
+        setTotalUsed(used);
+        setBalanceStock(balance);
     }
     
     

@@ -88,6 +88,7 @@ import org.apache.pdfbox.rendering.ImageType;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.StandardCopyOption;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -351,7 +352,7 @@ public class DASHBOARDController implements Initializable {
     @FXML
     private TableView<Inventory> inventory_tv;
     @FXML
-    private TableColumn<Inventory, Number> inventoryCode_col;
+    private TableColumn<Inventory, Number> inventoryCode_col; 
     @FXML
     private TableColumn<Inventory, String> inventoryName_col;
     @FXML
@@ -366,6 +367,11 @@ public class DASHBOARDController implements Initializable {
     private TableColumn<Inventory, String> inventoryStatus_col;
     @FXML
     private TableColumn<Inventory, Void> inventoryAction_col;
+    @FXML
+    private TableColumn<Inventory, Number> inventoryUsed_col;
+    @FXML
+    private TableColumn<Inventory, Number> inventoryBalance_col;
+
     
     @FXML
     private Pane AddEdit_InventoryPane;
@@ -595,8 +601,63 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     private TextField visitName_tf;
     @FXML
     private Hyperlink visitLog_searchStudent_hl;
+    
+    @FXML
+    private TabPane invTabPane;
+    @FXML
+    private TextField toolSearch_tf;
+    @FXML
+    private Button addTool_btn;
+    @FXML
+    private TableView<InventoryTool> tools_tv;
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_code; // for id = change to Number
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_name;
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_category;
+    @FXML
+    private TableColumn<InventoryTool, Number> inventoryTools_quantity;
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_unit;
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_location;
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_status;
+    @FXML
+    private TableColumn<InventoryTool, String> inventoryTools_remarks;
+    @FXML
+    private TableColumn<InventoryTool, Void> inventoryTools_action;
+    @FXML
+    private StackPane AddEdit_ToolPane;
+    @FXML
+    private TextField toolCode_tf;
+    @FXML
+    private TextField toolName_tf;
+    @FXML
+    private ComboBox<String> toolCategory_cb;
+    @FXML
+    private ComboBox<String> toolLocation_cb;
+    @FXML
+    private TextField toolQty_tf;
+    @FXML
+    private TextField toolUnit_tf;
+    @FXML
+    private ComboBox<String> toolStatus_cb;
+    @FXML
+    private DatePicker toolAcquired_dp;
+    @FXML
+    private TextField toolCost_tf;
+    @FXML
+    private TextArea toolRemarks_ta;
+    @FXML
+    private Label toolFormHint_lbl;
+    @FXML
+    private Button toolSave_btn;
+    @FXML
+    private Label toolFormTitle_lbl;
 
-
+    
 
 
     //for adding new consultation
@@ -656,12 +717,36 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     private boolean isEditMode = false;
     private Inventory editing = null;
      
-    
     // --- keep these fields ---
     private final ObservableList<Inventory> inventoryMaster = FXCollections.observableArrayList();
     private FilteredList<Inventory> inventoryFiltered;
     private SortedList<Inventory> inventorySorted;
     
+    //////////////////// TOOLS INVENTORY //////////////////////////////
+    private javafx.collections.ObservableList<InventoryTool> toolData;
+    private javafx.collections.transformation.FilteredList<InventoryTool> toolFiltered;
+    private javafx.collections.transformation.SortedList<InventoryTool> toolSorted;
+
+    // Backing lists / state
+    private final ObservableList<InventoryTool> toolsMaster = FXCollections.observableArrayList();
+    private FilteredList<InventoryTool> toolsFiltered;
+    private SortedList<InventoryTool>   toolsSorted;
+
+    // Preset options — tweak to taste
+    private final ObservableList<String> CATEGORY_OPTIONS = FXCollections.observableArrayList(
+            "Diagnostics", "Treatment Equipment", "Emergency Supply", "Mobility Aid",
+            "Measurement", "Furniture", "PPE", "Miscellaneous"
+    );
+    private final ObservableList<String> LOCATION_OPTIONS = FXCollections.observableArrayList(
+            "Clinic Room", "Treatment Room", "Storage Room", "Front Desk",
+            "Nurse Station Drawer", "Equipment Cabinet", "Clinic Corner Shelf"
+    );
+    private final ObservableList<String> CONDITION_OPTIONS = FXCollections.observableArrayList(
+            "good", "needs repair", "under repair", "decommissioned", "missing"
+    );
+
+    // Track whether we’re adding or editing
+    private InventoryTool editingTool = null;   // null = Add, non-null = Edit
 
 //    //visit log
 //    private javafx.collections.ObservableList<StudentOption> studentOptions;
@@ -745,6 +830,7 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     // keep the currentUserId, orig* vars, etc.
     private String adminImagePath = null;   // holds the current admin photo path from DB
 
+    
 
   
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -1115,13 +1201,92 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     }
 
     //=======================================================================================================
-        // INVENTORY
+        // INVENTORY in initialize
         setupColumns();
         loadData();
-//        setupInventoryTable();
         setupActionColumnINVENTORY();   // the "⋮" per row
         setupInventorySearchFilter();
         
+        // …inside setupColumns(), after set cell value factories:
+        final PseudoClass PC_EXPIRED  = PseudoClass.getPseudoClass("expired");
+        final PseudoClass PC_EXPIRING = PseudoClass.getPseudoClass("expiring");
+        final PseudoClass PC_OUT      = PseudoClass.getPseudoClass("out");
+
+        inventory_tv.setRowFactory(tv -> new TableRow<Inventory>() {
+            @Override
+            protected void updateItem(Inventory inv, boolean empty) {
+                super.updateItem(inv, empty);
+
+                // clear all flags by default
+                pseudoClassStateChanged(PC_EXPIRED,  false);
+                pseudoClassStateChanged(PC_EXPIRING, false);
+                pseudoClassStateChanged(PC_OUT,      false);
+
+                if (empty || inv == null) return;
+
+                String s = (inv.getStatus() == null) ? "" : inv.getStatus().toLowerCase();
+                switch (s) {
+                    case "expired"        -> pseudoClassStateChanged(PC_EXPIRED,  true);
+                    case "expiring soon"  -> pseudoClassStateChanged(PC_EXPIRING, true);
+                    case "out of stock"   -> pseudoClassStateChanged(PC_OUT,      true);
+                    default -> { /* leave normal */ }
+                }
+            }
+        });
+        //======================= TOOLS INVENTORY ============================
+        invTabPane.getStyleClass().add("underline-tabs");
+
+        // add tool pane
+        setupToolForm();
+        tools_tv.setItems(toolsMaster);
+        
+        // Table
+        setupToolsColumns();
+        setupToolsActionColumn();
+
+        // Load data
+        toolsMaster.setAll(InventoryToolsDAO.findAll());
+        setupToolsSearchFilter();
+
+        // Combo boxes
+        toolCategory_cb.setItems(CATEGORY_OPTIONS);
+        toolLocation_cb.setItems(LOCATION_OPTIONS);
+        toolStatus_cb.setItems(CONDITION_OPTIONS);
+
+        // Let user type new values if needed (optional)
+        toolCategory_cb.setEditable(true);
+        toolLocation_cb.setEditable(true);
+        toolStatus_cb.setEditable(true);
+
+        // Hide the form initially
+        if (AddEdit_ToolPane != null) AddEdit_ToolPane.setVisible(false);
+
+        
+        // === TOOL STATUS ROW COLORS ===
+        final PseudoClass PC_REPAIR   = PseudoClass.getPseudoClass("needsrepair");
+        final PseudoClass PC_UNDERREP = PseudoClass.getPseudoClass("underrepair");
+        final PseudoClass PC_DECOMM   = PseudoClass.getPseudoClass("decommissioned");
+
+        // Apply pseudo-class per row based on status
+        tools_tv.setRowFactory(tv -> new TableRow<InventoryTool>() {
+            @Override
+            protected void updateItem(InventoryTool item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    pseudoClassStateChanged(PC_REPAIR, false);
+                    pseudoClassStateChanged(PC_UNDERREP, false);
+                    pseudoClassStateChanged(PC_DECOMM, false);
+                    setStyle("");
+                    return;
+                }
+
+                String s = item.getStatus() == null ? "" : item.getStatus().toLowerCase();
+                pseudoClassStateChanged(PC_REPAIR,   s.contains("needs repair"));
+                pseudoClassStateChanged(PC_UNDERREP, s.contains("under repair"));
+                pseudoClassStateChanged(PC_DECOMM,   s.contains("decommissioned"));
+            }
+        });
+
         // ====================== VISIT LOG: initialize ======================
         setupColumnsVISITLOG();
         loadVisitLogs();
@@ -2691,27 +2856,48 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     
     ////////////////////////////////////////////////////////////////////////////INVENTORY
     private void setupColumns() {
-        // You can also use lambdas: col.setCellValueFactory(cell -> cell.getValue().itemIdProperty());
-        inventoryCode_col.setCellValueFactory(new PropertyValueFactory<>("itemId"));
-        inventoryName_col.setCellValueFactory(new PropertyValueFactory<>("itemName"));
-        inventoryType_col.setCellValueFactory(new PropertyValueFactory<>("type"));
-        inventoryQuantity_col.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        inventoryUnit_col.setCellValueFactory(new PropertyValueFactory<>("unit"));
-        inventoryExpiry_col.setCellValueFactory(new PropertyValueFactory<>("expiryDate"));
-        inventoryStatus_col.setCellValueFactory(new PropertyValueFactory<>("status"));
+     inventoryCode_col.setCellValueFactory(new PropertyValueFactory<>("itemId"));
+     inventoryName_col.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+     inventoryType_col.setCellValueFactory(new PropertyValueFactory<>("type"));
+     inventoryQuantity_col.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+     inventoryUsed_col.setCellValueFactory(new PropertyValueFactory<>("totalUsed"));
+     inventoryBalance_col.setCellValueFactory(new PropertyValueFactory<>("balanceStock"));
+     inventoryUnit_col.setCellValueFactory(new PropertyValueFactory<>("unit"));
+     inventoryExpiry_col.setCellValueFactory(new PropertyValueFactory<>("expiryDate"));
+     inventoryStatus_col.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        // Optional: pretty date format
-        inventoryExpiry_col.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(java.time.LocalDate d, boolean empty) {
-                super.updateItem(d, empty);
-                setText(empty || d == null ? "" : d.toString()); // format 
-            }
-        });
-    }
+     // Pretty date format
+     inventoryExpiry_col.setCellFactory(col -> new TableCell<>() {
+         @Override protected void updateItem(LocalDate d, boolean empty) {
+             super.updateItem(d, empty);
+             setText(empty || d == null ? "" : d.toString());
+         }
+     });
+
+//     inventory_tv.setRowFactory(tv -> new TableRow<Inventory>() {
+//        @Override protected void updateItem(Inventory inv, boolean empty) {
+//            super.updateItem(inv, empty);
+//            setStyle("");
+//            if (empty || inv == null) return;
+//            String s = inv.getStatus();
+//            if ("expired".equalsIgnoreCase(s)) {
+//                setStyle("-fx-background-color: rgba(255,0,0,0.08);");
+//            } else if ("expiring soon".equalsIgnoreCase(s)) {
+//                setStyle("-fx-background-color: rgba(255,165,0,0.10);");
+//            } else if ("low stock".equalsIgnoreCase(s)) {
+//                setStyle("-fx-background-color: rgba(255,215,0,0.10);");
+//            }
+//        }
+//    });
+
+//        
+
+ }
 
     private void loadData() {
         data = InventoryDAO.findAll();
         inventory_tv.setItems(data);
+        
     }
     
     private void setupInventoryTable() {
@@ -2846,16 +3032,25 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
             boolean ok = InventoryDAO.update(editing);
             if (!ok) { alert("Update failed."); return; }
             inventory_tv.refresh();  // ok for edits
-        } else {
-            Inventory inv = new Inventory(0, name, type, qty, unit, expiry, status);
-            int newId = InventoryDAO.insert(inv);
-            if (newId <= 0) { alert("Insert failed."); return; }
-            inv.setItemId(newId);
-
-            // IMPORTANT: add to the **master** list, not the TableView’s items
-            inventoryMaster.add(0, inv);
-            // (no need to touch inventory_tv.getItems(); filtered/sorted view updates automatically)
-        }
+        }  else {
+                Inventory inv = new Inventory(
+                    0,                // itemId (generated later)
+                    name,             // itemName
+                    type,             // type
+                    qty,              // quantity
+                    0,                // total_used (new item)
+                    qty,              // balance_stock (initially = quantity)
+                    unit,             // unit
+                    expiry,           // expiry_date
+                    status            // status (computed below)
+                );
+                int newId = InventoryDAO.insert(inv);
+                if (newId <= 0) { alert("Insert failed."); return; }
+                inv.setItemId(newId);
+                // IMPORTANT: add to the **master** list, not the TableView’s items
+                inventoryMaster.add(0, inv);
+                // (no need to touch inventory_tv.getItems(); filtered/sorted view updates automatically)
+            }
         
         // 4) Done: clear + hide
         clearForm();
@@ -2964,17 +3159,285 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
      * (Matches inventory status values in the schema.) 
      */
     private String computeStatus(LocalDate expiry, int qty) {
-        if (qty == 0) return "out of stock";
+        // Out of stock first
+        if (qty <= 0) return "out of stock";
+
+        // Expired beats any other status
+        if (expiry != null && expiry.isBefore(LocalDate.now())) return "expired";
+
+        // Expiring soon within 30 days (including today)
         if (expiry != null) {
             long days = ChronoUnit.DAYS.between(LocalDate.now(), expiry);
             if (days >= 0 && days <= 30) return "expiring soon";
         }
-        else if (qty <= 10) return "low stock"; 
+
+        // Low stock rule
+        if (qty <= 10) return "low stock";
+
         return "in stock";
-        
     }
+
     
     ////////////////////////////////////////////////////////////////////////////end inventory
+    
+    //////////////////////////////////////////////////////////////////////////// TOOLS INVENTORY
+    private void setupToolsColumns() {
+        // If "Code" column should show tool_code, change to getToolCodeProperty and String
+        // if "id" - toolIdProperty - then Number column type
+        inventoryTools_code.setCellValueFactory(c -> c.getValue().toolCodeProperty());
+        inventoryTools_name.setCellValueFactory(c -> c.getValue().itemNameProperty());
+        inventoryTools_category.setCellValueFactory(c -> c.getValue().categoryProperty());
+        inventoryTools_quantity.setCellValueFactory(c -> c.getValue().quantityProperty());
+        inventoryTools_unit.setCellValueFactory(c -> c.getValue().unitProperty());
+        inventoryTools_location.setCellValueFactory(c -> c.getValue().locationProperty());
+        inventoryTools_status.setCellValueFactory(c -> c.getValue().statusProperty());
+        inventoryTools_remarks.setCellValueFactory(c -> c.getValue().remarksProperty());
+
+        // Optional: nicer placeholders
+        tools_tv.setPlaceholder(new Label("No tools"));
+    }
+
+    private void setupToolsSearchFilter() {
+        toolsFiltered = new FilteredList<>(toolsMaster, t -> true);
+        toolSearch_tf.textProperty().addListener((o, a, text) -> {
+            final String q = (text == null ? "" : text.trim().toLowerCase());
+            if (q.isEmpty()) { toolsFiltered.setPredicate(t -> true); return; }
+            toolsFiltered.setPredicate(t -> {
+                String hay = (safe(t.getToolCode()) + " " + safe(t.getItemName()) + " " + //getCode
+                              safe(t.getCategory()) + " " + safe(t.getStatus())).toLowerCase();
+                for (String tok : q.split("\\s+")) if (!hay.contains(tok)) return false;
+                return true;
+            });
+        });
+
+        toolsSorted = new SortedList<>(toolsFiltered);
+        toolsSorted.comparatorProperty().bind(tools_tv.comparatorProperty());
+        tools_tv.setItems(toolsSorted);
+    }
+    private static String safe(String s) { return s == null ? "" : s; }
+
+    private void setupToolsActionColumn() {
+        inventoryTools_action.setCellFactory(col -> new TableCell<>() {
+            private final Button dots = new Button("⋮");
+            private final MenuItem viewEdit = new MenuItem("Edit / View");
+            private final MenuItem del      = new MenuItem("Delete");
+            private final ContextMenu menu  = new ContextMenu(viewEdit, del);
+
+            {
+                dots.getStyleClass().add("action-dots");
+                dots.setFocusTraversable(false);
+                dots.setOnAction(e -> menu.show(dots, javafx.geometry.Side.BOTTOM, 0, 0));
+
+                viewEdit.setOnAction(e -> {
+                    InventoryTool row = getTableView().getItems().get(getIndex());
+                    openEditTool(row);
+                });
+                del.setOnAction(e -> {
+                    InventoryTool row = getTableView().getItems().get(getIndex());
+                    confirmAndDeleteTool(row);
+                });
+            }
+
+            @Override protected void updateItem(Void it, boolean empty) {
+                super.updateItem(it, empty);
+                setGraphic(empty ? null : dots);
+                setText(null);
+            }
+        });
+    }
+    
+    private void confirmAndDeleteTool(InventoryTool t) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION,
+                "Delete \"" + t.getItemName() + "\" (" + t.getToolCode() + ")?",
+                ButtonType.OK, ButtonType.CANCEL);
+        a.setHeaderText(null);
+        a.showAndWait().ifPresent(bt -> {
+            if (bt == ButtonType.OK) {
+                boolean ok = InventoryToolsDAO.deleteById(t.getToolId());
+                if (ok) toolsMaster.remove(t);
+                else new Alert(Alert.AlertType.ERROR, "Delete failed.", ButtonType.OK).showAndWait();
+            }
+        });
+    }
+
+
+    private void openToolViewEditDialog(InventoryTool it) {
+        // Minimal, non-blocking viewer: show acquired_on and purchase_cost.
+        // Replace with a proper dialog when you build the Add/Edit pane.
+        Alert info = new Alert(Alert.AlertType.INFORMATION);
+        info.setTitle("Tool Details");
+        info.setHeaderText(it.getItemName());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Code: ").append(safe(it.getToolCode())).append("\n");
+        sb.append("Category: ").append(safe(it.getCategory())).append("\n");
+        sb.append("Quantity: ").append(it.getQuantity()).append(" ").append(safe(it.getUnit())).append("\n");
+        sb.append("Location: ").append(safe(it.getLocation())).append("\n");
+        sb.append("Status: ").append(safe(it.getStatus())).append("\n");
+        sb.append("Remarks: ").append(safe(it.getRemarks())).append("\n\n");
+        sb.append("Acquired On: ").append(it.getAcquiredOn() == null ? "" : it.getAcquiredOn().toString()).append("\n");
+        sb.append("Purchase Cost: ").append(it.getPurchaseCost() == null ? "" : it.getPurchaseCost().toPlainString());
+        info.setContentText(sb.toString());
+        info.showAndWait();
+    }
+    
+    @FXML
+    private void onAddTool(ActionEvent event) {
+        editingTool = null;          // ADD mode
+        clearToolForm();
+        AddEdit_ToolPane.setVisible(true);
+        Platform.runLater(() -> toolCode_tf.requestFocus());
+        // Optional: Set header label 
+        toolFormTitle_lbl.setText("Add Tool");
+    }
+
+
+    ///////////////////////////////////////////////////////// add tool pane
+    // Call once in initialize()
+    private void setupToolForm() {
+        toolStatus_cb.getSelectionModel().select("good");
+        toolAcquired_dp.setValue(java.time.LocalDate.now());
+
+        // live validation
+        ChangeListener<String> v = (obs,o,n) -> validateToolForm();
+        toolCode_tf.textProperty().addListener(v);
+        toolName_tf.textProperty().addListener(v);
+        toolQty_tf.textProperty().addListener(v);
+        toolUnit_tf.textProperty().addListener(v);
+        toolCategory_cb.valueProperty().addListener((o,a,b)->validateToolForm());
+        validateToolForm();
+    }
+
+    private void validateToolForm() {
+        boolean ok = true;
+
+        ok &= mark(toolCode_tf, !isBlank(toolCode_tf.getText()));
+        ok &= mark(toolName_tf, !isBlank(toolName_tf.getText()));
+        ok &= mark(toolCategory_cb, toolCategory_cb.getValue()!=null && !toolCategory_cb.getValue().isBlank());
+        ok &= mark(toolQty_tf, isInt(toolQty_tf.getText(), 0, Integer.MAX_VALUE));
+        ok &= mark(toolUnit_tf, !isBlank(toolUnit_tf.getText()));
+        ok &= mark(toolCost_tf, isMoney(toolCost_tf.getText()));
+
+        toolFormHint_lbl.setText(ok ? "" : "Please correct highlighted fields");
+        toolSave_btn.setDisable(!ok);
+    }
+    private boolean isBlank(String s){ return s==null || s.isBlank(); }
+    private boolean isInt(String s, int min, int max){
+        try { int v = Integer.parseInt(s.trim()); return v>=min && v<=max; } catch(Exception e){ return false; }
+    }
+    private boolean isMoney(String s){
+        if (isBlank(s)) return true; // optional
+        try { new java.math.BigDecimal(s.trim()); return true; } catch(Exception e){ return false; }
+    }
+    private boolean mark(Control c, boolean valid){
+        if (valid) c.getStyleClass().remove("invalid");
+        else if (!c.getStyleClass().contains("invalid")) c.getStyleClass().add("invalid");
+        return valid;
+    }
+
+    @FXML private void onCancelTool(ActionEvent e){
+        clearToolForm();
+        AddEdit_ToolPane.setVisible(false);
+    }
+    
+    private void clearToolForm() {
+        toolCode_tf.clear();
+        toolName_tf.clear();
+        toolCategory_cb.setValue(null);
+        toolQty_tf.clear();
+        toolUnit_tf.clear();
+        toolLocation_cb.setValue(null);
+        toolStatus_cb.setValue(null);
+        toolRemarks_ta.clear();
+        toolAcquired_dp.setValue(null);
+        toolCost_tf.clear();
+    }
+
+    @FXML
+    private void onSaveTool(ActionEvent e) {
+        // 1) validate
+        String code  = toolCode_tf.getText().trim();
+        String name  = toolName_tf.getText().trim();
+        if (code.isEmpty() || name.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Code and Item Name are required.", ButtonType.OK).showAndWait();
+            return;
+        }
+        int qty;
+        try { qty = Integer.parseInt(toolQty_tf.getText().trim()); }
+        catch (Exception ex) { new Alert(Alert.AlertType.WARNING,"Quantity must be a whole number.",ButtonType.OK).showAndWait(); return; }
+
+        String unit      = toolUnit_tf.getText().trim();
+        String category  = valueOrNull(toolCategory_cb.getEditor().getText(), toolCategory_cb.getValue());
+        String location  = valueOrNull(toolLocation_cb.getEditor().getText(), toolLocation_cb.getValue());
+        String condition = valueOrNull(toolStatus_cb.getEditor().getText(), toolStatus_cb.getValue());
+        String remarks   = toolRemarks_ta.getText();
+
+        LocalDate acquired = toolAcquired_dp.getValue();
+        BigDecimal cost = null;
+        String costTxt = toolCost_tf.getText().trim();
+        if (!costTxt.isEmpty()) {
+            try { cost = new BigDecimal(costTxt); }
+            catch (NumberFormatException ex) {
+                new Alert(Alert.AlertType.WARNING, "Purchase cost must be a number.", ButtonType.OK).showAndWait();
+                return;
+            }
+        }
+
+        if (editingTool == null) {
+            // ADD
+            InventoryTool t = new InventoryTool(0, code, name, category, qty, unit, location, condition, remarks, acquired, cost);
+            int newId = InventoryToolsDAO.insert(t);
+            if (newId <= 0) { new Alert(Alert.AlertType.ERROR, "Insert failed.", ButtonType.OK).showAndWait(); return; }
+            t.setToolId(newId);
+            toolsMaster.add(0, t);
+        } else {
+            // EDIT
+            editingTool.setToolCode(code);
+            editingTool.setItemName(name);
+            editingTool.setCategory(category);
+            editingTool.setQuantity(qty);
+            editingTool.setUnit(unit);
+            editingTool.setLocation(location);
+            editingTool.setStatus(condition);
+            editingTool.setRemarks(remarks);
+            editingTool.setAcquiredOn(acquired);
+            editingTool.setPurchaseCost(cost);
+
+            boolean ok = InventoryToolsDAO.update(editingTool);
+            if (!ok) { new Alert(Alert.AlertType.ERROR, "Update failed.", ButtonType.OK).showAndWait(); return; }
+            tools_tv.refresh(); // reflect changes
+        }
+
+        clearToolForm();
+        AddEdit_ToolPane.setVisible(false);
+    }
+
+    private static String valueOrNull(String editorText, String selected) {
+        String v = (selected != null ? selected : (editorText == null ? "" : editorText.trim()));
+        return v.isEmpty() ? null : v;
+    }
+    
+    private void openEditTool(InventoryTool t) {
+        if (t == null) return;
+        editingTool = t;
+
+        // populate fields
+        toolCode_tf.setText(safe(t.getToolCode()));
+        toolName_tf.setText(safe(t.getItemName()));
+        toolCategory_cb.setValue(safe(t.getCategory()));
+        toolQty_tf.setText(String.valueOf(t.getQuantity()));
+        toolUnit_tf.setText(safe(t.getUnit()));
+        toolLocation_cb.setValue(safe(t.getLocation()));
+        toolStatus_cb.setValue(safe(t.getStatus()));
+        toolRemarks_ta.setText(safe(t.getRemarks()));
+        toolAcquired_dp.setValue(t.getAcquiredOn());
+        toolCost_tf.setText(t.getPurchaseCost() == null ? "" : t.getPurchaseCost().toPlainString());
+
+        AddEdit_ToolPane.setVisible(true);
+        Platform.runLater(() -> toolName_tf.requestFocus());
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////// end of tools inventory
     
     
     // small helpers

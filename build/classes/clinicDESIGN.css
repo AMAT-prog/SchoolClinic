@@ -408,4 +408,148 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 }
 
 
+/* Whole-row text color by status */
+.table-row-cell:expired  .table-cell { -fx-text-fill: red;    -fx-font-weight: bold; }
+.table-row-cell:expiring .table-cell { -fx-text-fill: orange; -fx-font-weight: bold; }
+.table-row-cell:out      .table-cell { -fx-text-fill: gray;   -fx-font-style: italic; }
+
+/* keep selected rows readable (JavaFX selection paints background) */
+.table-row-cell:filled:focused:selected .table-cell,
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: -fx-text-background-color;
+    -fx-font-style: normal;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell:selected .table-cell { -fx-text-fill: black !important; }
+.table-row-cell:selected .text { -fx-fill: black !important; }
+
+/* ===== TOOL INVENTORY COLORS ===== */
+
+/* Needs Repair → amber / orange text */
+.table-row-cell:needsrepair .table-cell {
+    -fx-text-fill: #cc7a00;         /* dark orange */
+    -fx-font-weight: bold;
+}
+
+/* Under Repair → gray text */
+.table-row-cell:underrepair .table-cell {
+    -fx-text-fill: #666666;         /* medium gray */
+    -fx-font-style: italic;
+}
+
+/* Decommissioned → dark gray text */
+.table-row-cell:decommissioned .table-cell {
+    -fx-text-fill: #999999;
+    -fx-font-style: italic;
+}
+
+/* Keep black text when selected (overrides default white) */
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: black;
+}
+
+
+/* ========== Underline tabs (like the course chips) ========== */
+.underline-tabs {
+  -fx-background-color: transparent;
+}
+
+/* Make the whole header area transparent */
+.underline-tabs > .tab-header-area,
+.underline-tabs > .tab-header-area > .headers-region,
+.underline-tabs > .tab-header-area > .tab-header-background {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 0 0 0 0; /* space under labels for the underline */
+}
+
+/* Tabs look like text pills (no background) */
+.underline-tabs .tab {
+  -fx-background-color: transparent;
+  -fx-padding: 0px 3px 0px 3px; /* top / right / bottom / left */
+  -fx-border-width: 0 0 0px 0;    /* toggle only the bottom */
+  -fx-border-color: transparent;
+}
+
+/* Label style (unselected) */
+.underline-tabs .tab .tab-label {
+  -fx-text-fill: #1f1f1f;
+  -fx-font-weight: 700;             /*same weight as course tabs */
+  -fx-font-size: 15px;             
+  -fx-padding: 0 0 0 0;
+  /*-fx-font-weight: regular;*/
+}
+
+/* Hover: subtle underline hint */
+.underline-tabs .tab:hover {
+  -fx-border-color: transparent transparent rgba(0,0,0,0.15) transparent;
+}
+
+/* Selected: only a bottom border is visible (green, like the course bar) */
+.underline-tabs .tab:selected {
+  -fx-border-color: transparent transparent #00b36b transparent; /* your green */
+  -fx-border-width: 0 0 2px 0; 
+}
+
+/* Selected label stays dark */
+.underline-tabs .tab:selected .tab-label {
+  -fx-text-fill: #101010;
+  -fx-font-size: 16px;   
+}
+
+/* Remove the default dotted focus ring on selected tab */
+.underline-tabs:focused > .tab-header-area > .headers-region .tab:selected {
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+  -fx-font-weight: bold;
+}
+
+/* Content area of TabPane transparent (so background shows) */
+.underline-tabs > .tab-content-area {
+  -fx-background-color: transparent;
+  -fx-padding: 0;
+  -fx-border-color: transparent;
+}
+
+
+
+
+/* for adding new tool */
+/* container */
+.sheet { -fx-background-color: transparent; }
+
+/* inner panel */
+.panel {
+    -fx-background-color: rgba(255,255,255,0.99);
+    -fx-background-radius: 14;
+    -fx-padding: 18 20 18 20;
+}
+.panel-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.hint { -fx-text-fill: #777; }
+
+/* buttons */
+.ghost { -fx-background-color: transparent; -fx-border-color: #bbb; -fx-border-radius: 8; -fx-background-radius: 8; }
+.ghost-icon { -fx-background-color: transparent; -fx-font-size: 14px; }
+
+/* underlined text inputs */
+.text-field, .text-area, .combo-box, .date-picker {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    -fx-background-insets: 0,0,0,0;
+    -fx-padding: 6 4 6 2;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: -fx-control-inner-background, -fx-control-inner-background, #29b388, -fx-control-inner-background;
+}
+.text-field:focused, .text-area:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: transparent transparent #17a97c transparent;
+}
+
+/* simple invalid ring you can toggle from code */
+.invalid {
+    -fx-border-color: transparent transparent #e53935 transparent !important;
+}
+
 
