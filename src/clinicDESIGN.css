@@ -553,3 +553,48 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 }
 
 
+
+/* Notification list cells */
+.list-cell.sev-info    { -fx-background-color: rgba(0,0,0,0.02); }
+.list-cell.sev-warning { -fx-background-color: rgba(255,165,0,0.08); }
+.list-cell.sev-danger  { -fx-background-color: rgba(255,0,0,0.06); }
+
+/* Unread emphasis */
+.list-cell:unread .label { -fx-font-weight: bold; }
+
+/* Subtle delete button */
+.button.ghost-danger {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cc3333;
+}
+.button.ghost-danger:hover {
+    -fx-background-color: rgba(204,51,51,0.08);
+}
+
+/* Make titles a bit larger */
+.list-cell .label {
+    -fx-font-size: 13px;
+}
+
+
+
+
+/* badge circle color */
+#notifBadgeCircle {
+    -fx-fill: #e53935; /* red */
+}
+
+/* label on top of circle */
+#notifBadgeLabel {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+/* hide badge when zero (we'll also control visible in controller) */
+.hidden-badge {
+    -fx-opacity: 0;
+    -fx-visible: false;
+}
+

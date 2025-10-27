@@ -91,6 +91,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.StandardCopyOption;
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.YearMonth;
@@ -101,6 +102,9 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -108,7 +112,10 @@ import javafx.animation.SequentialTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -656,6 +663,35 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     private Button toolSave_btn;
     @FXML
     private Label toolFormTitle_lbl;
+    
+    @FXML
+    private ToggleButton all_tb;
+    @FXML
+    private ToggleButton unread_tb;
+    @FXML
+    private ToggleButton inv_tb;
+    @FXML
+    private ToggleButton cal_tb;
+    @FXML
+    private Button markAllRead_btn;
+    @FXML
+    private Button clearRead_btn;
+    @FXML
+    private ListView<Notification> notif_lv;
+    @FXML
+    private ToggleGroup notifTOGGLE;
+    @FXML
+    private VBox SIDENAV_VBOX;
+    @FXML
+    private StackPane notifBellStack;
+    @FXML
+    private ImageView notifBellImage;
+    @FXML
+    private StackPane notifBadgePane;
+    @FXML
+    private Circle notifBadgeCircle;
+    @FXML
+    private Label notifBadgeLabel;
 
     
 
@@ -830,9 +866,38 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     // keep the currentUserId, orig* vars, etc.
     private String adminImagePath = null;   // holds the current admin photo path from DB
 
+    //NOTIFICATIONS ON DASHBOARD
+     // --- backing lists ---
+    private final ObservableList<Notification> notifMaster   = FXCollections.observableArrayList();
+    private FilteredList<Notification>          notifFiltered;
+    private SortedList<Notification>            notifSorted;
     
+    // CSS pseudo-class for unread cells (used by notifications.css)
+    private static final PseudoClass PC_UNREAD = PseudoClass.getPseudoClass("unread");
 
-  
+    // helper internal property
+    private final IntegerProperty unreadCount = new SimpleIntegerProperty(0);
+    
+    // add:
+    private FilteredList<Notification> unreadFiltered;
+    private ScheduledExecutorService notifScheduler;   // optional periodic refresh
+    
+    // --- Notifications instant refresh support ---
+    private final java.util.concurrent.ExecutorService notifExec =
+            java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+                Thread t = new Thread(r, "notif-now");
+                t.setDaemon(true);
+                return t;
+            });
+
+    private final java.util.concurrent.atomic.AtomicBoolean notifRefreshInFlight =
+        new java.util.concurrent.atomic.AtomicBoolean(false);
+
+    // date creation format in each notification
+    private static final DateTimeFormatter DISPLAY_FMT =
+        DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a");
+
+
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
     @FXML
     private void dashboard_sideNav(ActionEvent event) {
@@ -938,6 +1003,8 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
         medicalCertificate_pane.setVisible(false);
         calendar_pane.setVisible(false);
         settings_pane.setVisible(false);
+        
+        SIDENAV_VBOX.setDisable(false);
     }
 
     ////////////////////////////////////////////////////////////////////////////end side navigation
@@ -975,9 +1042,20 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
 
     @FXML
     private void Notification_action(MouseEvent event) {
+        SIDENAV_VBOX.setDisable(true);
         Dashboard_pane.setDisable(true);
         Notification_pane.setVisible(true);
+
+//        // 1) Refresh the DB (this updates notifications server-side)
+//        NotificationDAO.refreshFromDB();
+//
+//        // 2) Refresh the same master list (without breaking binding)
+//        notifMaster.setAll(NotificationDAO.findAll());
+//
+//        // 3) Optional: Reapply filters
+//        refreshPredicate();
     }
+
 
     private void loadDashboardStats() {
         int students    = StudentDAO.countActive(); 
@@ -1475,6 +1553,111 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
         
         wireSwitch(toggleProfile);
         wireSwitch(togglePassword);
+        
+        //////////NOTIFICATIONS IN INITIALIZE///////////////
+        
+        // 1) Cell factory + placeholder
+        setupNotificationCellFactory();
+        notif_lv.setPlaceholder(new Label("No notifications"));
+
+        // 2) Pipeline for the ListView (master -> filtered -> sorted)
+        notifFiltered = new FilteredList<>(notifMaster, n -> true);
+        notifSorted   = new SortedList<>(notifFiltered);
+        // Newest first
+        notifSorted.setComparator(Comparator.comparing(Notification::getCreatedAt).reversed());
+        // Attach to ListView
+        notif_lv.setItems(notifSorted);
+        
+        // 3) Search + toggle filters
+        search_tf.textProperty().addListener((o, ov, nv) -> refreshPredicate());
+
+        all_tb.selectedProperty().addListener((o,ov,nv)-> { if (nv) { unread_tb.setSelected(false); inv_tb.setSelected(false); cal_tb.setSelected(false); } refreshPredicate(); });
+        unread_tb.selectedProperty().addListener((o,ov,nv)-> { if (nv) { all_tb.setSelected(false); } refreshPredicate(); });
+        inv_tb.selectedProperty().addListener((o,ov,nv)-> { if (nv) { all_tb.setSelected(false); } refreshPredicate(); });
+        cal_tb.selectedProperty().addListener((o,ov,nv)-> { if (nv) { all_tb.setSelected(false); } refreshPredicate(); });
+        all_tb.setSelected(true);
+        refreshPredicate();
+        
+        // 4) Badge: unread = items in master where isRead == false
+        unreadFiltered = new FilteredList<>(notifMaster, n -> n != null && !n.isRead());
+        setupNotificationBadge();  // binds badge to unreadFiltered size
+        
+        // when items are added, watch their readProperty to refresh the unread filter
+        notifMaster.addListener((ListChangeListener<Notification>) ch -> {
+            while (ch.next()) {
+                if (ch.wasAdded()) {
+                    for (Notification n : ch.getAddedSubList()) {
+                        n.readProperty().addListener((o, ov, nv) -> refreshUnreadFilter());
+                    }
+                }
+            }
+        });
+
+
+        // 5) First refresh (runs SP + loads list)
+        runNotifRefreshOnce();
+
+        // 6) Optional periodic refresh (daemon thread)
+        notifScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "notif-refresh");
+            t.setDaemon(true);
+            return t;
+        });
+//        notifScheduler.scheduleAtFixedRate(this::runNotifRefreshOnce, 5, 5, TimeUnit.MINUTES);
+        notifScheduler.scheduleAtFixedRate(this::runNotifRefreshOnce, 10, 30, TimeUnit.SECONDS);
+//        notifScheduler.scheduleAtFixedRate(() -> {
+//            if (Platform.isFxApplicationThread()) return;
+//            if (Notification_pane.isVisible()) {
+//                runNotifRefreshOnce();
+//            }
+//        }, 5, 5, TimeUnit.SECONDS);
+
+        
+
+        // 7) Toolbar handlers (inside initialize)
+        // mark all read
+        markAllRead_btn.setOnAction(e -> {
+            boolean ok = NotificationDAO.markAllRead();
+            if (!ok) {
+                new Alert(Alert.AlertType.ERROR, "Failed to mark all as read in DB.").showAndWait();
+                return;
+            }
+            // update in-memory
+            for (Notification n : notifMaster) n.setRead(true);
+            refreshUnreadFilter();          // <— updates badge immediately
+            triggerNotifRefreshNow(); 
+
+            notif_lv.refresh();
+        });
+
+        // clear read (delete read notifications)
+        clearRead_btn.setOnAction(e -> {
+            // Split read notifications into auto-generated vs manual
+            List<Notification> readNow = new ArrayList<>(notifMaster.filtered(Notification::isRead));
+            if (readNow.isEmpty()) return;
+
+            // 1) Snooze all AUTO read items (so refresh won’t bring them back today)
+            for (Notification n : readNow) {
+                if (n.isAutoGenerated()) {
+                    NotificationDAO.snoozeAuto(n.getKind(),
+                                               n.getRelatedType().name(),
+                                               n.getRelatedId(),
+                                               1);
+                }
+            }
+
+            // 2) Delete MANUAL read items from DB
+            for (Notification n : readNow) {
+                if (!n.isAutoGenerated()) {
+                    NotificationDAO.deleteById(n.getId());
+                }
+            }
+
+            // 3) Update UI
+            notifMaster.removeIf(Notification::isRead);
+            refreshUnreadFilter();          // <— updates badge immediately
+            triggerNotifRefreshNow();
+        });
 
     }  
     ////////////////////////////////////////////////////////////////////////////end initialization
@@ -1598,6 +1781,8 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
         // (optional) clear form state for the next Add
         clearFields();
         rxItems.clear();
+        
+        triggerNotifRefreshNow(); //TO UPDATE LABEL BADGE IN NOTIFICATION (FOR INVENTORY OF MEDICINE - STOCK)
     }
 
     // --- Edit button: allow fields to be edited (student change is not allowed here) ---
@@ -2969,6 +3154,8 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
         });
         
         loadDashboardStats();
+        triggerNotifRefreshNow(); //TO UPDATE LABEL BADGE IN NOTIFICATION (FOR INVENTORY OF MEDICINE - STOCK)
+
     }
 
     // Hook your existing edit popup here
@@ -3063,6 +3250,9 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
         setupActionColumnINVENTORY();   // the "⋮" per row
         setupInventorySearchFilter();
         loadDashboardStats();
+        
+        triggerNotifRefreshNow(); //TO UPDATE LABEL BADGE IN NOTIFICATION (FOR INVENTORY OF MEDICINE - STOCK)
+
     }
 
     @FXML
@@ -4665,6 +4855,7 @@ private void warnLong(String title, String header, String message) {
             upcomingList.getItems().setAll(dao.findUpcoming(6));
 //            remindersList.getItems().setAll(dao.remindersDueToday());
         } catch (Exception ex) { ex.printStackTrace(); }
+        triggerNotifRefreshNow();
     }
 
     //peek overlay
@@ -4751,6 +4942,7 @@ private void warnLong(String title, String header, String message) {
         a.setContentText(it.getTitle() + " (" + it.getKind() + ")");
         a.getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
         return a.showAndWait().filter(bt -> bt == ButtonType.OK).isPresent();
+        
     }
 
     //for legend color
@@ -5280,6 +5472,346 @@ private void warnLong(String title, String header, String message) {
             return inputCurrent.equals(storedFromDB);
         }
     }
+    ////////////////////////////////////////////////////////////////////////////NOTIFICATIONS
+//    private void setupNotificationList() {
+//        notif_lv.setCellFactory(lv -> new ListCell<>() {
+//            private final Label icon = new Label();          // use emoji or glyphs
+//            private final Label title = new Label();
+//            private final Label body  = new Label();
+//            private final Label when  = new Label();
+//            private final Button del  = new Button("Delete");
+//
+//            private final HBox header = new HBox(title, new Region(), when);
+//            private final HBox root   = new HBox(12, icon, new VBox(6, header, body), del);
+//
+//            {
+//                ((Region)header.getChildren().get(1)).setMinWidth(0);
+//                HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
+//                root.setAlignment(Pos.CENTER_LEFT);
+//                del.getStyleClass().add("ghost-danger");
+//                del.setOnAction(e -> {
+//                    Notification n = getItem();
+//                    if (n != null && NotificationDAO.deleteById(n.getNotificationId())) {
+//                        getListView().getItems().remove(n);
+//                    }
+//                });
+//
+//                // mark read on click
+//                root.setOnMouseClicked(e -> {
+//                    if (e.getClickCount()==1) {
+//                        Notification n = getItem();
+//                        if (n != null && !n.isRead()) {
+//                            n.setRead(true);
+//                            NotificationDAO.markRead(n.getNotificationId(), true);
+//                            updateReadStyle(n);
+//                        }
+//                        // (optional) navigate: open inventory tab/event based on n.getRelatedType()
+//                    }
+//                });
+//            }
+//
+//            @Override protected void updateItem(Notification n, boolean empty) {
+//                super.updateItem(n, empty);
+//                if (empty || n == null) { setGraphic(null); return; }
+//
+//                icon.setText(switch (n.getKind()) {
+//                    case "inventory" -> "📦";
+//                    case "calendar"  -> "🗓️";
+//                    default -> "🔔";
+//                });
+//                title.setText(n.getTitle());
+//                body.setText(n.getBody()==null ? "" : n.getBody());
+//
+//                LocalDateTime ts = n.getDueAt()!=null ? n.getDueAt() : n.getCreatedAt();
+//                when.setText(ts==null ? "" : ts.toLocalDate().toString());
+//
+//                // severity color
+//                getStyleClass().removeAll("sev-info","sev-warning","sev-danger");
+//                getStyleClass().add(switch (n.getSeverity()) {
+//                    case "warning" -> "sev-warning";
+//                    case "danger"  -> "sev-danger";
+//                    default -> "sev-info";
+//                });
+//
+//                updateReadStyle(n);
+//                setGraphic(root);
+//            }
+//
+//            private void updateReadStyle(Notification n) {
+//                pseudoClassStateChanged(PseudoClass.getPseudoClass("unread"), !n.isRead());
+//            }
+//        });
+//    }
+    ///////////FILTERS & SEARCH
+   
+
+//    private void loadNotifications() {
+//        NotificationDAO.refreshAuto();                 // build auto notifications
+//        notifMaster.setAll(NotificationDAO.findAll());
+//
+//        notifFiltered = new FilteredList<>(notifMaster, x -> true);
+//        notifSorted   = new SortedList<>(notifFiltered);
+//        notifSorted.comparatorProperty().bind(notif_lv.comparatorProperty());
+//        notif_lv.setItems(notifSorted);
+//    }
+
+//    private void applyFilters() {
+//        String search = search_tf.getText()==null ? "" : search_tf.getText().trim().toLowerCase();
+//        boolean onlyUnread = unread_tb.isSelected();
+//        boolean invOnly    = inv_tb.isSelected();
+//        boolean calOnly    = cal_tb.isSelected();
+//
+//        notifFiltered.setPredicate(n -> {
+//            if (onlyUnread && n.isRead()) return false;
+//            if (invOnly && !"inventory".equals(n.getKind())) return false;
+//            if (calOnly && !"calendar".equals(n.getKind())) return false;
+//            if (search.isEmpty()) return true;
+//            String hay = (n.getTitle()+" "+n.getBody()).toLowerCase();
+//            for (String t : search.split("\\s+")) if (!hay.contains(t)) return false;
+//            return true;
+//        });
+//    }
+    
+    /** Applies the current search + toggle into the FilteredList predicate. */
+    private void refreshPredicate() {
+        final String q = (search_tf.getText() == null) ? "" : search_tf.getText().trim().toLowerCase();
+
+        // which type (All / Inventory / Events)?
+        Notification.Type selectedType = null;
+        if (inv_tb.isSelected()) selectedType = Notification.Type.INVENTORY;
+        else if (cal_tb.isSelected()) selectedType = Notification.Type.EVENT;
+
+        final Notification.Type filterType = selectedType; // effectively final for lambda
+        final boolean onlyUnread = unread_tb.isSelected();
+
+        notifFiltered.setPredicate(n -> {
+            if (n == null) return false;
+
+            // unread filter
+            if (onlyUnread && n.isRead()) return false;
+
+            // type filter
+            if (filterType != null && n.getRelatedType() != filterType) return false;
+
+            // text search (title/body/severity)
+            if (!q.isEmpty()) {
+                String hay = ( (n.getTitle() == null ? "" : n.getTitle()) + " " +
+                               (n.getBody()  == null ? "" : n.getBody())  + " " +
+                               (n.getSeverity() == null ? "" : n.getSeverity().name())
+                             ).toLowerCase();
+                if (!hay.contains(q)) return false;
+            }
+            return true;
+        });
+    }
+
+
+    /** Custom cell with severity color, unread style, and a delete button. */
+    private void setupNotificationCellFactory() {
+        notif_lv.setCellFactory(lv -> new ListCell<>() {
+            private final Label title = new Label();
+            private final Label meta  = new Label();
+            private final Button del  = new Button("Delete");
+            private final VBox   texts = new VBox(2, title, meta);
+            private final HBox   root  = new HBox(12, texts, del);
+
+            {
+                // styling hooks to match notifications.css
+                del.getStyleClass().add("ghost-danger");
+                texts.setAlignment(Pos.CENTER_LEFT);
+                root.setAlignment(Pos.CENTER_LEFT);
+                HBox.setHgrow(texts, Priority.ALWAYS);
+
+                // delete handler (inside setupNotificationCellFactory())
+                del.setOnAction(e -> {
+                    Notification n = getItem();
+                    if (n == null) return;
+
+                    if (n.isAutoGenerated()) {
+                        // Snooze for today so it won't re-appear again today
+                        boolean ok = NotificationDAO.snoozeAuto(n.getKind(),
+                                                                n.getRelatedType().name(),
+                                                                n.getRelatedId(),
+                                                                1 /* days */);
+                        if (ok) notifMaster.remove(n);
+                        refreshUnreadFilter();          // <— updates badge immediately
+                    } else {
+                        if (NotificationDAO.deleteById(n.getId())) {
+                            notifMaster.remove(n);
+                            refreshUnreadFilter();          // <— updates badge immediately
+                        }
+                    } triggerNotifRefreshNow();
+                });
+
+
+
+                // mark read on click
+                setOnMouseClicked(e -> {
+                    Notification n = getItem();
+                    if (n != null && e.getClickCount() == 1) {
+                        // Toggle read state (or simply mark read)
+                        boolean target = true; // mark read on single click (change if want toggle) = to toggle read/unread on click, use boolean target = !n.isRead(); instead
+                        boolean dbOk = NotificationDAO.markRead(n.getId(), target);
+                        if (dbOk) {
+                            n.setRead(target);      // update in-memory model
+                            // keep pseudo-class in sync by forcing style recompute
+                            pseudoClassStateChanged(PC_UNREAD, !n.isRead());
+                            refreshUnreadFilter();          // <— updates badge immediately
+                            notif_lv.refresh();
+                        } else {
+                            new Alert(Alert.AlertType.ERROR, "Failed to update notification in database.").showAndWait();
+                        }
+                    } refreshUnreadFilter();          // <— updates badge immediately
+                      triggerNotifRefreshNow();
+                });
+
+            }
+
+            @Override protected void updateItem(Notification n, boolean empty) {
+                super.updateItem(n, empty);
+                if (empty || n == null) {
+                    setGraphic(null);
+                    getStyleClass().removeAll("sev-info","sev-warning","sev-danger");
+                    pseudoClassStateChanged(PC_UNREAD, false);
+                    return;
+                }
+
+                title.setText(n.getTitle());
+//                meta.setText(n.getCreatedAt().toString() + "  •  " + n.getBody());
+                meta.setText(DISPLAY_FMT.format(n.getCreatedAt()) + "  •  " + n.getBody());
+
+
+                // severity border color (via CSS classes)
+                getStyleClass().removeAll("sev-info","sev-warning","sev-danger");
+                switch (n.getSeverity()) {
+                    case INFO    -> getStyleClass().add("sev-info");
+                    case WARNING -> getStyleClass().add("sev-warning");
+                    case DANGER  -> getStyleClass().add("sev-danger");
+                }
+
+                // unread tint (via pseudo-class)
+                pseudoClassStateChanged(PC_UNREAD, !n.isRead());
+
+                setGraphic(root);
+            }
+        });
+    }
+
+    // call this from initialize() AFTER setting notifMaster (setAll from DAO) and connect listView pipeline
+//    private void setupNotificationBadge() {
+//        // initial CSS-styling is loaded from stylesheet (notifBadgeCircle & Label IDs)
+//        // position the badge relative to bell: top-right
+//        StackPane.setAlignment(notifBadgePane, Pos.TOP_RIGHT);
+//
+//        // small nudge so the circle sits on the top-right corner of the bell (tweak as needed)
+//        notifBadgePane.setTranslateX(8);   // move right
+//        notifBadgePane.setTranslateY(-8);  // move up
+//
+//        // bind label text to unreadCount, and visibility to unreadCount>0
+//        notifBadgeLabel.textProperty().bind(unreadCount.asString());
+//        notifBadgePane.visibleProperty().bind(unreadCount.greaterThan(0));
+//
+//        // Ensure mouse passes through the badge so parent click works
+//        notifBadgePane.setMouseTransparent(true);
+//
+//        // When the master list changes, attach read-listeners to new items and recalc unread
+//        notifMaster.addListener((ListChangeListener<Notification>) change -> {
+//            while (change.next()) {
+//                if (change.wasAdded()) {
+//                    for (Notification n : change.getAddedSubList()) {
+//                        // listen for read property changes
+//                        n.readProperty().addListener((obs, ov, nv) -> recalcUnreadCount());
+//                    }
+//                }
+//            }
+//            recalcUnreadCount();
+//        });
+//
+//        // attach listeners for already-present items (when first loaded)
+//        for (Notification n : notifMaster) {
+//            n.readProperty().addListener((obs, ov, nv) -> recalcUnreadCount());
+//        }
+//
+//        // initial calculation
+//        recalcUnreadCount();
+//    }
+
+    private void setupNotificationBadge() {
+        // place badge at the top-right of the bell (tweak offsets for your layout)
+        StackPane.setAlignment(notifBadgePane, Pos.TOP_RIGHT);
+        notifBadgePane.setTranslateX(8);
+        notifBadgePane.setTranslateY(-8);
+
+        // mouse clicks should pass through to the bell/pane
+        notifBadgePane.setMouseTransparent(true);
+
+        // bind label text and visibility straight to the unread filtered list
+        notifBadgeLabel.textProperty().bind(Bindings.size(unreadFiltered).asString());
+        notifBadgePane.visibleProperty().bind(Bindings.size(unreadFiltered).greaterThan(0));
+    }
+
+    // recompute unread count from notifMaster
+//    private void recalcUnreadCount() {
+//        int cnt = 0;
+//        for (Notification n : notifMaster) {
+//            if (!n.isRead()) cnt++;
+//        }
+//        unreadCount.set(cnt);
+//    }
+    
+    private void runNotifRefreshOnce() {
+        try {
+            NotificationDAO.refreshFromDB();                 // CALL sp_refresh_notifications()
+            ObservableList<Notification> fresh = NotificationDAO.findAll();
+
+            Platform.runLater(() -> {
+                notifMaster.setAll(fresh);  // keeps bindings alive
+                refreshPredicate();         // if have search/toggle filters on the ListView
+                refreshUnreadFilter();          // <— updates badge immediately
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void shutdown() {
+        if (notifScheduler != null) notifScheduler.shutdownNow();
+    }
+    
+    /** Force FilteredList to re-evaluate without changing the predicate. */
+    private void refreshUnreadFilter() {
+        if (unreadFiltered == null) return;
+        unreadFiltered.setPredicate(unreadFiltered.getPredicate());
+    }
+
+    /** Call this after any action that may change notifications (inventory/consultations/calendar). */
+    private void triggerNotifRefreshNow() {
+        if (!notifRefreshInFlight.compareAndSet(false, true)) return; // already running
+
+        notifExec.submit(() -> {
+            try {
+                // 1) Rebuild notifications in DB
+                NotificationDAO.refreshFromDB();
+
+                // 2) Pull fresh list
+                var fresh = NotificationDAO.findAll();
+
+                // 3) Push into the SAME master list on FX thread (keeps bindings/filters/badge)
+                javafx.application.Platform.runLater(() -> {
+                    notifMaster.setAll(fresh);
+                    refreshPredicate();          // keep current filters/search applied
+                    // badge will auto-update because it’s bound to notifMaster via your setup
+                });
+            } finally {
+                notifRefreshInFlight.set(false);
+            }
+        });
+    }
+    public void onClose1(){
+        notifExec.shutdownNow();
+    }
+
+
 
 
 }

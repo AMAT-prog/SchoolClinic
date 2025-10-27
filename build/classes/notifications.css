@@ -1,0 +1,166 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 25 Oct 2025, 16:09:06
+    Author     : Anna Margarette
+*/
+
+/* ========== GENERAL LAYOUT ========== */
+.root {
+    -fx-background-color: white;
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2b2b2b;
+}
+
+/* ========== SEGMENTED FILTER BUTTONS ========== */
+.segmented .toggle-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: transparent;
+    -fx-padding: 6 16 6 16;
+    -fx-cursor: hand;
+}
+
+.segmented .toggle-button:selected {
+    -fx-border-color: linear-gradient(to right, #00b38f, #33cc99);
+    -fx-text-fill: #00b38f;
+}
+
+.segmented .toggle-button:hover {
+    -fx-background-color: rgba(0,0,0,0.03);
+}
+
+/* ========== SEARCH FIELD ========== */
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 20;
+    -fx-padding: 6 14;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 20;
+}
+
+.text-field:focused {
+    -fx-border-color: #00b38f;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,179,143,0.3), 8, 0, 0, 0);
+}
+
+/* ========== LIST VIEW & CELLS ========== */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10;
+}
+
+.list-cell {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #eeeeee;
+    -fx-border-radius: 12;
+    -fx-padding: 10 15;
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 4, 0, 0, 2);
+    -fx-transition: all 0.2s;
+}
+
+/* Hover effect */
+.list-cell:hover {
+    -fx-background-color: #f7fdfb;
+    -fx-cursor: hand;
+}
+
+/* Unread notifications are bold and slightly tinted */
+.list-cell:unread {
+    -fx-background-color: linear-gradient(to bottom right, #e8fff8, #ffffff);
+    -fx-font-weight: bold;
+}
+
+/* ========== SEVERITY COLOR TAGS ========== */
+.list-cell.sev-info {
+    -fx-border-color: #b3e5fc;
+    -fx-border-width: 3;
+}
+.list-cell.sev-warning {
+    -fx-border-color: #ffe0b2;
+    -fx-border-width: 3;
+}
+.list-cell.sev-danger {
+    -fx-border-color: #ffcdd2;
+    -fx-border-width: 3;
+}
+
+/* Titles and text */
+.list-cell .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #333;
+}
+.list-cell:unread .label {
+    -fx-font-weight: bold;
+}
+
+/* ========== DELETE BUTTON INSIDE CELLS ========== */
+.button.ghost-danger {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d9534f;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+.button.ghost-danger:hover {
+    -fx-background-color: rgba(217,83,79,0.1);
+    -fx-text-fill: #c9302c;
+    -fx-background-radius: 5;
+}
+
+/* ========== ACTION BUTTONS (MARK ALL / CLEAR READ) ========== */
+.button {
+    -fx-background-radius: 20;
+    -fx-padding: 6 16;
+    -fx-background-color: linear-gradient(to bottom, #00c49a, #00b38f);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 4, 0, 0, 2);
+}
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #00b38f, #009d79);
+}
+.button:pressed {
+    -fx-background-color: #008c6a;
+}
+
+/* ========== LEGEND COLORS (BOTTOM) ========== */
+.legend-info {
+    -fx-text-fill: #0277bd;
+}
+.legend-warning {
+    -fx-text-fill: #ff8c00;
+}
+.legend-danger {
+    -fx-text-fill: #d32f2f;
+}
+
+/* Placeholder text */
+.list-view .placeholder .label {
+    -fx-text-fill: #999;
+    -fx-font-style: italic;
+}
+
+/* ========== SCROLLBAR (optional refinement) ========== */
+.scroll-bar:vertical .thumb {
+    -fx-background-color: linear-gradient(to bottom, #99e6cc, #66d9a6);
+    -fx-background-radius: 6;
+}
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
