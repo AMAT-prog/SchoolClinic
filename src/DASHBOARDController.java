@@ -94,6 +94,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
@@ -105,6 +106,8 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -114,9 +117,11 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
+import javafx.event.Event;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -125,7 +130,10 @@ import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.PieChart;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -582,11 +590,6 @@ private TextField student_tf;
     @FXML
     private Hyperlink pickStudent_hl;
 
-// --- Add Student (photo staging) ---
-private String pendingStudentPhotoPath = null;   // absolute path of chosen file (not yet copied)
-private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
-        + File.separator + "AppData" + File.separator + "Roaming"
-        + File.separator + "SchoolClinic" + File.separator + "students";
     @FXML
     private TableView<RxRow> rxTable;
     @FXML
@@ -692,6 +695,133 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     private Circle notifBadgeCircle;
     @FXML
     private Label notifBadgeLabel;
+    
+    
+    @FXML
+    private TabPane reportsTabPane;
+    @FXML
+    private BorderPane overviewRoot;
+    @FXML
+    private Button ovwExportExcelBtn;
+    @FXML
+    private Button ovwExportPdfBtn;
+    @FXML
+    private Label kpiConsultationsToday;
+    @FXML
+    private Label kpiConsultationsMonth;
+    @FXML
+    private Label kpiActiveStudents;
+    @FXML
+    private Label kpiMedsUsed;
+    @FXML
+    private BarChart<?, ?> overviewConsultationsPerMonthChart;
+    @FXML
+    private PieChart overviewTopComplaintsPie;
+    @FXML
+    private PieChart overviewBpStatusPie;
+    @FXML
+    private LineChart<?, ?> overviewMedsUsageTrend;
+    @FXML
+    private DatePicker consFromDate;
+    @FXML
+    private DatePicker consToDate;
+    @FXML
+    private Button consApplyFilterBtn;
+//    private TextField consSearchField;
+//    private Button consClearBtn;
+    @FXML
+    private Button consExportPdfBtn;
+    @FXML
+    private Button consExportExcelBtn;
+//    private TableView<?> dailyConsultationsTable;
+//    private TableColumn<?, ?> colConsDate;
+//    private TableColumn<?, ?> colConsStudent;
+//    private TableColumn<?, ?> colConsReason;
+//    private TableColumn<?, ?> colConsDiagnosis;
+//    private TableColumn<?, ?> colConsBP;
+//    private TableColumn<?, ?> colConsTemp;
+    @FXML
+    private BarChart<?, ?> monthlyConsultationsBar;
+    @FXML
+    private PieChart topComplaintsPie;
+    @FXML
+    private PieChart bpStatusPie;
+    @FXML
+    private DatePicker visFromDate;
+    @FXML
+    private DatePicker visToDate;
+    @FXML
+    private Button visApplyFilterBtn;
+    @FXML
+    private ComboBox<?> visGroupByBox;
+    @FXML
+    private Button visExportPdfBtn;
+    @FXML
+    private Button visExportExcelBtn;
+    @FXML
+    private TableView<?> visitsByDateTable;
+    @FXML
+    private TableColumn<?, ?> colVisitDate;
+    @FXML
+    private TableColumn<?, ?> colVisitStudent;
+    @FXML
+    private TableColumn<?, ?> colVisitReason;
+    @FXML
+    private BarChart<?, ?> visitsByYearLevelBar;
+    @FXML
+    private BarChart<?, ?> visitsByCourseBar;
+    @FXML
+    private TextField invSearchField;
+    @FXML
+    private Button invShowLowStockBtn;
+    @FXML
+    private Button invShowExpiringBtn;
+    @FXML
+    private Button invExportPdfBtn;
+    @FXML
+    private Button invExportExcelBtn;
+    @FXML
+    private TableView<?> medicineUsageTable;
+    @FXML
+    private TableColumn<?, ?> colInvItem;
+    @FXML
+    private TableColumn<?, ?> colInvUsed;
+    @FXML
+    private TableColumn<?, ?> colInvBalance;
+    @FXML
+    private TableColumn<?, ?> colInvExpiry;
+    @FXML
+    private LineChart<?, ?> itemUsageTrendChart;
+    @FXML
+    private TableView<?> lowStockTable;
+    @FXML
+    private TableColumn<?, ?> colLowItem;
+    @FXML
+    private TableColumn<?, ?> colLowQty;
+    @FXML
+    private TableColumn<?, ?> colLowStatus;
+    @FXML
+    private TableColumn<?, ?> colLowExpiry;
+    @FXML
+    private BorderPane consultationsRoot;
+    @FXML
+    private BorderPane visitsRoot;
+    @FXML
+    private BorderPane inventoryRoot;
+    @FXML
+    private ScrollPane consultationsScrollPane;
+    @FXML
+    private ScrollPane visitsScrollPane;
+    @FXML
+    private ScrollPane inventoryScrollPane;
+    @FXML
+    private AnchorPane consTODAYkpi;
+    @FXML
+    private AnchorPane consMONTHkpi;
+    @FXML
+    private AnchorPane consSTUDENTSkpi;
+    @FXML
+    private AnchorPane consMEDICINESkpi;
 
     
 
@@ -718,6 +848,12 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     private final StudentHistoryDAO historyDAO = new StudentHistoryDAO();
     
     int addStudent_sideNav = 0;
+    
+    // --- Add Student (photo staging) ---
+    private String pendingStudentPhotoPath = null;   // absolute path of chosen file (not yet copied)
+    private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
+            + File.separator + "AppData" + File.separator + "Roaming"
+            + File.separator + "SchoolClinic" + File.separator + "students";
     
     // ============================== CONSULTATION: Controller State ==============================
     // Table backing list
@@ -896,6 +1032,19 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
     // date creation format in each notification
     private static final DateTimeFormatter DISPLAY_FMT =
         DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a");
+    
+    //REPORTS
+     // Data stores (typed)
+    private final ObservableList<ConsRow> consRows = FXCollections.observableArrayList();
+    private final ObservableList<VisitRow> visitRows = FXCollections.observableArrayList();
+    private final ObservableList<MedUsageRow> usageRows = FXCollections.observableArrayList();
+    private final ObservableList<MedUsageRow> lowRows   = FXCollections.observableArrayList();
+
+//    private final ReportsDAO dao = new ReportsDAO();
+    private final ReportsDAO reportsDAO = new ReportsDAO();
+
+    private Window getWindow() { return reportsTabPane.getScene().getWindow(); }
+
 
 
     ////////////////////////////////////////////////////////////////////////////SIDE NAVIGATION
@@ -1659,6 +1808,165 @@ private static final String STUDENT_IMG_DIR = System.getProperty("user.home")
             triggerNotifRefreshNow();
         });
 
+        //////////// REPORTS //////////////
+        // ---- default date ranges ----
+        LocalDate now = LocalDate.now();
+        if (consFromDate != null) consFromDate.setValue(now.minusMonths(3).withDayOfMonth(1));
+        if (consToDate   != null) consToDate.setValue(now);
+        if (visFromDate  != null) visFromDate.setValue(now.minusMonths(3).withDayOfMonth(1));
+        if (visToDate    != null) visToDate.setValue(now);
+
+        // ---- Consultations table columns ----
+//        if (dailyConsultationsTable != null) {
+//            @SuppressWarnings("unchecked")
+//            TableView<ConsRow> tv = (TableView<ConsRow>) (TableView<?>) dailyConsultationsTable;
+//            @SuppressWarnings("unchecked") TableColumn<ConsRow, String> cDate = (TableColumn<ConsRow, String>) (TableColumn<?, ?>) colConsDate;
+//            @SuppressWarnings("unchecked") TableColumn<ConsRow, String> cStudent = (TableColumn<ConsRow, String>) (TableColumn<?, ?>) colConsStudent;
+//            @SuppressWarnings("unchecked") TableColumn<ConsRow, String> cReason = (TableColumn<ConsRow, String>) (TableColumn<?, ?>) colConsReason;
+//            @SuppressWarnings("unchecked") TableColumn<ConsRow, String> cDiagnosis = (TableColumn<ConsRow, String>) (TableColumn<?, ?>) colConsDiagnosis;
+//            @SuppressWarnings("unchecked") TableColumn<ConsRow, String> cBP = (TableColumn<ConsRow, String>) (TableColumn<?, ?>) colConsBP;
+//            @SuppressWarnings("unchecked") TableColumn<ConsRow, Number> cTemp = (TableColumn<ConsRow, Number>) (TableColumn<?, ?>) colConsTemp;
+
+//            cDate.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().date.toString()));
+//            cStudent.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().student));
+//            cReason.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().reason));
+//            cDiagnosis.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().diagnosis));
+//            cBP.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().bp));
+//            cTemp.setCellValueFactory(cd -> new SimpleDoubleProperty(cd.getValue().temperature!=null?cd.getValue().temperature:0));
+//
+//            tv.setItems(consRows);
+//        }
+
+        // ---- Visits table ----
+        if (visitsByDateTable != null) {
+            @SuppressWarnings("unchecked")
+            TableView<VisitRow> tv = (TableView<VisitRow>) (TableView<?>) visitsByDateTable;
+            @SuppressWarnings("unchecked") TableColumn<VisitRow, String> cDate = (TableColumn<VisitRow, String>) (TableColumn<?, ?>) colVisitDate;
+            @SuppressWarnings("unchecked") TableColumn<VisitRow, String> cStudent = (TableColumn<VisitRow, String>) (TableColumn<?, ?>) colVisitStudent;
+            @SuppressWarnings("unchecked") TableColumn<VisitRow, String> cReason = (TableColumn<VisitRow, String>) (TableColumn<?, ?>) colVisitReason;
+
+            cDate.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getDate().toString()));
+            cStudent.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getStudent()));
+            cReason.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getReason()));
+
+            tv.setItems(visitRows);
+        }
+
+        // ---- Inventory tables ----
+        if (medicineUsageTable != null) {
+            @SuppressWarnings("unchecked")
+            TableView<MedUsageRow> tv = (TableView<MedUsageRow>) (TableView<?>) medicineUsageTable;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, String> cItem = (TableColumn<MedUsageRow, String>) (TableColumn<?, ?>) colInvItem;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, Number> cUsed = (TableColumn<MedUsageRow, Number>) (TableColumn<?, ?>) colInvUsed;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, Number> cBal = (TableColumn<MedUsageRow, Number>) (TableColumn<?, ?>) colInvBalance;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, String> cExp = (TableColumn<MedUsageRow, String>) (TableColumn<?, ?>) colInvExpiry;
+
+            cItem.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getItem()));
+            cUsed.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getTotalUsed()));
+            cBal.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getBalance()));
+            cExp.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getExpiry()!=null?cd.getValue().getExpiry().toString():""));
+
+            tv.setItems(usageRows);
+        }
+        if (lowStockTable != null) {
+            @SuppressWarnings("unchecked")
+            TableView<MedUsageRow> tv = (TableView<MedUsageRow>) (TableView<?>) lowStockTable;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, String> cItem = (TableColumn<MedUsageRow, String>) (TableColumn<?, ?>) colLowItem;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, Number> cQty = (TableColumn<MedUsageRow, Number>) (TableColumn<?, ?>) colLowQty;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, String> cStatus = (TableColumn<MedUsageRow, String>) (TableColumn<?, ?>) colLowStatus;
+            @SuppressWarnings("unchecked") TableColumn<MedUsageRow, String> cExp = (TableColumn<MedUsageRow, String>) (TableColumn<?, ?>) colLowExpiry;
+
+            cItem.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getItem()));
+            cQty.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getBalance()));
+            cStatus.setCellValueFactory(cd -> new SimpleStringProperty(
+                    cd.getValue().getBalance()<=0 ? "Out" : (cd.getValue().getBalance()<=10 ? "Low" : "OK")
+            ));
+            cExp.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getExpiry()!=null?cd.getValue().getExpiry().toString():""));
+
+            tv.setItems(lowRows);
+        }
+
+        // ---- Button actions ----
+        if (consApplyFilterBtn != null) consApplyFilterBtn.setOnAction(e -> {
+                refreshConsultations();
+        });
+//        if (consClearBtn != null) {
+//            consClearBtn.setOnAction(e -> { consSearchField.clear(); refreshConsultations(); });
+//        }
+        if (visApplyFilterBtn != null) visApplyFilterBtn.setOnAction(e -> refreshVisits());
+
+        // Exports (per-tab)
+        if (ovwExportPdfBtn != null)
+        ovwExportPdfBtn.setOnAction(e ->
+            ExportUtil.exportNodeToPdf(getWindow(), overviewRoot.getCenter()));
+
+        if (ovwExportExcelBtn != null) ovwExportExcelBtn.setOnAction(e ->
+                ExportUtil.exportTableAndChartsToExcel(getWindow(),
+                        // Overview doesn’t have a single table; write an empty sheet and only images:
+                        new TableView<>(), List.of(
+                                (Node) overviewConsultationsPerMonthChart,
+                                (Node) overviewTopComplaintsPie,
+                                (Node) overviewBpStatusPie,
+                                (Node) overviewMedsUsageTrend,
+                                (Node) consTODAYkpi,
+                                (Node) consMONTHkpi,
+                                (Node) consSTUDENTSkpi,
+                                (Node) consMEDICINESkpi
+                        ), "Overview")
+        );
+        
+        topComplaintsPie.setPrefSize(420, 280);
+        bpStatusPie.setPrefSize(420, 280);
+        topComplaintsPie.setLabelsVisible(false);
+        bpStatusPie.setLabelsVisible(false);
+
+
+        if (consExportPdfBtn != null)
+        consExportPdfBtn.setOnAction(e ->
+            ExportUtil.exportNodeToPdf(getWindow(), consultationsScrollPane)); // <-- fx:id of that tab’s ScrollPane
+
+
+        // AFTER (charts only)
+        if (consExportExcelBtn != null) consExportExcelBtn.setOnAction(e -> {
+            ExportUtil.exportChartsToExcel(getWindow(), List.of(
+                    (Node) monthlyConsultationsBar, (Node) topComplaintsPie, (Node) bpStatusPie
+            ), "Consultations");
+        });
+
+        visitsScrollPane.addEventFilter(ScrollEvent.ANY, Event::consume); //freeze the scrollpane
+        if (visExportPdfBtn != null)
+        visExportPdfBtn.setOnAction(e ->
+            ExportUtil.exportNodeToPdf(getWindow(), visitsScrollPane)); // <-- fx:id
+
+        if (visExportExcelBtn != null) visExportExcelBtn.setOnAction(e -> {
+            ExportUtil.exportChartsToExcel(getWindow(), List.of(
+                    (Node) visitsByYearLevelBar, (Node) visitsByCourseBar
+            ), "Visits");
+        });
+
+        inventoryScrollPane.addEventFilter(ScrollEvent.ANY, Event::consume); //freeze the scrollpane
+        if (invExportPdfBtn != null)
+        invExportPdfBtn.setOnAction(e ->
+            ExportUtil.exportNodeToPdf(getWindow(), inventoryScrollPane)); // <-- fx:id
+
+        if (invExportExcelBtn != null) invExportExcelBtn.setOnAction(e -> {
+            @SuppressWarnings("unchecked") TableView<MedUsageRow> tv = (TableView<MedUsageRow>) (TableView<?>) lowStockTable;
+            ExportUtil.exportTableAndChartsToExcel(getWindow(), tv, List.of(
+                    (Node) itemUsageTrendChart
+            ), "Inventory");
+        });
+
+        if (invShowLowStockBtn != null) invShowLowStockBtn.setOnAction(e -> refreshLowStock());
+        if (invShowExpiringBtn != null) invShowExpiringBtn.setOnAction(e -> refreshExpiring());
+
+        // ---- initial load ----
+        Platform.runLater(() -> {
+            refreshOverview();
+            refreshConsultations();
+            refreshVisits();
+            refreshInventory();
+        });
+        
     }  
     ////////////////////////////////////////////////////////////////////////////end initialization
     
@@ -4178,14 +4486,19 @@ private void warnLong(String title, String header, String message) {
     PdfWriter.getInstance(d, new FileOutputStream(dest));
     d.open();
 
-    d.add(new Paragraph("REPUBLIC OF THE PHILIPPINES", FontFactory.getFont(FontFactory.HELVETICA, 12)));
-    d.add(new Paragraph("SOUTHERN LUZON STATE UNIVERSITY", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
-    d.add(new Paragraph("Health Services\n\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+//    d.add(new Paragraph("REPUBLIC OF THE PHILIPPINES", FontFactory.getFont(FontFactory.HELVETICA, 12)));
+//    d.add(new Paragraph("SOUTHERN LUZON STATE UNIVERSITY", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+//    d.add(new Paragraph("Health Services\n\n", FontFactory.getFont(FontFactory.HELVETICA, 12)));
 
-    Paragraph title = new Paragraph("MEDICAL CERTIFICATE", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14));
+    Paragraph head = new Paragraph("Republic of the Philippines\nSOUTHERN LUZON STATE UNIVERSITY\n"
+                + "Lucban, Quezon\n\nHEALTH SERVICES\n\n\n", FontFactory.getFont(FontFactory.HELVETICA, 12));
+        head.setAlignment(Element.ALIGN_CENTER);
+        d.add(head);
+        
+    Paragraph title = new Paragraph("MEDICAL CERTIFICATE\n\n", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14));
     title.setAlignment(Element.ALIGN_CENTER);
     d.add(title);
-    d.add(new Paragraph("\nDate: " + dateText + "\n\n"));
+    d.add(new Paragraph("\nDate: " + dateText + "\n\n\n"));
 
     // ---- Body with bold name, status, activity ----
     // ---- Fonts (iText 5) ----
@@ -4208,18 +4521,19 @@ private void warnLong(String title, String header, String message) {
 
 
     Paragraph remarksPara = new Paragraph();
-    remarksPara.add(new Chunk("Remarks: ", bold));
+    remarksPara.add(new Chunk("\n\nRemarks: "));
     remarksPara.add(new Chunk(isEmpty(remarks) ? "N/A" : remarks, normal));
-    remarksPara.add(new Chunk("\n\n", normal));
+    remarksPara.add(new Chunk("\n", normal));
     d.add(remarksPara);
 
-    d.add(new Paragraph("Vital Signs: BP: " + bp + "   Temp: " + temp + " °C   Pulse: " + pulse + " bpm   Resp: " + resp + " cpm\n\n"));
+    d.add(new Paragraph("\n\nVital Signs: BP: " + bp + "   Temp: " + temp + " °C   Pulse: " + pulse + " bpm   Resp: " + resp + " cpm\n\n\n\n"));
 
-    Paragraph sig = new Paragraph("______________________________\n" + nurseName + "\nUniversity Health Services");
+//    Paragraph sig = new Paragraph("______________________________\n" + nurseName + "\nDirector, University Health Services");
+    Paragraph sig = new Paragraph("______________________________\n" + "JERRY M. IMPERIAL, RN" + "\nDirector, University Health Services");
     sig.setAlignment(Element.ALIGN_RIGHT);
     d.add(sig);
 
-    Paragraph footer = new Paragraph("\n*Generated by School Clinic System | Certificate ID: " + certCode + "*",
+    Paragraph footer = new Paragraph("\n\n\n\n\n\n\n\n\n\n*Generated by School Clinic System | Certificate ID: " + certCode + "*",
             FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9));
     footer.setAlignment(Element.ALIGN_CENTER);
     d.add(footer);
@@ -4965,27 +5279,7 @@ private void warnLong(String title, String header, String message) {
     }
 
     ////////////////////////////////////////////////////////////////////////////SETTINGS
-    // Call after you load the user from DB
-//    private void loadUserToUI(User u) {
-//        currentUserId = u.getUserId();
-//        origFirst = u.getFirstName();  origLast = u.getLastName();
-//        origUser  = u.getUsername();   origPhotoPath = u.getPhotoPath();
-//
-//        ADMINfirstName_tf.setText(origFirst);
-//        ADMINlastName_tf.setText(origLast);
-//        ADMINusername_tf.setText(origUser);
-//
-//        Image img = (origPhotoPath != null && new File(origPhotoPath).exists())
-//                ? new Image(new File(origPhotoPath).toURI().toString(), true)
-//                : new Image(getClass().getResource("/img/avatar-default.png").toExternalForm());
-//        AdminPhoto.setImage(img);
-//        AdminPhoto_edit.setImage(img);
-//
-//        Profile_gridpane.setDisable(true);
-//        Password_gridpane.setDisable(true);
-//        clearPasswordSide();
-//    }
-
+ 
     private void clearPasswordSide() {
         current_pw.clear(); new_pw.clear(); confirm_pw.clear();
         current_pw_tf.clear(); new_pw_tf.clear(); confirm_pw_tf.clear();
@@ -5472,106 +5766,8 @@ private void warnLong(String title, String header, String message) {
             return inputCurrent.equals(storedFromDB);
         }
     }
-    ////////////////////////////////////////////////////////////////////////////NOTIFICATIONS
-//    private void setupNotificationList() {
-//        notif_lv.setCellFactory(lv -> new ListCell<>() {
-//            private final Label icon = new Label();          // use emoji or glyphs
-//            private final Label title = new Label();
-//            private final Label body  = new Label();
-//            private final Label when  = new Label();
-//            private final Button del  = new Button("Delete");
-//
-//            private final HBox header = new HBox(title, new Region(), when);
-//            private final HBox root   = new HBox(12, icon, new VBox(6, header, body), del);
-//
-//            {
-//                ((Region)header.getChildren().get(1)).setMinWidth(0);
-//                HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
-//                root.setAlignment(Pos.CENTER_LEFT);
-//                del.getStyleClass().add("ghost-danger");
-//                del.setOnAction(e -> {
-//                    Notification n = getItem();
-//                    if (n != null && NotificationDAO.deleteById(n.getNotificationId())) {
-//                        getListView().getItems().remove(n);
-//                    }
-//                });
-//
-//                // mark read on click
-//                root.setOnMouseClicked(e -> {
-//                    if (e.getClickCount()==1) {
-//                        Notification n = getItem();
-//                        if (n != null && !n.isRead()) {
-//                            n.setRead(true);
-//                            NotificationDAO.markRead(n.getNotificationId(), true);
-//                            updateReadStyle(n);
-//                        }
-//                        // (optional) navigate: open inventory tab/event based on n.getRelatedType()
-//                    }
-//                });
-//            }
-//
-//            @Override protected void updateItem(Notification n, boolean empty) {
-//                super.updateItem(n, empty);
-//                if (empty || n == null) { setGraphic(null); return; }
-//
-//                icon.setText(switch (n.getKind()) {
-//                    case "inventory" -> "📦";
-//                    case "calendar"  -> "🗓️";
-//                    default -> "🔔";
-//                });
-//                title.setText(n.getTitle());
-//                body.setText(n.getBody()==null ? "" : n.getBody());
-//
-//                LocalDateTime ts = n.getDueAt()!=null ? n.getDueAt() : n.getCreatedAt();
-//                when.setText(ts==null ? "" : ts.toLocalDate().toString());
-//
-//                // severity color
-//                getStyleClass().removeAll("sev-info","sev-warning","sev-danger");
-//                getStyleClass().add(switch (n.getSeverity()) {
-//                    case "warning" -> "sev-warning";
-//                    case "danger"  -> "sev-danger";
-//                    default -> "sev-info";
-//                });
-//
-//                updateReadStyle(n);
-//                setGraphic(root);
-//            }
-//
-//            private void updateReadStyle(Notification n) {
-//                pseudoClassStateChanged(PseudoClass.getPseudoClass("unread"), !n.isRead());
-//            }
-//        });
-//    }
-    ///////////FILTERS & SEARCH
-   
-
-//    private void loadNotifications() {
-//        NotificationDAO.refreshAuto();                 // build auto notifications
-//        notifMaster.setAll(NotificationDAO.findAll());
-//
-//        notifFiltered = new FilteredList<>(notifMaster, x -> true);
-//        notifSorted   = new SortedList<>(notifFiltered);
-//        notifSorted.comparatorProperty().bind(notif_lv.comparatorProperty());
-//        notif_lv.setItems(notifSorted);
-//    }
-
-//    private void applyFilters() {
-//        String search = search_tf.getText()==null ? "" : search_tf.getText().trim().toLowerCase();
-//        boolean onlyUnread = unread_tb.isSelected();
-//        boolean invOnly    = inv_tb.isSelected();
-//        boolean calOnly    = cal_tb.isSelected();
-//
-//        notifFiltered.setPredicate(n -> {
-//            if (onlyUnread && n.isRead()) return false;
-//            if (invOnly && !"inventory".equals(n.getKind())) return false;
-//            if (calOnly && !"calendar".equals(n.getKind())) return false;
-//            if (search.isEmpty()) return true;
-//            String hay = (n.getTitle()+" "+n.getBody()).toLowerCase();
-//            for (String t : search.split("\\s+")) if (!hay.contains(t)) return false;
-//            return true;
-//        });
-//    }
     
+    ////////////////////////////////////////////////////////////////////////////NOTIFICATIONS
     /** Applies the current search + toggle into the FilteredList predicate. */
     private void refreshPredicate() {
         final String q = (search_tf.getText() == null) ? "" : search_tf.getText().trim().toLowerCase();
@@ -5643,8 +5839,6 @@ private void warnLong(String title, String header, String message) {
                     } triggerNotifRefreshNow();
                 });
 
-
-
                 // mark read on click
                 setOnMouseClicked(e -> {
                     Notification n = getItem();
@@ -5664,7 +5858,6 @@ private void warnLong(String title, String header, String message) {
                     } refreshUnreadFilter();          // <— updates badge immediately
                       triggerNotifRefreshNow();
                 });
-
             }
 
             @Override protected void updateItem(Notification n, boolean empty) {
@@ -5680,7 +5873,6 @@ private void warnLong(String title, String header, String message) {
 //                meta.setText(n.getCreatedAt().toString() + "  •  " + n.getBody());
                 meta.setText(DISPLAY_FMT.format(n.getCreatedAt()) + "  •  " + n.getBody());
 
-
                 // severity border color (via CSS classes)
                 getStyleClass().removeAll("sev-info","sev-warning","sev-danger");
                 switch (n.getSeverity()) {
@@ -5691,51 +5883,11 @@ private void warnLong(String title, String header, String message) {
 
                 // unread tint (via pseudo-class)
                 pseudoClassStateChanged(PC_UNREAD, !n.isRead());
-
                 setGraphic(root);
             }
         });
     }
-
-    // call this from initialize() AFTER setting notifMaster (setAll from DAO) and connect listView pipeline
-//    private void setupNotificationBadge() {
-//        // initial CSS-styling is loaded from stylesheet (notifBadgeCircle & Label IDs)
-//        // position the badge relative to bell: top-right
-//        StackPane.setAlignment(notifBadgePane, Pos.TOP_RIGHT);
-//
-//        // small nudge so the circle sits on the top-right corner of the bell (tweak as needed)
-//        notifBadgePane.setTranslateX(8);   // move right
-//        notifBadgePane.setTranslateY(-8);  // move up
-//
-//        // bind label text to unreadCount, and visibility to unreadCount>0
-//        notifBadgeLabel.textProperty().bind(unreadCount.asString());
-//        notifBadgePane.visibleProperty().bind(unreadCount.greaterThan(0));
-//
-//        // Ensure mouse passes through the badge so parent click works
-//        notifBadgePane.setMouseTransparent(true);
-//
-//        // When the master list changes, attach read-listeners to new items and recalc unread
-//        notifMaster.addListener((ListChangeListener<Notification>) change -> {
-//            while (change.next()) {
-//                if (change.wasAdded()) {
-//                    for (Notification n : change.getAddedSubList()) {
-//                        // listen for read property changes
-//                        n.readProperty().addListener((obs, ov, nv) -> recalcUnreadCount());
-//                    }
-//                }
-//            }
-//            recalcUnreadCount();
-//        });
-//
-//        // attach listeners for already-present items (when first loaded)
-//        for (Notification n : notifMaster) {
-//            n.readProperty().addListener((obs, ov, nv) -> recalcUnreadCount());
-//        }
-//
-//        // initial calculation
-//        recalcUnreadCount();
-//    }
-
+    
     private void setupNotificationBadge() {
         // place badge at the top-right of the bell (tweak offsets for your layout)
         StackPane.setAlignment(notifBadgePane, Pos.TOP_RIGHT);
@@ -5749,15 +5901,6 @@ private void warnLong(String title, String header, String message) {
         notifBadgeLabel.textProperty().bind(Bindings.size(unreadFiltered).asString());
         notifBadgePane.visibleProperty().bind(Bindings.size(unreadFiltered).greaterThan(0));
     }
-
-    // recompute unread count from notifMaster
-//    private void recalcUnreadCount() {
-//        int cnt = 0;
-//        for (Notification n : notifMaster) {
-//            if (!n.isRead()) cnt++;
-//        }
-//        unreadCount.set(cnt);
-//    }
     
     private void runNotifRefreshOnce() {
         try {
@@ -5809,6 +5952,147 @@ private void warnLong(String title, String header, String message) {
     }
     public void onClose1(){
         notifExec.shutdownNow();
+    }
+////////////////////////////////////////////////////////////////////////////////end of notification
+    
+////////////////////////////////////////////////////////////////////////////////REPORTS
+ /* ===========================================================
+       (C) OUTSIDE INITIALIZATION: loaders & helpers
+       =========================================================== */
+
+    // -------- OVERVIEW --------
+    private void refreshOverview() {
+        try {
+            kpiConsultationsToday.setText(String.valueOf(reportsDAO.consultationsToday()));
+            kpiConsultationsMonth.setText(String.valueOf(reportsDAO.consultationsThisMonth()));
+            kpiActiveStudents.setText(String.valueOf(reportsDAO.activeStudents()));
+            kpiMedsUsed.setText(String.valueOf(reportsDAO.totalMedsUsedAllTime()));
+
+            int y = Year.now().getValue();
+            ChartUtils.fillBar(castBar(overviewConsultationsPerMonthChart), "Consultations", reportsDAO.consultationsPerMonth(y));
+            ChartUtils.fillPie(overviewBpStatusPie, reportsDAO.bpStatusCounts());
+            ChartUtils.fillPieFromList(overviewTopComplaintsPie, reportsDAO.topComplaints(3));
+            ChartUtils.fillLine(castLine(overviewMedsUsageTrend), "Units Used", reportsDAO.medsUsageTrendByMonth(y));
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    // -------- CONSULTATIONS --------
+    // AFTER (charts only)
+    private void refreshConsultations() {
+        LocalDate from = consFromDate.getValue();
+        LocalDate to   = consToDate.getValue();
+
+        try {
+            // Bar
+            ChartUtils.fillBar(castBar(monthlyConsultationsBar),
+                    "Consultations",
+                    reportsDAO.consultationsMonthlyInRange(from, to));
+
+            // Top complaints: legend shows "Label — N (p%)"
+            topComplaintsPie.setData(
+                    ChartUtils.pieDataWithStatsFromList(
+                            reportsDAO.topComplaintsInRange(from, to)
+                    )
+            );
+            topComplaintsPie.setLabelsVisible(false);
+            topComplaintsPie.setLegendVisible(true);
+
+            // BP status: legend shows "Label — N (p%)"
+            bpStatusPie.setData(
+                    ChartUtils.pieDataWithStatsFromMap(
+                            reportsDAO.bpStatusInRange(from, to)
+                    )
+            );
+            bpStatusPie.setLabelsVisible(false);
+            bpStatusPie.setLegendVisible(true);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+
+
+
+    // -------- VISITS --------
+    private void refreshVisits() {
+        LocalDate from = visFromDate.getValue();
+        LocalDate to   = visToDate.getValue();
+
+        try {
+            visitRows.setAll(reportsDAO.visitsRange(from, to));
+            ChartUtils.fillBar(castBar(visitsByYearLevelBar), "Visits", reportsDAO.visitsByYearLevel(from, to));
+            ChartUtils.fillBar(castBar(visitsByCourseBar), "Visits", reportsDAO.visitsByCourse(from, to));
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    // -------- INVENTORY --------
+    private void refreshInventory() {
+        try {
+            usageRows.setAll(reportsDAO.medicineUsage(invSearchField.getText()));
+            // Trend: reuse overview meds trend line for current year (usage across all items)
+            ChartUtils.fillLine(castLine(itemUsageTrendChart), "Units Used", reportsDAO.medsUsageTrendByMonth(Year.now().getValue()));
+            refreshLowStock(); // preload
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private void refreshLowStock() {
+        try { lowRows.setAll(reportsDAO.lowStock(10)); } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private void refreshExpiring() {
+        try { lowRows.setAll(reportsDAO.expiringSoon(30)); } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    // -------- small casting helpers for generic FXML charts --------
+    @SuppressWarnings("unchecked")
+    private BarChart<String,Number> castBar(BarChart<?,?> b) { return (BarChart<String,Number>) (BarChart<?,?>) b; }
+    @SuppressWarnings("unchecked")
+    private LineChart<String,Number> castLine(LineChart<?,?> l) { return (LineChart<String,Number>) (LineChart<?,?>) l; }
+
+
+    // Make sure pie labels render immediately (no need to export first)
+    private void forcePieLabels(javafx.scene.chart.PieChart pie) {
+        pie.setLabelsVisible(true);
+        pie.setLegendVisible(true);
+        pie.setAnimated(false);               // avoids re-animation hiding labels
+
+        javafx.application.Platform.runLater(() -> {
+            pie.applyCss();                   // compute styles
+            pie.layout();                     // force layout pass
+            pie.lookupAll(".chart-pie-label").forEach(n -> n.setVisible(true));
+        });
+    }
+
+    private void stabilizePie(PieChart pie) {
+        pie.setAnimated(false);
+        pie.setLabelsVisible(true);
+        pie.setLegendVisible(true);
+        pie.setLabelLineLength(18);         // a bit longer leader lines helps too
+
+        // make sure layout happens after parent finished resizing
+        Platform.runLater(() -> {
+            pie.applyCss();
+            pie.requestLayout();
+            pie.layout();                    // force a full pass now
+            pie.lookupAll(".chart-pie-label").forEach(n -> n.setVisible(true));
+        });
+    }
+    
+    private PieChart rebuildPie(PieChart old, ObservableList<PieChart.Data> data) {
+        PieChart fresh = new PieChart(data);
+        fresh.setTitle(old.getTitle());
+        fresh.setClockwise(true);
+        fresh.setLabelsVisible(true);
+        fresh.setLegendVisible(true);
+        fresh.setAnimated(false);
+        fresh.setPrefSize(old.getWidth(), old.getHeight());
+
+        Pane parent = (Pane) old.getParent();
+        int idx = parent.getChildren().indexOf(old);
+        parent.getChildren().set(idx, fresh);
+        return fresh;
     }
 
 

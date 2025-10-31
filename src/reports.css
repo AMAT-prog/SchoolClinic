@@ -1,0 +1,583 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 28 Oct 2025, 11:31:27
+    Author     : Anna Margarette
+*/
+
+
+/* ---------- Design tokens (lookups) ---------- */
+.root {
+    /* palette */
+    -color-bg:            #0f172a;   /* slate-900 */
+    -color-surface:       #111827;   /* gray-900 */
+    -color-card:          #111827;   /* gray-900 */
+    -color-card-2:        #0b1224;   /* deeper */
+    /* typography & contrast */
+    -color-text:   #f3f4f6;  /* brighter gray-100 */
+    -color-muted:  #cbd5e1;  /* slate-300 */
+    -color-strong: #ffffff;  /* pure white for titles */
+    -color-border:        #1f2937;   /* gray-800 */
+
+    /* accents */
+    -accent:              #6366f1;   /* indigo-500 */
+    -accent-2:            #22d3ee;   /* cyan-400 */
+    -accent-3:            #22c55e;   /* green-500 */
+    -accent-4:            #f59e0b;   /* amber-500 */
+    -accent-5:            #ef4444;   /* red-500 */
+
+    /* radii & elevation */
+    -radius:              16px;
+    -radius-sm:           10px;
+    -shadow-1:            dropshadow(gaussian, rgba(0,0,0,0.35), 18, 0.1, 0, 6);
+    -shadow-2:            dropshadow(gaussian, rgba(0,0,0,0.45), 28, 0.2, 0, 10);
+
+    /* typography */
+    -fx-font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial;
+/*    -size-h1: 20px;
+    -size-h2: 16px;
+    -size-body: 13.5px;*/
+    -size-h1: 22px;
+    -size-h2: 18px;
+    -size-body: 14px;
+
+
+    -fx-background-color: -color-bg;
+    -fx-text-fill: -color-text;
+    
+/*    -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;*/
+}
+
+/* ---------- TabPane ---------- */
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-open-tab-animation: NONE;
+    -fx-close-tab-animation: NONE;
+    -fx-tab-min-height: 10px;
+}
+.tab-pane:top .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 2px 1px 0 2px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 1 0;
+}
+.tab-pane:top .headers-region .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 14px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-base-color: -color-muted;
+    -fx-background-insets: 0;
+}
+
+.tab-pane:top .headers-region .tab:selected {
+    -fx-text-base-color: -color-strong;
+    -fx-background-color: linear-gradient(to bottom, rgba(99,102,241,0.35), rgba(34,211,238,0.10));
+    -fx-background-radius: 6px 6px 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.25), 10, 0.2, 0, 3);
+}
+.tab-pane:top .headers-region .tab:selected .tab-label {
+    -fx-underline: false;
+}
+
+
+/* ---------- ScrollPane/VBox/HBox spacing ---------- */
+.scroll-pane, .border-pane, .anchor-pane {
+    -fx-background-color: transparent;
+}
+.vbox, .hbox, .grid-pane, .split-pane {
+    -fx-background-color: transparent;
+    -fx-spacing: 12px;
+}
+
+/* ---------- ToolBar ---------- */
+.tool-bar {
+    -fx-background-color: linear-gradient(to bottom, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    -fx-padding: 8px 12px;
+    -fx-spacing: 8px;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 1 0;
+}
+.tool-bar .label {
+    -fx-text-fill: -color-muted;
+}
+.separator:vertical {
+    -fx-padding: 0 8px;
+}
+
+/* ---------- Inputs ---------- */
+.text-field, .combo-box {
+    -fx-background-color: -color-surface, transparent, transparent;
+    -fx-background-radius: 10px;
+    -fx-padding: 8px 10px;
+    -fx-text-fill: -color-text;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10px;
+}
+.date-picker {
+    -fx-background-color: -color-surface, transparent, transparent;
+    -fx-text-fill: -color-text;
+/*    -fx-background-radius: 10px;
+    -fx-padding: 8px 10px;
+    -fx-text-fill: -color-text;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10px;*/
+}
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: -accent;
+    -fx-effect: -shadow-1;
+}
+
+/* ---------- Buttons ---------- */
+.button {
+    -fx-background-radius: 12px;
+    -fx-background-color: #1f2937; /* gray-800 */
+    -fx-text-fill: -color-text;
+    -fx-padding: 5px 9px;
+    -fx-border-color: transparent;
+}
+.button:hover {
+    -fx-background-color: #232f3e;
+}
+.button:armed {
+    -fx-background-color: #18202b;
+}
+.button.primary, #exportPdfBtn, #exportExcelBtn, #consApplyFilterBtn, #visApplyFilterBtn, #certApplyFilterBtn {
+    -fx-background-color: -accent;
+    -fx-text-fill: white;
+}
+.button.primary:hover, #exportPdfBtn:hover, #exportExcelBtn:hover,
+#consApplyFilterBtn:hover, #visApplyFilterBtn:hover, #certApplyFilterBtn:hover {
+    -fx-background-color: derive(-accent, -10%);
+}
+
+/* ---------- KPI Cards ---------- */
+.kpi-card {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 100% 100%, rgba(99,102,241,0.08), rgba(34,211,238,0.05)),
+        -color-card;
+    -fx-background-radius: 18px;
+    -fx-padding: 12px;
+    -fx-effect: -shadow-1;
+    -fx-border-color: rgba(255,255,255,0.05);
+    -fx-border-radius: 18px;
+    -fx-min-height: 90px;
+}
+.kpi-card:hover { -fx-effect: -shadow-2; }
+
+/*.kpi-title {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.4px;
+    -fx-text-transform: uppercase;  visual intent; JavaFX doesn't transform text, but keeping for clarity 
+}
+.kpi-value {
+    -fx-text-fill: -color-strong;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}*/
+.kpi-value {
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+}
+.kpi-title {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+
+/* ---------- Tables ---------- */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #0d152c, #0a1020);
+    -fx-background-radius: 10px 10px 0 0;
+    -fx-border-color: -color-border;
+    -fx-border-width: 0 0 1 0;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-size: 34px;
+}
+.table-view .column-header .label {
+    -fx-text-fill: -color-muted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.table-view .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-cell-size: 34px;
+}
+.table-row-cell:odd {
+    -fx-background-color: rgba(255,255,255,0.025);
+}
+.table-row-cell:selected {
+    -fx-background-color: rgba(99,102,241,0.25);
+}
+.table-cell {
+    -fx-text-fill: -color-text;
+    -fx-padding: 8px;
+    -fx-border-color: rgba(255,255,255,0.03);
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Optional status pills for inventory table:
+   Apply these via setStyleClass on TableCell or via custom cell factory. */
+.pill {
+    -fx-background-radius: 999px;
+    -fx-padding: 2px 8px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+.status-low     { -fx-background-color: rgba(245,158,11,0.2); -fx-text-fill: #f59e0b; }
+.status-expiring{ -fx-background-color: rgba(34,211,238,0.2); -fx-text-fill: #22d3ee; }
+.status-out     { -fx-background-color: rgba(239,68,68,0.2);  -fx-text-fill: #ef4444; }
+.status-stock   { -fx-background-color: rgba(34,197,94,0.2);  -fx-text-fill: #22c55e; }
+
+/* ---------- SplitPane ---------- */
+.split-pane > .split-pane-divider {
+    -fx-background-color: -color-border;
+    -fx-padding: 0.25em;
+}
+
+/* ---------- Charts ---------- */
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 8px;
+}
+.chart-legend {
+    -fx-background-color: transparent;
+}
+/*.chart-title {
+    -fx-text-fill: -color-strong;
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+}*/
+.axis, .axis .axis-label, .axis .tick-label {
+    -fx-tick-label-fill: #f8fafc;
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+.chart-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+}
+
+.axis .axis-tick-mark, .axis .axis-minor-tick-mark {
+    -fx-stroke: #273144;
+}
+
+/* Bar/Line series colors */
+.default-color0.chart-bar, .default-color0.chart-series-line { -fx-bar-fill: -accent;           -fx-stroke: -accent; }
+.default-color1.chart-bar, .default-color1.chart-series-line { -fx-bar-fill: -accent-3;         -fx-stroke: -accent-3; }
+.default-color2.chart-bar, .default-color2.chart-series-line { -fx-bar-fill: -accent-2;         -fx-stroke: -accent-2; }
+.default-color3.chart-bar, .default-color3.chart-series-line { -fx-bar-fill: -accent-4;         -fx-stroke: -accent-4; }
+.default-color4.chart-bar, .default-color4.chart-series-line { -fx-bar-fill: -accent-5;         -fx-stroke: -accent-5; }
+
+/* Pie slices */
+.default-color0.chart-pie { -fx-pie-color: -accent; }
+.default-color1.chart-pie { -fx-pie-color: -accent-3; }
+.default-color2.chart-pie { -fx-pie-color: -accent-2; }
+.default-color3.chart-pie { -fx-pie-color: -accent-4; }
+.default-color4.chart-pie { -fx-pie-color: -accent-5; }
+
+/* ---------- Export preview table ---------- */
+#exportPreviewTable {
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10px;
+}
+
+/* ---------- Small helpers ---------- */
+.muted { -fx-text-fill: -color-muted; }
+.h1    { -fx-font-size: 22px; -fx-font-weight: 800; }
+.h2    { -fx-font-size: 18px; -fx-font-weight: 700; }
+
+/* ---------- Light mode (optional) ----------
+   Apply programmatically: root.getStyleClass().add("light"); */
+.root.light {
+    -color-bg:      #f8fafc;
+    -color-surface: #ffffff;
+    -color-card:    #ffffff;
+    -color-card-2:  #f1f5f9;
+    -color-muted:   #475569;
+    -color-text:    #0f172a;
+    -color-strong:  #0b1224;
+    -color-border:  #e5e7eb;
+}
+.root.light .table-row-cell:odd {
+    -fx-background-color: rgba(15,23,42,0.025);
+}
+.root.light .tab-pane:top .headers-region .tab:selected {
+    -fx-background-color: linear-gradient(to bottom, rgba(99,102,241,0.12), transparent);
+}
+
+.tool-bar {
+    -fx-padding: 8 16;
+    -fx-alignment: center-right;
+}
+
+/* ScrollPane + viewport */
+.reports-scroll, .reports-scroll .viewport, .reports-scroll .content {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 0;
+}
+
+/* Tab content area */
+.tab-pane .tab-content-area {
+  -fx-background-color: transparent;
+}
+
+/* SplitPane (pane + divider) */
+.split-pane, .split-pane .split-pane-divider {
+  -fx-background-color: transparent;
+}
+
+/* TableView */
+.table-view {
+  -fx-background-color: transparent;
+  -fx-control-inner-background: transparent;   /* rows */
+  -fx-background-insets: 0;
+}
+.table-view .column-header-background,
+.table-view .filler,
+.table-row-cell,
+.table-cell {
+  -fx-background-color: transparent;
+}
+
+/* Charts */
+.chart, .chart-content, .chart-legend, .chart-title,
+.chart-plot-background {
+  -fx-background-color: transparent;
+}
+
+/* Pie chart data labels (the floating texts) */
+.chart-pie-label {
+  -fx-fill: #f3f4f6;          /* light text */
+  -fx-font-size: 14px;
+  -fx-font-weight: 700;
+}
+
+/* The small leader lines that point to slices */
+.chart-pie-label-line {
+  -fx-stroke: #cbd5e1;        /* light gray line */
+  -fx-stroke-width: 1.25px;
+}
+
+/* header bar stays transparent */
+.tab-pane:top .tab-header-area {
+  -fx-background-color: transparent;
+  -fx-padding: 2 2 0 2;
+  -fx-border-color: -color-border;
+  -fx-border-width: 0 0 1 0;  /* subtle baseline across the bar */
+}
+
+/* every tab: transparent background + readable text */
+.tab-pane:top .headers-region .tab {
+  -fx-background-color: transparent;
+  -fx-text-base-color: #e5e7eb;   /* visible even when NOT selected */
+  -fx-font-size: 14px;
+  -fx-font-weight: 600;
+  -fx-padding: 6 14;
+}
+
+/* selected tab: keep transparent bg, just show a bottom accent line */
+.tab-pane:top .headers-region .tab:selected {
+  -fx-background-color: transparent;
+  -fx-text-base-color: #ffffff;
+  -fx-border-color: -accent;
+  -fx-border-width: 0 0 2px 0;        /* indicator */
+  -fx-border-insets: 0 0 -1 0;        /* sits on top of the header baseline */
+  -fx-effect: none;                   /* no glow */
+}
+
+/* also ensure no underline */
+.tab-pane:top .headers-region .tab:selected .tab-label { -fx-underline: false; }
+
+/* kill default blue focus glow/outline */
+.root {
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+}
+
+/*===============================================================================additions/overides*/
+/* ==== CLINIC LIGHT THEME OVERRIDES (at end) ==== */
+:root, .root {
+  /* base surfaces */
+  -color-bg:       #f3f6f8;       /* page wash */
+  -color-surface:  #ffffff;       /* white cards */
+  -color-card:     #ffffff;
+  -color-card-2:   #f0f7f3;       /* faint green tint for accents */
+  -color-border:   #e5e7eb;
+
+  /* text */
+  -color-text:     #0f172a;       /* slate-900 */
+  -color-muted:    #64748b;       /* slate-500 */
+  -color-strong:   #0b1224;
+
+  /* clinic accents (green primary, blue/teal support) */
+  -accent:   #16a34a;   /* green-600 */
+  -accent-2: #0ea5a4;   /* teal-600 */
+  -accent-3: #3b82f6;   /* blue-500 */
+  -accent-4: #f59e0b;   /* amber-500 */
+  -accent-5: #ef4444;   /* red-500 */
+
+  -radius: 18px;
+  -shadow-1: dropshadow(gaussian, rgba(8,17,26,0.14), 18, 0.2, 0, 6);
+  -shadow-2: dropshadow(gaussian, rgba(8,17,26,0.20), 28, 0.25, 0, 12);
+
+  -fx-background-color: -color-bg;
+  -fx-text-fill: -color-text;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+}
+/* Header rail stays transparent with a faint baseline */
+.tab-pane:top .tab-header-area {
+  -fx-background-color: transparent;
+  -fx-border-color: -color-border;
+  -fx-border-width: 0 0 1 0;
+  -fx-padding: 2 8 0 8;
+}
+
+.tab-pane:top .headers-region .tab {
+  -fx-background-color: transparent;
+  -fx-text-base-color: #1f2937;   /* readable when not selected */
+  -fx-font-size: 14px;
+  -fx-font-weight: 600;
+  -fx-padding: 8 14 10 14;
+  -fx-background-insets: 0;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+}
+
+.tab-pane:top .headers-region .tab:selected {
+  -fx-background-color: transparent;        /* no pill */
+  -fx-text-base-color: #0b1224;
+  -fx-border-color: -accent;                /* green underline */
+  -fx-border-width: 0 0 3px 0;
+  -fx-border-insets: 0 0 -1 0;
+  -fx-effect: none;                         /* remove glow/blue outline */
+}
+.tab-pane:top .headers-region .tab:selected .tab-label { -fx-underline: false; }
+.tool-bar {
+  -fx-background-color: linear-gradient(to bottom, #ffffff, #ffffff);
+  -fx-padding: 10 16;
+  -fx-alignment: center-right;
+  -fx-border-color: -color-border;
+  -fx-border-width: 0 0 1 0;
+  -fx-effect: -shadow-1;
+}
+.tool-bar .label { -fx-text-fill: -color-muted; }
+.button {
+  -fx-background-radius: 14px;
+  -fx-background-color: #f3f4f6;
+  -fx-text-fill: #0f172a;
+  -fx-padding: 6 12;
+  -fx-border-color: transparent;
+}
+.button:hover   { -fx-background-color: #e8eef6; }
+.button.primary,
+#exportPdfBtn, #exportExcelBtn, #consApplyFilterBtn, #visApplyFilterBtn, #certApplyFilterBtn {
+  -fx-background-color: -accent;      /* clinic green */
+  -fx-text-fill: white;
+}
+.button.primary:hover,
+#exportPdfBtn:hover, #exportExcelBtn:hover,
+#consApplyFilterBtn:hover, #visApplyFilterBtn:hover, #certApplyFilterBtn:hover {
+  -fx-background-color: derive(-accent, -8%);
+}
+/* Make the scroll area a white card with padding/shadow for contrast */
+.reports-scroll {
+  -fx-background-color: transparent;
+  -fx-padding: 0;
+}
+.reports-scroll .viewport {
+  -fx-background-color: transparent;
+}
+.reports-card {                      /* put this on a wrapper VBox inside the ScrollPane */
+  -fx-background-color: -color-surface;
+  -fx-background-radius: 18px;
+  -fx-border-color: rgba(2,6,23,0.06);
+  -fx-border-radius: 18px;
+  -fx-padding: 18px;
+  -fx-effect: -shadow-1;
+}
+
+/* thicker, lighter scrollbar on light bg */
+.scroll-bar:vertical, .scroll-bar:horizontal {
+  -fx-background-color: transparent;
+}
+.scroll-bar .thumb {
+  -fx-background-color: rgba(2,6,23,0.28);
+  -fx-background-radius: 8px;
+}
+.scroll-bar .track {
+  -fx-background-color: rgba(2,6,23,0.08);
+  -fx-background-radius: 8px;
+}
+.kpi-card {
+  -fx-background-color: -color-surface;
+  -fx-background-radius: 20px;
+  -fx-border-color: rgba(2,6,23,0.06);
+  -fx-border-radius: 20px;
+  -fx-padding: 14px;
+  -fx-effect: -shadow-1;
+}
+.kpi-card:hover { -fx-effect: -shadow-2; }
+.kpi-title { -fx-text-fill: -color-muted; -fx-font-size: 12px; -fx-font-weight: 700; }
+.kpi-value { -fx-text-fill: #0b1224; -fx-font-size: 28px; -fx-font-weight: 900; }
+.table-view {
+  -fx-background-color: transparent;
+  -fx-control-inner-background: transparent;
+  -fx-border-color: -color-border;
+  -fx-border-radius: 12px; -fx-background-radius: 12px;
+}
+.table-view .column-header-background {
+  -fx-background-color: #f8fafc;
+  -fx-background-radius: 12px 12px 0 0;
+  -fx-border-color: -color-border; -fx-border-width: 0 0 1 0;
+}
+.table-view .column-header .label { -fx-text-fill: #0f172a; -fx-font-weight: 700; }
+.table-row-cell:odd { -fx-background-color: rgba(2,6,23,0.028); }
+.table-row-cell:selected { -fx-background-color: rgba(22,163,74,0.20); }
+.table-cell { -fx-text-fill: #0f172a; }
+
+.chart, .chart-content, .chart-legend, .chart-title, .chart-plot-background {
+  -fx-background-color: transparent;
+}
+.chart-title { -fx-text-fill: #0b1224; -fx-font-size: 17px; -fx-font-weight: 800; }
+.axis, .axis .axis-label, .axis .tick-label {
+  -fx-text-fill: #0f172a; -fx-tick-label-fill: #0f172a; -fx-font-size: 13px; -fx-font-weight: 600;
+}
+.axis .axis-tick-mark, .axis .axis-minor-tick-mark { -fx-stroke: #cbd5e1; }
+.chart-legend { -fx-background-color: transparent; }
+.chart-legend .label { -fx-text-fill: #0f172a; -fx-font-weight: 600; }
+
+/* series colors */
+.default-color0.chart-bar, .default-color0.chart-series-line { -fx-bar-fill: -accent;   -fx-stroke: -accent; }
+.default-color1.chart-bar, .default-color1.chart-series-line { -fx-bar-fill: -accent-2; -fx-stroke: -accent-2; }
+.default-color2.chart-bar, .default-color2.chart-series-line { -fx-bar-fill: -accent-3; -fx-stroke: -accent-3; }
+.default-color3.chart-bar, .default-color3.chart-series-line { -fx-bar-fill: -accent-4; -fx-stroke: -accent-4; }
+.default-color4.chart-bar, .default-color4.chart-series-line { -fx-bar-fill: -accent-5; -fx-stroke: -accent-5; }
+
+/* pie slices + data labels (now dark & readable) */
+.default-color0.chart-pie { -fx-pie-color: -accent; }
+.default-color1.chart-pie { -fx-pie-color: -accent-2; }
+.default-color2.chart-pie { -fx-pie-color: -accent-3; }
+.default-color3.chart-pie { -fx-pie-color: -accent-4; }
+.default-color4.chart-pie { -fx-pie-color: -accent-5; }
+
+.chart-pie-label      { -fx-fill: #0f172a; -fx-font-size: 14px; -fx-font-weight: 700; }
+.chart-pie-label-line { -fx-stroke: #64748b; -fx-stroke-width: 1.25px; }
