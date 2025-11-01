@@ -72,6 +72,18 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-font-weight: bold;
 }
  
+.logOut_btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+
+.logOut_btn:hover {
+/*    -fx-border-color:  #e6ffe6;
+    -fx-border-radius: 5px;*/
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
  
  .bg-head{
       -fx-background-color: #fff;

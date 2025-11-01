@@ -1,0 +1,69 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 1 Nov 2025, 17:17:28
+    Author     : Anna Margarette
+*/
+
+/*.splash-card {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 24;
+    -fx-padding: 28 36 28 36;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 24, 0.22, 0, 8);
+}
+.headline { -fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #111827; }
+.sub { -fx-text-fill: #6b7280; -fx-font-size: 12px; }*/
+
+/* splash.css */
+.root, .splash-bg {
+    -fx-background-color:
+        linear-gradient(to bottom right, #eef6f3, #ffffff); /* subtle */
+}
+
+.splash-card {
+    -fx-background-color: #f9fbfa;        /* off-white */
+    -fx-background-radius: 28;
+    -fx-padding: 48 64 52 64;
+    /* border hint for “glass” look */
+    -fx-border-color: rgba(0,0,0,0.04);
+    -fx-border-radius: 28;
+    -fx-border-width: 1;
+}
+
+/* Title + copy */
+.headline {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #153e35;               /* deep green */
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.8), 1, 0.0, 0, 1);
+}
+.sub {
+    -fx-text-fill: #628a81;               /* muted green-blue */
+    -fx-font-size: 14px;
+}
+
+/* Spinner + percent */
+.splash-spinner {
+    -fx-progress-color: #1f6f8b;          /* touch of blue */
+}
+.percent {
+    -fx-font-size: 14px;
+    -fx-text-fill: #425e59;
+}
+
+/* optional: rounded window feel if undecorated */
+.splash-bg {
+    -fx-padding: 24;
+}
+.bg-dim {
+    -fx-fill: rgba(0,0,0,0.35);
+}
+.card {
+    -fx-padding: 32 32 28 32;
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.14), 24, 0.20, 0, 8),
+                dropshadow(gaussian, rgba(255,255,255,0.9), 0, 0.0, 0, 0);
+}

@@ -479,7 +479,7 @@
                   </ImageView>
                </children>
             </Pane>
-            <VBox fx:id="SIDENAV_VBOX" layoutX="-1.0" layoutY="-2.0" prefHeight="655.0" prefWidth="206.0" styleClass="SIDE_nav" stylesheets="@clinicDESIGN.css">
+            <VBox fx:id="SIDENAV_VBOX" layoutX="-1.0" layoutY="-2.0" prefHeight="655.0" prefWidth="206.0" spacing="5.0" styleClass="SIDE_nav" stylesheets="@clinicDESIGN.css">
                <children>
                   <StackPane minHeight="55.0" minWidth="93.0" prefHeight="66.0" prefWidth="206.0">
                      <VBox.margin>
@@ -604,9 +604,9 @@
                         <Insets left="5.0" right="5.0" />
                      </VBox.margin>
                   </HBox>
-                  <HBox prefHeight="16.0" prefWidth="206.0">
+                  <HBox prefHeight="76.0" prefWidth="206.0">
                      <children>
-                        <ToggleButton mnemonicParsing="false" prefHeight="32.0" prefWidth="237.0" styleClass="SIDE_btn" stylesheets="@clinicDESIGN.css" text="Log Out">
+                        <ToggleButton mnemonicParsing="false" onAction="#logOut_btn" prefHeight="32.0" prefWidth="237.0" styleClass="logOut_btn" stylesheets="@clinicDESIGN.css" text="Log Out">
                            <graphic>
                               <ImageView fitHeight="24.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -620,7 +620,7 @@
                         </ToggleButton>
                      </children>
                      <VBox.margin>
-                        <Insets top="230.0" />
+                        <Insets top="190.0" />
                      </VBox.margin>
                   </HBox>
                </children>

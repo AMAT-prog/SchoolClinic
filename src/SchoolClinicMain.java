@@ -28,7 +28,7 @@ public class SchoolClinicMain extends Application {
     public void start(Stage primaryStage) {
 
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("DASHBOARD.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("Login1.fxml"));
             Scene scene = new Scene(root);
 
             primaryStage.setTitle("SLSU Alabat Clinic");
@@ -37,6 +37,7 @@ public class SchoolClinicMain extends Application {
             primaryStage.getIcons().add(new Image("C:\\Users\\User\\OneDrive\\Documents\\NetBeansProjects\\SchoolClinic\\SchoolClinic\\src\\image\\stethoscope.png"));
             primaryStage.setScene(scene);
             primaryStage.show();
+            
         } catch (IOException ex) {
             Logger.getLogger(SchoolClinicMain.class.getName()).log(Level.SEVERE, null, ex);
         }

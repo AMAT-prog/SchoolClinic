@@ -102,4 +102,62 @@ public class UserDAO {
             return false;
         }
     }
+    
+    // for login (used by AuthService.java class
+     /** For login: fetch user by username */
+    public User findByUsername(String username) {
+        String sql = """
+            SELECT user_id, username, first_name, last_name, contact_number, password, photo_path
+            FROM users
+            WHERE username = ?
+            LIMIT 1
+        """;
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User();
+                    u.setUserId(rs.getInt("user_id"));
+                    u.setUsername(rs.getString("username"));
+                    u.setFirstName(rs.getString("first_name"));
+                    u.setLastName(rs.getString("last_name"));
+                    u.setContactNumber(rs.getString("contact_number"));
+                    u.setPasswordHash(rs.getString("password")); // stored hash
+                    u.setPhotoPath(rs.getString("photo_path"));
+                    return u;
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
+    /** Single-user convenience: return that user_id (first row) */
+    
+    public int getSingleUserId() {
+        String sql = "SELECT user_id FROM users ORDER BY user_id LIMIT 1";
+        try (Connection c = MySQL.connect(); Statement st = c.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) { e.printStackTrace(); return 0; }
+    }
+
+    /** Read the hashed recovery key (nullable) */
+    public String getRecoveryKeyHash(int id) {
+        String sql = "SELECT recovery_key_hash FROM users WHERE user_id=?";
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString(1) : null;
+            }
+        } catch (SQLException e) { e.printStackTrace(); return null; }
+    }
+    
+    public boolean updateRecoveryKeyHash(int id, String hash) {
+        String sql = "UPDATE users SET recovery_key_hash=? WHERE user_id=?";
+        try (Connection c = MySQL.connect(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, hash);
+            ps.setInt(2, id);
+            return ps.executeUpdate() == 1;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
 }

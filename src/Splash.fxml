@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+
+<StackPane prefHeight="650.0" prefWidth="1261.0" styleClass="bg-dim" stylesheets="@splash.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="SplashController">
+   <children>
+      <ImageView fitHeight="660.0" fitWidth="1261.0" opacity="0.7" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@image/IMG_20240313_103647.png" />
+         </image>
+      </ImageView>
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="660.0" stroke="BLACK" strokeType="INSIDE" styleClass="bg-dim" width="1261.0" />
+      <StackPane fx:id="splashRoot" maxWidth="450.0" minHeight="-Infinity" prefHeight="570.0" prefWidth="450.0" styleClass="card" stylesheets="@splash.css">
+         <children>
+            <StackPane fx:id="card" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="460.0" prefWidth="382.0">
+               <children>
+                  <VBox alignment="CENTER" prefHeight="460.0" prefWidth="455.0" spacing="22.0" StackPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="title" alignment="TOP_CENTER" prefHeight="155.0" prefWidth="382.0" styleClass="headline" text="Welcome to School Clinic System" />
+                        <StackPane prefHeight="139.0" prefWidth="382.0">
+                           <children>
+                              <ProgressIndicator fx:id="spinner" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="90.0" prefWidth="90.0" progress="0.0" styleClass="splash-spinner" />
+                              <Label fx:id="percentLabel" styleClass="percent" text="0%" visible="false" />
+                           </children>
+                        </StackPane>
+                        <Label alignment="CENTER" prefHeight="17.0" prefWidth="229.0" styleClass="sub" text="Loading dashboard…" />
+                     </children>
+                  </VBox>
+               </children>
+            </StackPane>
+         </children>
+         <StackPane.margin>
+            <Insets bottom="40.0" left="24.0" right="24.0" top="40.0" />
+         </StackPane.margin>
+      </StackPane>
+   </children>
+</StackPane>

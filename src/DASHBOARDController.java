@@ -122,6 +122,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.Event;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -130,6 +131,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.input.MouseButton;
@@ -149,6 +151,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Duration;
 import org.mindrot.jbcrypt.BCrypt;
@@ -822,6 +825,48 @@ private TextField student_tf;
     private AnchorPane consSTUDENTSkpi;
     @FXML
     private AnchorPane consMEDICINESkpi;
+
+    
+    @FXML
+    private void logOut_btn(ActionEvent event) {
+        // 1) Confirm
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+        a.setTitle("Log out");
+        a.setHeaderText("Sign out of School Clinic?");
+        a.setContentText("You will be returned to the login screen.");
+        ButtonType logout = new ButtonType("Log out", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        a.getButtonTypes().setAll(cancel, logout);
+
+        Optional<ButtonType> res = a.showAndWait();
+        if (res.isEmpty() || res.get() != logout) return;
+
+        // 2) (Optional) stop background tasks / schedulers here
+        // notifScheduler.shutdownNow();
+        // anyTimeline.stop(); etc.
+        notifExec.shutdownNow();
+
+        // 3) Clear session
+        Session.userId = 0;
+        Session.fullName = null;
+
+        // 4) Load login scene and swap it into this same Stage
+        try {
+            // Adjust path if needed (use absolute like "/clinic/ui/login1.fxml" if in resources root)
+            Parent loginRoot = FXMLLoader.load(getClass().getResource("login1.fxml"));
+            
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().getStylesheets().add(getClass().getResource("login.css").toExternalForm());
+            stage.setScene(new Scene(loginRoot));
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            // Fallback: close stage if loading fails
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.close();
+        }
+    }
 
     
 
