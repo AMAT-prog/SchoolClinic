@@ -82,20 +82,6 @@
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/SchoolClinicMain.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/AuthService.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/User.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/Login1Controller.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/clinicDESIGN.css</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/SplashController.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/Splash.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/PasswordUtil.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/Session.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/DashboardLoadTask.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/GenerateRecoveryKey.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/DASHBOARDController.java</file>
-            <file>file:/C:/Users/User/OneDrive/Documents/NetBeansProjects/SchoolClinic/SchoolClinic/src/UserDAO.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

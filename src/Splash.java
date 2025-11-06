@@ -10,9 +10,14 @@ import javafx.util.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 
 public class Splash {
 
+    private static final double BASE_W = 1261;
+    private static final double BASE_H = 650;
+    
     public static void showUntilReady(
             String title,
             Duration minDuration,
@@ -21,17 +26,26 @@ public class Splash {
     ) {
         try {
             FXMLLoader fx = new FXMLLoader(Splash.class.getResource("Splash.fxml"));
-            Parent root = fx.load();
+            // IMPORTANT: load the splash as a Region (FXML root must be a Region like StackPane/AnchorPane/BorderPane)
+            Region splashSurface = fx.load();
             SplashController c = fx.getController();
             c.setTitle(title);
 
-            Stage st = new Stage();
-            Scene scene = new Scene(root);
+            // Wrap the designed surface inside a StackPane so the scene can resize,
+            // while the inner surface scales uniformly via ScaleSupport.
+            StackPane wrapper = new StackPane(splashSurface);
+            Scene scene = new Scene(wrapper, BASE_W, BASE_H);
             scene.getStylesheets().add(Splash.class.getResource("splash.css").toExternalForm());
+
+            Stage st = new Stage();
             st.initStyle(StageStyle.UNDECORATED);
             st.setScene(scene);
             st.centerOnScreen();
             st.show();
+
+            // <<< uniform scale-to-fit, centered >>>
+            ScaleSupport.hook(scene, splashSurface, BASE_W, BASE_H, 1.6);
+
 
             AtomicBoolean timeDone = new AtomicBoolean(false);
             AtomicBoolean taskDone = new AtomicBoolean(false);

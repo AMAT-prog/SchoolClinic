@@ -1,7 +1,10 @@
 // DashboardLoadTask.java
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
 public class DashboardLoadTask extends Task<Parent> {
     @Override protected Parent call() throws Exception {
@@ -9,6 +12,7 @@ public class DashboardLoadTask extends Task<Parent> {
         updateProgress(0, 100);
 
         FXMLLoader fx = new FXMLLoader(getClass().getResource("DASHBOARD.fxml"));
+        
         Parent root = fx.load();
         updateProgress(70, 100);              // after FXML load
 

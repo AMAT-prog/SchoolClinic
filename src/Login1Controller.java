@@ -26,6 +26,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -67,6 +68,9 @@ public class Login1Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+//        bgImage.fitWidthProperty().bind(root.widthProperty());
+//        bgImage.fitHeightProperty().bind(root.heightProperty());
+
          // Bind plain text & password fields to stay in sync
         password_tf.textProperty().bindBidirectional(password_pf.textProperty());
 
@@ -163,30 +167,43 @@ public class Login1Controller implements Initializable {
             alert(Alert.AlertType.ERROR, "Update failed. Please try again.");
         }
     }
-
+ // Login1Controller.java
     // ======= SPLASH / LOADING then DASHBOARD =======
-    private void showSplashThenDashboard() {
-    Stage loginStage = (Stage) root.getScene().getWindow();
-    loginStage.hide();
+    private static final double BASE_W = 1261;
+    private static final double BASE_H = 650;
 
-    Splash.showUntilReady(
-        "Welcome to School Clinic System",
-        Duration.seconds(3.0),                         // minimum splash time
-        DashboardLoadTask::new,                        // background loader
-        dashRoot -> {                                  // UI callback when ready
-            try {
-                Stage dash = new Stage();
-                dash.setTitle("School Clinic System — Dashboard");
-                dash.setScene(new Scene(dashRoot));
-                dash.show();
-                loginStage.close();                    // close for good
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                loginStage.show();                     // fallback
+
+    private void showSplashThenDashboard() {
+        Stage loginStage = (Stage) root.getScene().getWindow();
+        loginStage.hide();
+
+        Splash.showUntilReady(
+            "Welcome to School Clinic System",
+            Duration.seconds(3.0),
+            DashboardLoadTask::new,
+            dashRoot -> {
+                try {
+                    // dashRoot is your designed surface from DASHBOARD.fxml
+                    StackPane dashWrapper = new StackPane(dashRoot);
+                    Scene dashScene = new Scene(dashWrapper, BASE_W, BASE_H);
+
+                    // Scale uniformly (cap optional)
+                    ScaleSupport.hook(dashScene, (Region) dashRoot, BASE_W, BASE_H, 1.6);
+
+                    Stage dash = new Stage();
+                    dash.setTitle("SLSU Alabat Clinic — Dashboard");
+                    dash.setScene(dashScene);
+                    dash.show();
+
+                    loginStage.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    loginStage.show();
+                }
             }
-        }
-    );
-}
+        );
+    }
+
 
 
 

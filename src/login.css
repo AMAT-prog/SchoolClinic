@@ -49,32 +49,36 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-padding: 2 28 2 2; /* right pad for eye icon */
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
 }
 
 /* Primary button (touch of blue + green hover) */
 .btn-primary {
-    -fx-background-color: linear-gradient(to bottom, #1d4ed8, #1e40af); /* blue */
+    /*-fx-background-color: linear-gradient(to bottom, #1d4ed8, #1e40af);  blue */
+    -fx-background-color: linear-gradient(to bottom, #16a34a, #15803d); /* green hover */
     -fx-text-fill: white;
     -fx-font-weight: 700;
     -fx-padding: 12 16 12 16;
     -fx-background-radius: 16;
 }
 .btn-primary:hover {
-    -fx-background-color: linear-gradient(to bottom, #16a34a, #15803d); /* green hover */
+    -fx-background-color: linear-gradient(to bottom, #16a34a, #99ffcc); /* green hover */
 }
 
 /* Outline link styled pill */
 .link-outline {
-    -fx-border-color: #93c5fd;              /* soft blue */
-    -fx-text-fill: #1d4ed8;
+    /*-fx-border-color: #93c5fd;               soft blue */
+    
+    -fx-text-fill: #15803d;
+    -fx-border-color: #34d399;              /* green tint */
     -fx-border-radius: 16;
     -fx-background-radius: 16;
     -fx-padding: 10 16 10 16;
 }
 .link-outline:hover {
-    -fx-border-color: #34d399;              /* green tint */
-    -fx-text-fill: #15803d;
+  
+    -fx-border-color:  #82e3c0;              /* green tint */
+    -fx-text-fill: #34d399;
 }
 
 /* Divider */

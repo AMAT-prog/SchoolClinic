@@ -27,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -37,10 +38,14 @@ public class SplashController {
     @FXML private Label title;
     @FXML private ProgressIndicator spinner;
     @FXML private Label percentLabel;
+    @FXML
+    private StackPane root;
+    @FXML
+    private ImageView bgImage;
 
+    
     /** Called by Splash.show() */
     public void setTitle(String t) { title.setText(t); }
-
     /** Neumorphism: two opposite drop-shadows (applied once). */
     private void applyNeumorph() {
         DropShadow dark = new DropShadow();

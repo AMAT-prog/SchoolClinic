@@ -1,53 +1,54 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMain.java to edit this template
- */
-
-//import java.awt.Image;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
-import javafx.scene.control.Button;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-/**
- *
- * @author User
- */
 public class SchoolClinicMain extends Application {
- 
+
+    private static final double BASE_W = 1261;
+    private static final double BASE_H = 650;
+
     @Override
-    public void start(Stage primaryStage) {
-
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("Login1.fxml"));
-            Scene scene = new Scene(root);
-
-            primaryStage.setTitle("SLSU Alabat Clinic");
-    
-            // Set the application icon.
-            primaryStage.getIcons().add(new Image("C:\\Users\\User\\OneDrive\\Documents\\NetBeansProjects\\SchoolClinic\\SchoolClinic\\src\\image\\stethoscope.png"));
-            primaryStage.setScene(scene);
-            primaryStage.show();
-            
-        } catch (IOException ex) {
-            Logger.getLogger(SchoolClinicMain.class.getName()).log(Level.SEVERE, null, ex);
+    public void start(Stage stage) throws Exception {
+        /////////////////////////////////////////////////////trial//////////////////////////
+            if (TrialManager.isTrialExpired()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Session Expired");
+            alert.setHeaderText("Your session has ended");
+            alert.setContentText("Please contact the developer to activate the full version.");
+            alert.showAndWait();
+            Platform.exit();
+            return;
+        } else {
+            long daysLeft = TrialManager.getDaysLeft();
+//            System.out.println("Trial active. Days left: " + daysLeft);
         }
+        /////////////////////////////////////////////////////////////////////////////////////
+        Region appSurface = FXMLLoader.load(getClass().getResource("login1.fxml"));
+
+        StackPane wrapper = new StackPane(appSurface);           // only in Java
+        Scene scene = new Scene(wrapper, BASE_W, BASE_H);
+
+        stage.setTitle("SLSU Alabat Clinic");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/image/stethoscope.png")));
+        stage.setScene(scene);
+        stage.setResizable(true);
+        stage.show();
+
+        ScaleSupport.hook(scene, appSurface, BASE_W, BASE_H, 1.6);
     }
 
-    /**
-     * @param args the command line arguments
-     */
+
     public static void main(String[] args) {
         launch(args);
     }
-
 }

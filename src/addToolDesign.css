@@ -1,0 +1,48 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 6 Nov 2025, 11:22:01
+    Author     : Anna Margarette
+*/
+
+
+/* for adding new tool */
+/* container */
+.sheet { -fx-background-color: transparent; }
+
+/* inner panel */
+.panel {
+    -fx-background-color: rgba(255,255,255,0.99);
+    -fx-background-radius: 14;
+    -fx-padding: 18 20 18 20;
+}
+.panel-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.hint { -fx-text-fill: #777; }
+
+/* buttons */
+.ghost { -fx-background-color: transparent; -fx-border-color: #bbb; -fx-border-radius: 8; -fx-background-radius: 8; }
+.ghost-icon { -fx-background-color: transparent; -fx-font-size: 14px; }
+
+/* underlined text inputs */
+.text-field, .text-area, .combo-box, .date-picker {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    -fx-background-insets: 0,0,0,0;
+    -fx-padding: 6 4 6 2;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: -fx-control-inner-background, -fx-control-inner-background, #29b388, -fx-control-inner-background;
+}
+.text-field:focused, .text-area:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: transparent transparent #17a97c transparent;
+}
+
+/* simple invalid ring you can toggle from code */
+.invalid {
+    -fx-border-color: transparent transparent #e53935 transparent !important;
+}
+
+

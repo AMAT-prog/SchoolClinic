@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
  */
-
 import com.itextpdf.text.Chunk;
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -88,6 +87,8 @@ import org.apache.pdfbox.rendering.ImageType;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.nio.file.StandardCopyOption;
 import java.time.DayOfWeek;
@@ -156,7 +157,7 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 import org.mindrot.jbcrypt.BCrypt;
 
-
+//campusNurse_fullName
 
 /**
  * FXML Controller class
@@ -857,6 +858,7 @@ private TextField student_tf;
             
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().getStylesheets().add(getClass().getResource("login.css").toExternalForm());
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/image/stethoscope.png")));
             stage.setScene(new Scene(loginRoot));
             stage.centerOnScreen();
             stage.show();
@@ -1112,6 +1114,7 @@ private TextField student_tf;
     
     @FXML
     private void AddStudent_sideNav(ActionEvent event) {
+        setCircularImage(addStudent_imageview, defaultStudentImage(), 80);
         addStudent_sideNav = 1;
         
         Dashboard_pane.setVisible(false);
@@ -1368,6 +1371,8 @@ private TextField student_tf;
         addStudent_course_cb.getItems().setAll("BSIT", "BIT", "BSFAS");
         addStudent_year_cb.getItems().setAll("1st Year","2nd Year","3rd Year","4th Year","Irregular");
         addStudent_gender_cb.getItems().setAll("Male","Female","Other");
+        
+        setCircularImage(addStudent_imageview, defaultStudentImage(), 80);
 
     // ============================== CONSULTATION: initialize() setup ==============================
     // Bind columns to Consultation model
@@ -2135,7 +2140,16 @@ private TextField student_tf;
         clearFields();
         rxItems.clear();
         
+        //refresh inventory
+        setupColumns();
+        loadData();
+        setupActionColumnINVENTORY();   // the "⋮" per row
+        setupInventorySearchFilter();
+        
         triggerNotifRefreshNow(); //TO UPDATE LABEL BADGE IN NOTIFICATION (FOR INVENTORY OF MEDICINE - STOCK)
+        refreshOverview(); //reports overview
+        refreshConsultations();
+        refreshInventory();
     }
 
     // --- Edit button: allow fields to be edited (student change is not allowed here) ---
@@ -2166,7 +2180,15 @@ private TextField student_tf;
                     rxItems.clear();
                 }
             });
-        }
+        } refreshOverview(); //reports overview
+          refreshConsultations();
+          refreshInventory();
+          
+          //refresh inventory
+        setupColumns();
+        loadData();
+        setupActionColumnINVENTORY();   // the "⋮" per row
+        setupInventorySearchFilter();
     }
 
 
@@ -2387,6 +2409,7 @@ private TextField student_tf;
     ////////////////////////////////////////////////////////////////////////////end consultation
        
     ////////////////////////////////////////////////////////////////////////////STUDENT RECORD/DETAILS
+
     @FXML
     private void uploadPhoto_btn(ActionEvent event) {
         FileChooser fc = new FileChooser();
@@ -2394,31 +2417,44 @@ private TextField student_tf;
             new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp")
         );
         File f = fc.showOpenDialog(viewStudent_pane.getScene().getWindow());
-        if (f != null) {
-            try {
-                // copy to app data folder (e.g., ./data/images/students/)
-                File dir = new File("data/images/students");
-                if (!dir.exists()) dir.mkdirs();
-                String safeName = System.currentTimeMillis() + "_" + f.getName();
-                File dest = new File(dir, safeName);
-                Files.copy(f.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        if (f == null) return;
 
-                pendingPhotoPath = "data/images/students/" + safeName; // store relative path
-                showImage(pendingPhotoPath);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                alert(Alert.AlertType.ERROR, "Upload Photo", ex.getMessage());
-            }
+        try {
+            // ensure target folder exists
+            File dir = new File(STUDENT_IMG_DIR);
+            if (!dir.exists()) dir.mkdirs();
+
+            // safe & unique name
+            String ext = f.getName().toLowerCase().endsWith(".png") ? ".png" : ".jpg";
+            String safeName = "student_" + System.currentTimeMillis() + ext;
+            File dest = new File(dir, safeName);
+
+            // copy uploaded file into writable folder
+            Files.copy(f.toPath(), dest.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            // store absolute path (for DB)
+            pendingPhotoPath = dest.getAbsolutePath();
+
+            // update preview
+//            Image preview = new Image(dest.toURI().toString(), false);
+//            setCircularImage(image_imageView, preview, 120);
+            showImage(pendingPhotoPath);
+                
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            alert(Alert.AlertType.ERROR, "Upload Photo", "Failed to copy image:\n" + ex.getMessage());
         }
     }
 
+    // -----------------------------------
+    // Save new photo path to database
+    // -----------------------------------
     @FXML
     private void savePhoto_btn(ActionEvent event) {
         if (currentStudentId == null) {
             alert(Alert.AlertType.WARNING, "No Student Selected", "Please select a student first.");
             return;
         }
-
         if (pendingPhotoPath == null || pendingPhotoPath.isBlank()) {
             alert(Alert.AlertType.WARNING, "No Photo Selected", "Please upload a photo before saving.");
             return;
@@ -2428,36 +2464,31 @@ private TextField student_tf;
                 "Save this new photo for the student?",
                 ButtonType.OK, ButtonType.CANCEL);
         confirm.setHeaderText(null);
+
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
-                // then execute SQL update block
-                    String sql = "UPDATE students SET image = ? WHERE student_id = ?";
-                    try (Connection c = MySQL.connect();
-                         PreparedStatement ps = c.prepareStatement(sql)) {
+                String sql = "UPDATE students SET image = ? WHERE student_id = ?";
+                try (Connection c = MySQL.connect();
+                     PreparedStatement ps = c.prepareStatement(sql)) {
 
-                        ps.setString(1, pendingPhotoPath);   // store the image path
-                        ps.setInt(2, currentStudentId);
-                        ps.executeUpdate();
+                    ps.setString(1, pendingPhotoPath);
+                    ps.setInt(2, currentStudentId);
+                    ps.executeUpdate();
 
-                        alert(Alert.AlertType.INFORMATION, "Photo Saved", "Student photo has been updated successfully.");
+                    alert(Alert.AlertType.INFORMATION, "Photo Saved", "Student photo has been updated successfully.");
 
-                        // update image preview immediately
-                        showImage(pendingPhotoPath);
+                    // immediately refresh preview
+                    showImage(pendingPhotoPath);
+                    pendingPhotoPath = null;
+                    loadStudents();
 
-                        // clear pending selection
-                        pendingPhotoPath = null;
-
-                        // optional: reload data in the table if image paths are visible
-                        loadStudents();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        alert(Alert.AlertType.ERROR, "Save Photo Error", e.getMessage());
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    alert(Alert.AlertType.ERROR, "Save Photo Error", e.getMessage());
+                }
             }
         });
     }
-
 
     
     @FXML
@@ -2505,7 +2536,7 @@ private TextField student_tf;
 //            else
 //                ps.setNull(15, Types.VARCHAR);
 
-            ps.setInt(16, currentStudentId);
+            ps.setInt(15, currentStudentId);
 
             // --- 3) Execute update ---
             ps.executeUpdate();
@@ -2530,12 +2561,42 @@ private TextField student_tf;
             // refresh table and dashboard
             loadStudents();
             loadDashboardStats();
+            refreshOverview();//report overview (active students)
 
         } catch (Exception e) {
             e.printStackTrace();
-            alert(Alert.AlertType.ERROR, "Save", e.getMessage());
+            showExceptionDialog( "Save", e);
         }
     }
+    
+private void showExceptionDialog(String header, Throwable ex) {
+    Alert alert = new Alert(Alert.AlertType.ERROR);
+    alert.setTitle("Error");
+    alert.setHeaderText(header);
+    alert.setContentText(ex.getMessage());
+
+    StringWriter sw = new StringWriter();
+    ex.printStackTrace(new PrintWriter(sw));
+    String stack = sw.toString();
+
+    TextArea area = new TextArea(stack);
+    area.setEditable(false);
+    area.setWrapText(false);
+    area.setMaxWidth(Double.MAX_VALUE);
+    area.setMaxHeight(Double.MAX_VALUE);
+    GridPane.setVgrow(area, Priority.ALWAYS);
+    GridPane.setHgrow(area, Priority.ALWAYS);
+
+    GridPane exp = new GridPane();
+    exp.setMaxWidth(Double.MAX_VALUE);
+    exp.add(new Label("Stacktrace:"), 0, 0);
+    exp.add(area, 0, 1);
+
+    alert.getDialogPane().setExpandableContent(exp);
+    alert.getDialogPane().setExpanded(false);     // close by default
+    alert.getDialogPane().setMinWidth(600);
+    alert.showAndWait();
+}
 
 
 
@@ -2848,6 +2909,7 @@ private TextField student_tf;
             alert(Alert.AlertType.ERROR, "Delete", e.getMessage());
         }
         loadDashboardStats();
+        refreshOverview();
     }
 
     // ====== helpers ======
@@ -2902,6 +2964,8 @@ private TextField student_tf;
     
     @FXML
     private void addNewStudent(ActionEvent event) {
+        setCircularImage(addStudent_imageview, defaultStudentImage(), 80); 
+        
         StudentRecord_pane.setVisible(false);
         AddStudent_pane.setVisible(true);
         AddStudent_pane.toFront();
@@ -2940,8 +3004,18 @@ private TextField student_tf;
         draftHistoryForNewStudent = null; //ir there is any saved draft history
         AddStudent_pane.setVisible(false);
         StudentRecord_pane.setVisible(true);
+        
+         // clear any staged file and restore default circular avatar
+        pendingStudentPhotoPath = null;
+        setCircularImage(addStudent_imageview, defaultStudentImage(), 80);
+       
     }
     
+    private Image defaultStudentImage() {
+        URL url = getClass().getResource("/image/default-user.png");
+        // If present in your jar, url != null both in IDE and installer
+        return (url != null) ? new Image(url.toExternalForm(), true) : null;
+    }
 
     @FXML
     private void addStudent_save(ActionEvent event) {
@@ -3014,7 +3088,7 @@ private TextField student_tf;
                 draftHistoryForNewStudent = null;
             }
 
-            showInfo("Student added (ID: " + newId + ").");
+            showInfo("Student added (ID: " + idNumber + ").");
             clearAddStudentForm();
             AddStudent_pane.setVisible(false);
 
@@ -3029,6 +3103,7 @@ private TextField student_tf;
             showError("Failed to save student.\n" + ex.getMessage());
         }
         loadDashboardStats();
+        refreshOverview();
     }
 
     
@@ -3135,6 +3210,8 @@ private TextField student_tf;
        AddStudent_pane.setDisable(true);
        HistoryForm_pane.setVisible(true);
        HistoryForm_pane.toFront();
+       
+       SIDENAV_VBOX.setDisable(true);
     }
 
     @FXML
@@ -3177,6 +3254,7 @@ private TextField student_tf;
         AddStudent_pane.setDisable(false);
     }
     HistoryForm_pane.setVisible(false);
+    SIDENAV_VBOX.setDisable(false);
 }
 
     @FXML
@@ -3207,7 +3285,8 @@ private TextField student_tf;
         }
 
         HistoryForm_pane.setVisible(false);
-
+        SIDENAV_VBOX.setDisable(false);
+        
     } catch (Exception ex) {
         ex.printStackTrace();
         showError("Failed to save history.\n" + ex.getMessage());
@@ -3347,6 +3426,7 @@ private TextField student_tf;
         VisitLog_addpane.setVisible(false);
 
         loadDashboardStats(); // if you show live stats on the dashboard
+        refreshVisits();
     }
 
     // ====================== VISIT LOG: cancel ======================
@@ -3374,6 +3454,7 @@ private TextField student_tf;
             }
         });
         loadDashboardStats();
+        refreshVisits();
     }
 
     // ====================== VISIT LOG: helpers ======================
@@ -3411,24 +3492,6 @@ private TextField student_tf;
              setText(empty || d == null ? "" : d.toString());
          }
      });
-
-//     inventory_tv.setRowFactory(tv -> new TableRow<Inventory>() {
-//        @Override protected void updateItem(Inventory inv, boolean empty) {
-//            super.updateItem(inv, empty);
-//            setStyle("");
-//            if (empty || inv == null) return;
-//            String s = inv.getStatus();
-//            if ("expired".equalsIgnoreCase(s)) {
-//                setStyle("-fx-background-color: rgba(255,0,0,0.08);");
-//            } else if ("expiring soon".equalsIgnoreCase(s)) {
-//                setStyle("-fx-background-color: rgba(255,165,0,0.10);");
-//            } else if ("low stock".equalsIgnoreCase(s)) {
-//                setStyle("-fx-background-color: rgba(255,215,0,0.10);");
-//            }
-//        }
-//    });
-
-//        
 
  }
 
@@ -3508,7 +3571,8 @@ private TextField student_tf;
         
         loadDashboardStats();
         triggerNotifRefreshNow(); //TO UPDATE LABEL BADGE IN NOTIFICATION (FOR INVENTORY OF MEDICINE - STOCK)
-
+        refreshOverview(); //reports overview
+        refreshInventory();
     }
 
     // Hook your existing edit popup here
@@ -3605,7 +3669,8 @@ private TextField student_tf;
         loadDashboardStats();
         
         triggerNotifRefreshNow(); //TO UPDATE LABEL BADGE IN NOTIFICATION (FOR INVENTORY OF MEDICINE - STOCK)
-
+        refreshOverview(); //reports overview
+        refreshInventory();
     }
 
     @FXML
@@ -6055,7 +6120,6 @@ private void warnLong(String title, String header, String message) {
             ex.printStackTrace();
         }
     }
-
 
 
 
