@@ -19,7 +19,7 @@ public class TrialManager {
 
     private static final String FOLDER = System.getenv("ProgramData") + "\\SchoolClinic";
     private static final String FILE = FOLDER + "\\trial.properties";
-    private static final int TRIAL_DAYS = 14; // 7 days
+    private static final int TRIAL_DAYS = 20; // 20 days
 
     public static boolean isTrialExpired() {
         try {

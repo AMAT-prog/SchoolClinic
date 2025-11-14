@@ -20,18 +20,18 @@ public class SchoolClinicMain extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         /////////////////////////////////////////////////////trial//////////////////////////
-            if (TrialManager.isTrialExpired()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Session Expired");
-            alert.setHeaderText("Your session has ended");
-            alert.setContentText("Please contact the developer to activate the full version.");
-            alert.showAndWait();
-            Platform.exit();
-            return;
-        } else {
-            long daysLeft = TrialManager.getDaysLeft();
-//            System.out.println("Trial active. Days left: " + daysLeft);
-        }
+//            if (TrialManager.isTrialExpired()) {
+//            Alert alert = new Alert(Alert.AlertType.ERROR);
+//            alert.setTitle("Session Expired");
+//            alert.setHeaderText("Your session has ended");
+//            alert.setContentText("Please contact the developer to activate the full version.");
+//            alert.showAndWait();
+//            Platform.exit();
+//            return;
+//        } else {
+//            long daysLeft = TrialManager.getDaysLeft();
+////            System.out.println("Trial active. Days left: " + daysLeft);
+//        }
         /////////////////////////////////////////////////////////////////////////////////////
         Region appSurface = FXMLLoader.load(getClass().getResource("login1.fxml"));
 

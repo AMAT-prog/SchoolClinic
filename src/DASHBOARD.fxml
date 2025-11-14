@@ -437,7 +437,7 @@
                            <children>
                               <Pane layoutX="31.0" layoutY="96.0" prefHeight="396.0" prefWidth="1002.0">
                                  <children>
-                                    <HBox layoutX="2.0" layoutY="-40.0" prefHeight="38.0" prefWidth="319.0">
+                                    <HBox layoutX="2.0" layoutY="-40.0" prefHeight="38.0" prefWidth="316.0">
                                        <children>
                                           <ToggleButton fx:id="btnALL" mnemonicParsing="false" prefHeight="38.0" prefWidth="68.0" selected="true" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="ALL">
                                              <toggleGroup>
@@ -446,7 +446,7 @@
                                           </ToggleButton>
                                           <ToggleButton fx:id="btn_BSFAS" mnemonicParsing="false" prefHeight="37.0" prefWidth="89.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BSFAS" toggleGroup="$courseFilter" />
                                           <ToggleButton fx:id="btnBSIT" mnemonicParsing="false" prefHeight="37.0" prefWidth="73.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BSIT" toggleGroup="$courseFilter" />
-                                          <ToggleButton fx:id="btnBIT" mnemonicParsing="false" prefHeight="43.0" prefWidth="69.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BIT" toggleGroup="$courseFilter" />
+                                          <ToggleButton fx:id="btnBIT" mnemonicParsing="false" prefHeight="38.0" prefWidth="101.0" styleClass="toggle-button1" stylesheets="@clinicDESIGN.css" text="BINDTECH" toggleGroup="$courseFilter" />
                                        </children>
                                     </HBox>
                                     <TableView fx:id="student_tv" layoutX="1.0" layoutY="8.0" prefHeight="409.0" prefWidth="996.0" stylesheets="@clinicDESIGN.css">
@@ -493,7 +493,7 @@
                               <Button layoutX="954.0" layoutY="52.0" mnemonicParsing="false" onAction="#addNewStudent" prefHeight="29.0" prefWidth="69.0" style="-fx-background-radius: 3;" text="Add New" />
                            </children>
                         </Pane>
-                        <Pane fx:id="StudentRecord_pane1" layoutX="-3.0" layoutY="24.0" prefHeight="497.0" prefWidth="1057.0" visible="false">
+                        <Pane fx:id="StudentRecord_pane1" layoutX="-3.0" layoutY="24.0" prefHeight="497.0" prefWidth="1057.0">
                            <children>
                               <Label layoutX="56.0" layoutY="4.0" prefHeight="52.0" prefWidth="983.0" text="Student Details">
                                  <font>
@@ -2065,7 +2065,7 @@
                               </ScrollPane>
                            </center>
                         </BorderPane>
-                        <AnchorPane fx:id="calendar_pane" layoutX="4.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1038.0" styleClass="calendar_pane" stylesheets="@calendar.css">
+                        <AnchorPane fx:id="calendar_pane" layoutX="4.0" layoutY="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1038.0" styleClass="calendar_pane" stylesheets="@calendar.css" visible="false">
                            <children>
                               <BorderPane fx:id="rootBorder" layoutX="16.0" layoutY="10.0" styleClass="pane-bg" stylesheets="@calendar.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <left>

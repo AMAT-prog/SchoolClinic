@@ -187,8 +187,8 @@ public class DASHBOARDController implements Initializable {
     @FXML
     private HBox filterField_hbox;
     @FXML
-    private TextField filterField_inventory;
-    @FXML
+    private TextField filterField_inventory; 
+    @FXML 
     private Pane Notification_pane;
     @FXML
     private Pane VisitLog_pane;
@@ -1339,7 +1339,7 @@ private TextField student_tf;
         btnALL.setUserData("ALL");
         btnBSIT.setUserData("BSIT");
         btn_BSFAS.setUserData("BSFAS");
-        btnBIT.setUserData("BIT");
+        btnBIT.setUserData("BINDTECH");
 
         // Default: show all
         courseFilter.selectToggle(btnALL);
@@ -1357,7 +1357,7 @@ private TextField student_tf;
 
         //2.6 Added for replaced textfields to combo box
         // DETAILS combo options (edit pane)
-        course_cb.setItems(FXCollections.observableArrayList("BSIT", "BIT", "BSFAS"));
+        course_cb.setItems(FXCollections.observableArrayList("BSIT", "BINDTECH", "BSFAS"));
         gender_cb.setItems(FXCollections.observableArrayList("Male", "Female", "Other"));
         DETAILSyearLevel_cb.setItems(FXCollections.observableArrayList(
             "1st Year","2nd Year","3rd Year","4th Year","Irregular"
@@ -1368,7 +1368,7 @@ private TextField student_tf;
         refreshStudentPredicate();
         ///////////////////////////////////////////////////////////////////////////////////////////////
         //for adding a student
-        addStudent_course_cb.getItems().setAll("BSIT", "BIT", "BSFAS");
+        addStudent_course_cb.getItems().setAll("BSIT", "BINDTECH", "BSFAS");
         addStudent_year_cb.getItems().setAll("1st Year","2nd Year","3rd Year","4th Year","Irregular");
         addStudent_gender_cb.getItems().setAll("Male","Female","Other");
         
